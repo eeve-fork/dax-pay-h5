@@ -1,125 +1,123 @@
 <template>
-  <div class="cashier">
+  <div v-if="orderAndConfig" class="cashier">
     <div class="cash_topBox">
       <div class="payPrice">
         <span class="unit">￥</span>
-        <div class="price">1299.8</div>
+        <div class="price">
+          {{ orderAndConfig.order.amount }} 元
+        </div>
       </div>
       <div class="excessTime">
         <span class="exTitle">剩余支付时间</span>
-        <span class="number">{{ downTime.currentMiute }}</span>
+        <span class="number">{{ orderTime.currentMiute }}</span>
         <span class="point">:</span>
-        <span class="number">{{ downTime.currentSeconds }}</span>
+        <span class="number">{{ orderTime.currentSeconds }}</span>
       </div>
       <div class="payMessItem">
-        <div class="itemTitle">标题:</div>
-        <div class="itemContent">商业版 1288 预购版</div>
+        <div class="itemTitle">
+          标题:
+        </div>
+        <div class="itemContent">
+          {{ orderAndConfig.order.title }}
+        </div>
       </div>
       <div class="payMessItem">
-        <div class="itemTitle">订单编号:</div>
-        <div class="itemContent">207084835007084835066</div>
+        <div class="itemTitle">
+          订单编号:
+        </div>
+        <div class="itemContent">
+          {{ orderAndConfig.order.orderNo }}
+        </div>
       </div>
     </div>
     <div class="cash_bodyBox">
       <h2>请选择支付方式</h2>
       <div class="payGoupList">
         <div
+          v-for="item in orderAndConfig.groupConfigs[0].items"
+          :key="item.id"
           class="payMethodsItem"
-          v-for="item in paymentMethods"
-          :key="item"
           @click="payTypeClick(item)"
         >
           <div class="itemType">
-            <img :src="item.icon" alt="" />
-            <p>{{ item.label }}</p>
-            <span v-if="item.recommended"> 推荐</span>
+            <img :src="item.icon" alt="">
+            <p>{{ item.name }}</p>
+            <span v-if="item.recommend"> 推荐</span>
           </div>
           <div class="selectBox">
             <img
-              v-if="item.value == payType"
+              v-if="item.id === selectId"
               src="@/assets/images/selected-arrow-icon.png"
               alt=""
-            />
+            >
           </div>
         </div>
       </div>
-      <div class="payBtnBox">支付￥<span>1299.8</span></div>
+      <div class="payBtnBox">
+        支付￥<span>{{ orderAndConfig.order.amount }}</span>
+      </div>
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 // 导入图片文件
-import zfbPay from "@/assets/images/zfb_pay.png";
-import wxPay from "@/assets/images/new_wx_pay.png";
-import quickPay from "@/assets/images/quick_pay.png";
-import { ref, reactive, onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
+import { getOrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
 
-//点击支付类型
-const payType = ref("alipay");
-const payTypeClick = (item) => {
-  console.log(item);
-  payType.value = item.value;
-};
+const route = useRoute()
 
-//支付方式列表
-const paymentMethods = ref([
-  {
-    value: "alipay",
-    label: "支付宝",
-    icon: zfbPay,
-    recommended: true,
-  },
-  {
-    value: "wechat",
-    label: "微信",
-    icon: wxPay,
-    recommended: false,
-  },
-  {
-    value: "quickpay",
-    label: "快捷支付",
-    icon: quickPay,
-    recommended: false,
-  },
-]);
+const { code: orderNo } = route.params
+const orderAndConfig = ref<OrderAndConfig>()
 
-//倒计时对象
-const downTime = reactive({
-  timer: null,
-  totalTme: 300, //总共时间
-  currentMiute: "05", //当前分钟
-  currentSeconds: "00", //当前秒数
-  formatTime: (time: number) => {
-    //格式化时间
-    return time.toString().padStart(2, "0");
-  },
-  startCountdown: () => {
-    //每秒渲染时间函数
-    if (downTime.totalTme == 0) {
-      clearInterval(timer);
-      downTime.timer = null;
-    }
-    downTime.totalTme--;
-    downTime.currentMiute = downTime.formatTime(Math.floor(downTime.totalTme / 60));
-    downTime.currentSeconds = downTime.formatTime(Math.floor(downTime.totalTme % 60));
-  },
-});
+// 选中的支付方式
+const selectId = ref()
+function payTypeClick(item) {
+  selectId.value = item.id
+}
+
+// 倒计时对象
+const orderTime = reactive({
+  totalTme: 300, // 总共时间
+  currentMinute: '05', // 当前分钟
+  currentSeconds: '00', // 当前秒数
+})
+
+const { pause, resume } = useIntervalFn(() => {
+  orderTime.totalTme--
+  orderTime.currentMinute = formatTime(Math.floor(orderTime.totalTme / 60))
+  orderTime.currentSeconds = formatTime(Math.floor(orderTime.totalTme % 60))
+}, 1000)
+
+function formatTime(time: number){
+  // 格式化时间
+  return time.toString().padStart(2, '0')
+}
+
 onMounted(() => {
-  downTime.timer = setInterval(() => {
-    downTime.startCountdown();
-  }, 1000);
-});
+  init()
+})
 onUnmounted(() => {
-  if (timer) {
-    clearInterval(timer);
-    downTime.timer = null;
-  }
-});
+  pause()
+})
+
+/**
+ * 初始化
+ */
+function init() {
+  getOrderAndConfig(orderNo).then(({ data }) => {
+    orderAndConfig.value = data
+    // orderTime.totalTme = data.order.expireTime
+    resume()
+  })
+}
 </script>
 
 <style scoped lang="less">
 .cashier {
-  font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+  font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
   width: 100%;
   height: 100vh;
   background-color: #f5f5f5;

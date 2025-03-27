@@ -109,9 +109,9 @@ const transform: AxiosTransform = {
     if (!isUrlStr && joinPrefix) {
       config.url = `${urlPrefix}${config.url}`
     }
+    console.log(config.url)
 
     if (!isUrlStr && apiUrl && isString(apiUrl)) {
-      config.url = `${apiUrl}${config.url}`
     }
     const params = config.params || {}
     const data = config.data || false

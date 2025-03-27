@@ -15,6 +15,6 @@ export interface GlobEnvConfig {
   VITE_GLOB_API_URL: string
   // 接口前缀
   VITE_GLOB_API_URL_PREFIX?: string
-  //项目简称
+  // 项目简称
   VITE_GLOB_APP_SHORT_NAME: string
 }

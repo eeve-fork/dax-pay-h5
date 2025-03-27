@@ -7,18 +7,18 @@
         </van-loading>
       </div>
     </van-overlay>
-      <van-cell-group inset title="订单信息">
-        <van-cell title="金额" title-style="font-size: 22px;color: red">
-          <template #default>
-            <span style="font-size: 22px;color: red">{{ aggregateInfo.order.amount }}元</span>
-          </template>
-        </van-cell>
-        <van-field label="标题" :model-value="aggregateInfo.order.title" readonly />
-        <van-field label="订单号" :model-value="aggregateInfo.order.bizOrderNo" readonly />
-        <van-field label="支付号" :model-value="aggregateInfo.order.orderNo" readonly />
-        <van-field label="描述" rows="2"  type="textarea" :model-value="aggregateInfo.order.description" readonly />
-      </van-cell-group>
-      <van-submit-bar safe-area-inset-bottom :price="(aggregateInfo.order.amount || 0)*100" button-text="支付" @submit="pay" />
+    <van-cell-group inset title="订单信息">
+      <van-cell title="金额" title-style="font-size: 22px;color: red">
+        <template #default>
+          <span style="font-size: 22px;color: red">{{ aggregateInfo.order.amount }}元</span>
+        </template>
+      </van-cell>
+      <van-field label="标题" :model-value="aggregateInfo.order.title" readonly />
+      <van-field label="订单号" :model-value="aggregateInfo.order.bizOrderNo" readonly />
+      <van-field label="支付号" :model-value="aggregateInfo.order.orderNo" readonly />
+      <van-field label="描述" rows="2" type="textarea" :model-value="aggregateInfo.order.description" readonly />
+    </van-cell-group>
+    <van-submit-bar safe-area-inset-bottom :price="(aggregateInfo.order.amount || 0) * 100" button-text="支付" @submit="pay" />
   </div>
 </template>
 
@@ -59,7 +59,7 @@ async function initData() {
   await getAggregateConfig(orderNo, CheckoutAggregateEnum.ALI).then(({ data }) => {
     aggregateInfo.value = data
   }).catch((res) => {
-    router.push({ name: 'ErrorResult', query: { msg: res.message }, replace: true  })
+    router.push({ name: 'ErrorResult', query: { msg: res.message }, replace: true })
   })
   // 判断是否自动拉起支付
   if (aggregateInfo.value.aggregateConfig.autoLaunch) {
