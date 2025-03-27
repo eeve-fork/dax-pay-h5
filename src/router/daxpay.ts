@@ -27,7 +27,7 @@ export const DaxPayRoute: RouteRecordRaw = {
       },
     },
     {
-      path: '/cashier/:code',
+      path: 'cashier/:code',
       name: 'CashierCode',
       component: () => import('@/views/daxpay/cashier/Cashier.vue'),
       meta: {
@@ -58,5 +58,21 @@ export const DaxPayRoute: RouteRecordRaw = {
         title: '微信收银台',
       },
     },
+    {
+      path: 'paySuccess',
+      name: 'PaySuccess',
+      component: () => import('@/views/daxpay/result/PaySuccess.vue'),
+      meta: {
+        title: '支付成功页面',
+      },
+    },
+    {
+      path: 'payFail',
+      name: 'payFail',
+      component: () => import('@/views/daxpay/result/PayFail.vue'),
+      meta: {
+        title: '支付失败页面',
+      },
+    }
   ],
 }
