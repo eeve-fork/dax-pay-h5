@@ -1,6 +1,6 @@
 <template>
   <van-overlay v-show="show" :show="true">
-    <div class="wrapper" @click.stop>
+    <div class="loading-wrapper" @click.stop>
       <van-loading size="24px">
         获取中...
       </van-loading>
@@ -12,8 +12,8 @@
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
 import { showDialog } from 'vant'
-import type { AuthCodeParam } from '@/views/daxpay/channel/ChannelAuth.api'
-import { authAndSet } from '@/views/daxpay/channel/ChannelAuth.api'
+import type { AuthCodeParam } from '@/views/daxpay/auth/ChannelAuth.api'
+import { authAndSet } from '@/views/daxpay/auth/ChannelAuth.api'
 
 const script = document.createElement('script')
 script.setAttribute(
@@ -60,12 +60,6 @@ async function init() {
 </script>
 
 <style scoped lang="less">
-.wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
 
 .block {
   width: 120px;

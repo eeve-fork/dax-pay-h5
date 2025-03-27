@@ -11,41 +11,49 @@ export const DaxPayRoute: RouteRecordRaw = {
   component: Layout,
   children: [
     {
-      path: '/alipay/auth/:appId/:channel/:queryCode/:aliAppId',
+      path: '/auth/alipay/:appId/:channel/:queryCode/:aliAppId',
       name: 'AlipayAuth',
-      component: () => import('@/views/daxpay/channel/alipay/auth/AlipayAuth.vue'),
+      component: () => import('@/views/daxpay/auth/alipay/AlipayAuth.vue'),
       meta: {
         title: '支付宝信息获取',
       },
     },
     {
-      path: '/wechat/auth/:appId/:channel/:queryCode',
+      path: '/auth/wechat/:appId/:channel/:queryCode',
       name: 'WechatAuth',
-      component: () => import('@/views/daxpay/channel/wechat/auth/WechatAuth.vue'),
+      component: () => import('@/views/daxpay/auth/wechat/WechatAuth.vue'),
       meta: {
         title: '微信信息获取',
       },
     },
     {
-      path: '/channel/cashier/:mchNo/:appId',
-      name: 'ChannelCashier',
-      component: () => import('@/views/daxpay/channel/ChannelCashier.vue'),
+      path: '/cashier/:code',
+      name: 'CashierCode',
+      component: () => import('@/views/daxpay/cashier/Cashier.vue'),
       meta: {
         title: '收银台',
       },
     },
     {
-      path: '/alipay/cashier/:mchNo/:appId',
-      name: 'AlipayCashier',
-      component: () => import('@/views/daxpay/channel/alipay/cashier/AlipayCashier.vue'),
+      path: '/aggregate/:code',
+      name: 'CheckAggregate',
+      component: () => import('@/views/daxpay/aggregate/Aggregate.vue'),
+      meta: {
+        title: '聚合收银台',
+      },
+    },
+    {
+      path: '/aggregate/alipay/:code',
+      name: 'AliCheckout',
+      component: () => import('@/views/daxpay/aggregate/alipay/AlipayAggregate.vue'),
       meta: {
         title: '支付宝收银台',
       },
     },
     {
-      path: '/wechat/cashier/:mchNo/:appId',
-      name: 'WechatCashier',
-      component: () => import('@/views/daxpay/channel/wechat/cashier/WechatCashier.vue'),
+      path: '/aggregate/wechat/:code',
+      name: 'WechatCheckout',
+      component: () => import('@/views/daxpay/aggregate/wechat/WechatAggregate.vue'),
       meta: {
         title: '微信收银台',
       },

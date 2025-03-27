@@ -1,35 +1,24 @@
-import type { AuthResult } from './ChannelAuth.api'
+import type { AuthResult } from '../auth/ChannelAuth.api'
 import { http } from '@/utils/http/axios'
 import type { Result } from '#/axios'
 
 /**
- * 获取商户名称
+ * 获取收银台配置信息
  */
-export function getMchName(mchNo: string) {
-  return http.request<Result<string>>({
-    url: '/unipay/ext/channel/cashier/getMchName',
+export function getCashierTypeConfig(cashierType: string, cashierCode: string) {
+  return http.request<Result<CashierTypeConfigResult>>({
+    url: '/unipay/cashier/code/findByCashierType',
     method: 'GET',
-    params: { mchNo },
-  })
-}
-
-/**
- * 获取收银台信息
- */
-export function getCashierInfo(cashierType: string, appId: string) {
-  return http.request<Result<ChannelCashierConfigResult>>({
-    url: '/unipay/ext/channel/cashier/getCashierType',
-    method: 'GET',
-    params: { cashierType, appId },
+    params: { cashierType, cashierCode },
   })
 }
 
 /**
  * 获取收银台所需授权链接, 用于获取OpenId一类的信息
  */
-export function generateAuthUrl(param: CashierAuthParam) {
+export function generateAuthUrl(param: CashierAuthUrlParam) {
   return http.request<Result<string>>({
-    url: '/unipay/ext/channel/cashier/generateAuthUrl',
+    url: '/unipay/cashier/code/generateAuthUrl',
     method: 'POST',
     data: param,
   })
@@ -38,9 +27,9 @@ export function generateAuthUrl(param: CashierAuthParam) {
 /**
  * 获取授权信息
  */
-export function auth(param: CashierPayParam) {
+export function auth(param: CashierAuthParam) {
   return http.request<Result<AuthResult>>({
-    url: '/unipay/ext/channel/cashier/auth',
+    url: '/unipay/cashier/code/auth',
     method: 'POST',
     data: param,
   })
@@ -51,20 +40,28 @@ export function auth(param: CashierPayParam) {
  */
 export function cashierPay(param: CashierPayParam) {
   return http.request<Result<PayResult>>({
-    url: '/unipay/ext/channel/cashier/pay',
+    url: '/unipay/cashier/code/pay',
     method: 'POST',
     data: param,
   })
 }
 
 /**
- * 通道认证参数
+ * 获取认证URL参数
+ */
+export interface CashierAuthUrlParam {
+  // 应用号
+  cashierCode?: string
+  // 收银台类型
+  cashierType?: string
+}
+
+/**
+ * 认证参数
  */
 export interface CashierAuthParam {
-  // 商户号
-  mchNo?: string
   // 应用号
-  appId?: string
+  cashierCode?: string
   // 收银台类型
   cashierType?: string
   // 授权码
@@ -75,11 +72,8 @@ export interface CashierAuthParam {
  * 通道收银支付参数
  */
 export interface CashierPayParam {
-
-  // 商户号
-  mchNo?: string
   // 应用号
-  appId?: string
+  cashierCode?: string
   // 收银台类型
   cashierType?: string
   // 支付金额
@@ -94,7 +88,6 @@ export interface CashierPayParam {
  * 支付结果
  */
 export interface PayResult {
-
   // 支付状态
   status: string
   // 支付参数体
@@ -124,23 +117,17 @@ export interface WxJsapiSignResult {
 }
 
 /**
- * 收银台配置信息
+ * 收银码牌配置信息
  */
-export interface ChannelCashierConfigResult {
-  // 商户号
-  mchNo?: string
+export interface CashierTypeConfigResult {
   // 应用号
   appId?: string
-  // 收银台类型
-  cashierType?: string
-  // 收银台名称
-  cashierName?: string
+  // 码牌名称
+  name?: string
   // 支付通道
   channel?: string
   // 支付方式
   payMethod?: string
   // 是否开启分账
   allocation?: boolean
-  // 自动分账
-  autoAllocation?: boolean
 }
