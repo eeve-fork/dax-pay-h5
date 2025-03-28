@@ -87,17 +87,11 @@ const transform: AxiosTransform = {
     }
 
     // 接口请求成功，直接返回相应结果
-    if (code === ResultEnum.SUCCESS) {
+    if (code) {
       return result
     }
     // 接口请求错误，统一提示错误信息 这里逻辑可以根据项目进行修改
     const errorMsg = msg
-
-    // 请求失败
-    console.log(code)
-    if (code) {
-      showFailToast(errorMsg)
-    }
     throw new Error(errorMsg)
   },
 

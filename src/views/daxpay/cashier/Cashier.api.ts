@@ -11,6 +11,17 @@ export function getOrderAndConfig(orderNo) {
     params: { orderNo, cashierType: 'h5' },
   })
 }
+/**
+ * 发起支付
+ */
+export function payOrder(data:payParam){
+  return http.request<Result<payConfig>>({
+    url: '/unipay/gateway/pay',
+    method: 'POST',
+    data,
+  })
+}
+
 
 /**
  * 收银台配置
@@ -38,7 +49,7 @@ export interface GatewayOrder {
   description?: string
   /** 金额(元) */
   amount?: number
-
+  expiredTime?: string;
 }
 /**
  * 聚合支付配置信息
@@ -84,4 +95,31 @@ export interface CashierConfig {
   icon?: string
   /** 是否推荐 */
   recommend?: boolean
+}
+
+/**
+ * 支付配置项参数
+ */
+export interface payParam{
+  // 订单号
+  orderNo?:string, 
+  //支付配置项ID
+  itemId?:number,
+  // 唯一标识
+  openId?:string,
+  // 付款码
+  anthCode?:string,
+} 
+/**
+ * 支付配置项参数返回值
+ */
+export interface payConfig{
+  // 商户订单号
+  bizOrderNo?:string,
+  // 订单号
+  orderNo?:string,
+  //支付状态
+  status?:string,
+  //支付参数体
+  payBody?:string
 }
