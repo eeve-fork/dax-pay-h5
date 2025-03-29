@@ -40,6 +40,7 @@
           <div class="itemType">
             <img v-if="item.icon === 'wechat'" src="@/assets/images/new_wx_pay.png" alt="">
             <img v-if="item.icon === 'alipay'" src="@/assets/images/zfb_pay.png" alt="">
+            <img v-if="item.icon === 'aggregate'" src="@/assets/images/aggregate-pay.png" alt="">
             <!-- <img src="@/assets/images/quick_pay.png" alt=""> -->
             <p>{{ item.name }}</p>
             <span v-if="item.recommend"> 推荐</span>
@@ -71,7 +72,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { OrderAndConfig, payConfig } from '@/views/daxpay/cashier/Cashier.api'
+import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
 import { getOrderAndConfig, payOrder } from '@/views/daxpay/cashier/Cashier.api'
 
 const route = useRoute()
