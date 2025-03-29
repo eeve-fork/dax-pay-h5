@@ -3,34 +3,10 @@
     <div class="payLogo">
       <img src="@/assets/images/fail1.png" alt="">
       <p>支付失败</p>
-      <span>订单超时自动关闭，请重新发起支付</span>
-    </div>
-    <div class="payPrice">
-      <span class="unit">￥</span>
-      <div class="price">
-        793.21
-      </div>
-    </div>
-    <div class="payMessBox">
-      <div class="payMessItem">
-        <div class="itemTitle">
-          支付标题
-        </div>
-        <div class="itemContent">
-          商业版 1288 预购版
-        </div>
-      </div>
-      <div class="payMessItem">
-        <div class="itemTitle">
-          订单编号
-        </div>
-        <div class="itemContent">
-          20708483506
-        </div>
-      </div>
+      <span>{{ errorMsg ? errorMsg : "支付失败,请重试!" }}</span>
     </div>
 
-    <div class="payBtnBox">
+    <div class="payBtnBox" @click="closeClick">
       关闭
     </div>
   </div>
@@ -38,6 +14,14 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
+// 获取路由参数
+const route = useRoute()
+const { msg: errorMsg } = route.query
+
+// 点击关闭
+function closeClick() {
+  window.close()
+}
 </script>
 
 <style scoped lang="less">
@@ -49,6 +33,7 @@ import { useRoute, useRouter } from 'vue-router'
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3rem;
   position: relative;
 
@@ -57,6 +42,7 @@ import { useRoute, useRouter } from 'vue-router'
     flex-direction: column;
     gap: 1.25rem;
     align-items: center;
+    transform: translateY(-50%);
 
     img {
       width: 3.125rem;
@@ -70,51 +56,9 @@ import { useRoute, useRouter } from 'vue-router'
     }
 
     span {
-      font-size: 0.75rem;
       letter-spacing: 2px;
       font-size: 0.875rem;
       font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    }
-  }
-
-  .payPrice {
-    display: flex;
-    gap: 0.315rem;
-    align-items: center;
-
-    .unit {
-      font-size: 0.75rem;
-      transform: translateY(0.525rem);
-    }
-
-    .price {
-      font-size: 2rem;
-      font-weight: 700;
-    }
-  }
-
-  .payMessBox {
-    width: 100%;
-    padding: 0px 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-
-    .payMessItem {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-
-      .itemTitle {
-        font-size: 1rem;
-        color: #797d81;
-      }
-
-      .itemContent {
-        font-size: 1rem;
-        font-weight: 500;
-        font-size: '微软雅黑';
-      }
     }
   }
 

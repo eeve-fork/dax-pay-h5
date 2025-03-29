@@ -66,13 +66,53 @@
         </div>
       </div>
     </div>
+    <!-- 取消支付 -->
+    <div v-if="cancelObj.showCancelMask" id="cancelPay" class="cancelMask">
+      <div class="confirmDialog">
+        <div class="confirmHeader">
+          确定离开收银台
+        </div>
+        <div class="confimContent">
+          <p class="contentTxt">
+            订单尚未完成支付，请尽快支付。
+          </p>
+        </div>
+        <div class="confimFooter">
+          <div id="confirmLeaveBtn" class="confimBtn" @click="cancelObj.handleConfirmLeave">
+            确认离开
+          </div>
+          <div id="continuePay" class="confimBtn payBtn" style="color: #E41937" @click="cancelObj.handleContinuePay">
+            继续支付
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 关闭页面 -->
+    <div v-if="closeObj.showCloseMask" id="cancelPay" class="cancelMask">
+      <div class="confirmDialog">
+        <div class="confirmHeader">
+          确定关闭该页面？
+        </div>
+        <div class="confimContent">
+          <p class="contentTxt" />
+        </div>
+        <div class="confimFooter">
+          <div id="confirmLeaveBtn" class="confimBtn" @click="closeObj.handleConfirmClose">
+            确认关闭
+          </div>
+          <div id="continuePay" class="confimBtn payBtn" style="color: #E41937" @click="closeObj.handleContinueClose">
+            继续支付
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
+import type { OrderAndConfig, payConfig } from '@/views/daxpay/cashier/Cashier.api'
 import { getOrderAndConfig, payOrder } from '@/views/daxpay/cashier/Cashier.api'
 
 const route = useRoute()
@@ -88,7 +128,6 @@ const selectId = ref<string>()
 function payTypeClick(item) {
   selectId.value = item.id
 }
-
 // 倒计时对象
 const orderTime = reactive({
   totalTme: 0, // 总共时间
@@ -135,7 +174,7 @@ watch(
     }
   },
 )
-
+// 控制加载弹窗
 const loading = ref(false)
 // 发起支付
 function payClick() {
@@ -145,21 +184,87 @@ function payClick() {
     itemId: selectId.value,
   }
   payOrder(form as any)
-    .then(({ data }) => {
-      console.log(data)
-      // loading.value = false
-      // location.replace(data.payBody as any)
+    .then(({ data, code, msg }) => {
+      if (code !== 0) {
+        // 如果异常，跳转错误页面
+        router.replace({
+          path: '/payFail',
+          query: { msg },
+        })
+        return
+      }
+      loading.value = false
+      location.replace(data.payBody as any)
     })
     .catch((error) => {
       console.log(error)
     })
 }
 
+// 返回弹窗对象
+const cancelObj = reactive({
+  // 控制弹窗
+  showCancelMask: false,
+  // 处理确认离开
+  handleConfirmLeave: () => {
+    cancelObj.showCancelMask = false // 隐藏弹窗
+    router.go(-1) // 返回上一页
+  },
+  // 处理继续支付
+  handleContinuePay: () => {
+    cancelObj.showCancelMask = false // 隐藏弹窗
+    history.pushState(null, '', location.href) // 阻止返回行为
+  },
+  // 监听事件处理
+  handlePopstate: () => {
+    cancelObj.showCancelMask = true // 显示取消支付弹窗
+  },
+
+})
+
+// 关闭弹窗对象
+const closeObj = reactive({
+  // 控制弹窗
+  showCloseMask: false,
+  // 处理确认关闭
+  handleConfirmClose: () => {
+    closeObj.showCloseMask = false // 隐藏弹窗
+    // 尝试关闭页面
+    try {
+      window.close() // 尝试关闭当前页面
+      console.log('给访谈法')
+    }
+    catch {
+      // eslint-disable-next-line no-alert
+      alert('无法关闭页面，请手动关闭。')
+      router.replace('/')
+    }
+  },
+  // 处理继续支付
+  handleContinueClose: () => {
+    closeObj.showCloseMask = false // 隐藏弹窗
+    history.pushState(null, '', location.href) // 阻止返回行为
+  },
+  // 监听关闭事件处理
+  handleBeforeUnload: (event: BeforeUnloadEvent) => {
+    event.preventDefault()
+    closeObj.showCloseMask = true
+  },
+
+})
+
 onMounted(() => {
   init()
+  // 初始化历史记录栈
+  history.pushState({ page: 'cashier' }, '', location.href)
+  // 监听点击浏览器返回
+  window.addEventListener('popstate', cancelObj.handlePopstate)
+  window.addEventListener('beforeunload', closeObj.handleBeforeUnload)
 })
 onUnmounted(() => {
   pause()
+  window.removeEventListener('popstate', cancelObj.handlePopstate)
+  window.removeEventListener('beforeunload', closeObj.handleBeforeUnload)
 })
 
 /**
@@ -170,7 +275,7 @@ function init() {
     if (code !== 0) {
       // 如果异常，跳转异常页面
       router.replace({
-        path: '/PayExcessTime',
+        path: '/payFail',
         query: { msg },
       })
       return
@@ -388,6 +493,91 @@ function init() {
       100% {
         transform: rotate(360deg);
       }
+    }
+  }
+
+  /* 取消支付 */
+  .cancelMask {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+
+    .confirmDialog {
+      width: 15rem;
+      background: #ffffff;
+      border-radius: 0.2rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .confirmHeader {
+      font-size: 0.9rem;
+      line-height: 1.2rem;
+      color: #22242e;
+      padding: 1.55rem 0.6rem 0;
+    }
+
+    .confimContent {
+      width: 100%;
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: #6c6e75;
+      padding: 0.55rem 1rem 1.55rem;
+      display: flex;
+      justify-content: center;
+      text-align: justify;
+    }
+
+    .contentTxt {
+      line-height: 1.05rem;
+    }
+
+    .confimFooter {
+      width: 100%;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #eeeeee;
+      position: relative;
+    }
+
+    .confimFooter::after {
+      position: absolute;
+      content: '';
+      height: 100%;
+      width: 1px;
+      background: #eeeeee;
+      left: 50%;
+      top: 0;
+    }
+
+    .confimBtn {
+      height: 100%;
+      flex: 1;
+      color: #22242e;
+      text-align: center;
+      font-size: 0.7rem;
+      line-height: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .payBtn {
+      color: #5568d5;
     }
   }
 }

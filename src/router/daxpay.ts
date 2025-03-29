@@ -74,13 +74,5 @@ export const DaxPayRoute: RouteRecordRaw = {
         title: '支付失败页面',
       },
     },
-    {
-      path: '/PayExcessTime',
-      name: 'PayExcessTime',
-      component: () => import('@/views/daxpay/result/PayExcessTime.vue'),
-      meta: {
-        title: '支付超时页面',
-      },
-    },
   ],
 }
