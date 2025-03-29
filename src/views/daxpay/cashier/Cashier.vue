@@ -232,7 +232,6 @@ const closeObj = reactive({
     // 尝试关闭页面
     try {
       window.close() // 尝试关闭当前页面
-      console.log('给访谈法')
     }
     catch {
       // eslint-disable-next-line no-alert
