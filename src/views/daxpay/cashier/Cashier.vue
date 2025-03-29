@@ -3,7 +3,9 @@
     <div class="cash_topBox">
       <div class="payPrice">
         <span class="unit">￥</span>
-        <div class="price">{{ orderAndConfig.order.amount }} 元</div>
+        <div class="price">
+          {{ orderAndConfig.order.amount }} 元
+        </div>
       </div>
       <div class="excessTime">
         <span class="exTitle">剩余支付时间</span>
@@ -12,13 +14,17 @@
         <span class="number">{{ orderTime.currentSeconds }}</span>
       </div>
       <div class="payMessItem">
-        <div class="itemTitle">标题:</div>
+        <div class="itemTitle">
+          标题:
+        </div>
         <div class="itemContent">
           {{ orderAndConfig.order.title }}
         </div>
       </div>
       <div class="payMessItem">
-        <div class="itemTitle">订单编号:</div>
+        <div class="itemTitle">
+          订单编号:
+        </div>
         <div class="itemContent">
           {{ orderAndConfig.order.orderNo }}
         </div>
@@ -34,151 +40,155 @@
           @click="payTypeClick(item)"
         >
           <div class="itemType">
-            <img src="@/assets/images/new_wx_pay.png" alt="" v-if="item.icon == 'wechat'" />
-            <img src="@/assets/images/zfb_pay.png" alt="" v-if="item.icon == 'alipay'" />
+            <img v-if="item.icon == 'wechat'" src="@/assets/images/new_wx_pay.png" alt="">
+            <img v-if="item.icon == 'alipay'" src="@/assets/images/zfb_pay.png" alt="">
             <!-- <img src="@/assets/images/quick_pay.png" alt=""> -->
             <p>{{ item.name }}</p>
             <span v-if="item.recommend"> 推荐</span>
           </div>
           <div class="selectBox">
-            <img v-if="item.id === selectId" src="@/assets/images/selected-arrow-icon.png" alt="" />
+            <img v-if="item.id === selectId" src="@/assets/images/selected-arrow-icon.png" alt="">
           </div>
         </div>
       </div>
-      <div class="payBtnBox" @click="payClick" v-if="selectId">
+      <div v-if="selectId" class="payBtnBox" @click="payClick">
         支付￥<span>{{ orderAndConfig.order.amount }}</span>
       </div>
-      <div class="payBtnBox noSelect" v-else>
+      <div v-else class="payBtnBox noSelect">
         支付￥<span>{{ orderAndConfig.order.amount }}</span>
       </div>
     </div>
     <!-- loading -->
-    <div class="loadingMask hide" id="loadingMask" v-if="loading">
+    <div v-if="loading" id="loadingMask" class="loadingMask hide">
       <div class="content">
-        <img class="loadingImg" src="@/assets/images/loading.png" alt="" />
-        <div class="loadingTxt">处理中，请耐心等待</div>
+        <img class="loadingImg" src="@/assets/images/loading.png" alt="">
+        <div class="loadingTxt">
+          处理中，请耐心等待
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, reactive, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import type { OrderAndConfig, payConfig } from "@/views/daxpay/cashier/Cashier.api";
-import { getOrderAndConfig, payOrder } from "@/views/daxpay/cashier/Cashier.api";
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
+import { getOrderAndConfig, payOrder } from '@/views/daxpay/cashier/Cashier.api'
 
-const route = useRoute();
-const router = useRouter();
+const route = useRoute()
+const router = useRouter()
 
-//获取传入的参数
-const { code: orderNo } = route.params;
-//储存初始化的数据
-const orderAndConfig = ref<OrderAndConfig>();
+// 获取传入的参数
+const { code: orderNo } = route.params
+// 储存初始化的数据
+const orderAndConfig = ref<OrderAndConfig>()
 
 // 选中的支付方式
-const selectId = ref<string>();
+const selectId = ref<string>()
 function payTypeClick(item) {
-  selectId.value = item.id;
+  selectId.value = item.id
 }
 
 // 倒计时对象
 const orderTime = reactive({
   totalTme: 0, // 总共时间
-  currentMinute: "00", // 当前分钟
-  currentSeconds: "00", // 当前秒数
-});
+  currentMinute: '00', // 当前分钟
+  currentSeconds: '00', // 当前秒数
+})
 
 // 定时器
 const { pause, resume } = useIntervalFn(() => {
-  getMinter(); //每秒获取分秒方法
-}, 1000);
+  getMinter() // 每秒获取分秒方法
+}, 1000)
 
 // 格式化时间
 function formatTime(time: number) {
-  return time.toString().padStart(2, "0");
+  return time.toString().padStart(2, '0')
 }
-//获取倒计时秒数
+// 获取倒计时秒数
 function getDownTotalTime(expiredTime: any) {
-  let nowTime = new Date(); //获取当前时间
-  let excessTime = new Date(expiredTime); //获取失效时间
-  let interval = excessTime.getTime() - nowTime.getTime(); //获取倒计时毫秒数
+  const nowTime = new Date() // 获取当前时间
+  const excessTime = new Date(expiredTime) // 获取失效时间
+  const interval = excessTime.getTime() - nowTime.getTime() // 获取倒计时毫秒数
   if (interval > 0) {
-    orderTime.totalTme = Math.floor(interval / 1000);
-  } else {
-    console.log("失效了");
+    orderTime.totalTme = Math.floor(interval / 1000)
+  }
+  else {
+    console.log('失效了')
   }
 }
 
-//获取分秒
+// 获取分秒
 function getMinter() {
-  orderTime.totalTme--;
-  orderTime.currentMinute = formatTime(Math.floor(orderTime.totalTme / 60));
-  orderTime.currentSeconds = formatTime(Math.floor(orderTime.totalTme % 60));
+  orderTime.totalTme--
+  orderTime.currentMinute = formatTime(Math.floor(orderTime.totalTme / 60))
+  orderTime.currentSeconds = formatTime(Math.floor(orderTime.totalTme % 60))
 }
 
-//监听倒计时，到时间跳转超时页面
+// 监听倒计时，到时间跳转超时页面
 watch(
   () => orderTime.totalTme,
   (newValue) => {
     if (newValue == 0) {
-      router.replace("/PayExcessTime");
+      router.replace('/PayExcessTime')
     }
-  }
-);
+  },
+)
 
-const loading = ref(false);
+const loading = ref(false)
 // 发起支付
 function payClick() {
-  loading.value = true;
+  loading.value = true
   const form = {
-    orderNo: orderNo,
+    orderNo,
     itemId: selectId.value,
-  };
+  }
   payOrder(form as any)
     .then(({ data }) => {
-      loading.value = false;
-      location.replace(data.payBody as any);
+      console.log(data)
+      // loading.value = false
+      // location.replace(data.payBody as any)
     })
     .catch((error) => {
-      console.log(error);
-    });
+      console.log(error)
+    })
 }
 
 onMounted(() => {
-  init();
-});
+  init()
+})
 onUnmounted(() => {
-  pause();
-});
+  pause()
+})
 
 /**
  * 初始化
  */
 function init() {
   getOrderAndConfig(orderNo).then(({ data, code, msg }) => {
-      if (code != 0) {
-        //如果异常，跳转异常页面
-        router.replace({
-          path: "/PayExcessTime",
-          query: { msg },
-        });
-        return;
-      }
-      orderAndConfig.value = data; //赋值初始化数据
-      getDownTotalTime(data.order.expiredTime); //计算倒计时
-      getMinter(); //先执行一下 解决进入页面一秒后才显示倒计时
-      resume(); //开启倒计时
-    })
+    if (code !== 0) {
+      // 如果异常，跳转异常页面
+      router.replace({
+        path: '/PayExcessTime',
+        query: { msg },
+      })
+      return
+    }
+    orderAndConfig.value = data // 赋值初始化数据
+    getDownTotalTime(data.order.expiredTime) // 计算倒计时
+    getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
+    resume() // 开启倒计时
+  })
     .catch((error) => {
-      console.log(error);
-    });
+      console.log(error)
+    })
 }
 </script>
 
 <style scoped lang="less">
 .cashier {
-  font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+  font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
   width: 100%;
   height: 100vh;
   background-color: #f5f5f5;
@@ -315,7 +325,9 @@ function init() {
       width: 15rem;
       background: #ffffff;
       border-radius: 0.2rem;
-      box-shadow: 0px 12px 48px 16px rgba(0, 0, 0, 0.03), 0px 9px 28px 0px rgba(0, 0, 0, 0.05),
+      box-shadow:
+        0px 12px 48px 16px rgba(0, 0, 0, 0.03),
+        0px 9px 28px 0px rgba(0, 0, 0, 0.05),
         0px 6px 16px -8px rgba(0, 0, 0, 0.08);
       display: flex;
       left: 50%;

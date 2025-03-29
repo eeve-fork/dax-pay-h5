@@ -1,23 +1,19 @@
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
-import type { AxiosResponse } from 'axios'
-import axios from 'axios'
-import { showDialog, showFailToast } from 'vant'
-import { VAxios } from './Axios'
-import type { AxiosTransform } from './axiosTransform'
-import { checkStatus } from './checkStatus'
-import { formatRequestDate, joinTimestamp } from './helper'
-import type { CreateAxiosOptions, RequestOptions } from './types'
-import { ContentTypeEnum, RequestEnum, ResultEnum } from '@/enums/httpEnum'
-import { PageEnum } from '@/enums/pageEnum'
-import { useGlobSetting } from '@/hooks/setting'
+import type { AxiosResponse } from "axios";
+import axios from "axios";
+import { showDialog, showFailToast } from "vant";
+import { VAxios } from "./Axios";
+import type { AxiosTransform } from "./axiosTransform";
+import { checkStatus } from "./checkStatus";
+import { formatRequestDate, joinTimestamp } from "./helper";
+import type { CreateAxiosOptions, RequestOptions } from "./types";
+import { ContentTypeEnum, RequestEnum, ResultEnum } from "@/enums/httpEnum";
+import { useGlobSetting } from "@/hooks/setting";
 
-import { isString } from '@/utils/is/'
-import { deepMerge, isUrl } from '@/utils'
-import { setObjToUrlParams } from '@/utils/urlUtils'
-
-import router from '@/router'
-import { storage } from '@/utils/Storage'
-import type { Result } from '#/axios'
+import { isString } from "@/utils/is/";
+import { deepMerge, isUrl } from "@/utils";
+import { setObjToUrlParams } from "@/utils/urlUtils";
+import type { Result } from "#/axios";
 
 const globSetting = useGlobSetting()
 const urlPrefix = globSetting.urlPrefix
@@ -87,12 +83,11 @@ const transform: AxiosTransform = {
     }
 
     // 接口请求成功，直接返回相应结果
-    if (code==ResultEnum.SUCCESS) {
+    if (code == ResultEnum.SUCCESS) {
       return result
     }
     // 接口请求错误，统一提示错误信息 这里逻辑可以根据项目进行修改
-    const errorMsg = msg
-    throw new Error(errorMsg)
+    throw new Error(msg)
   },
 
   // 请求之前处理config
@@ -214,7 +209,7 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
           // 是否返回原生响应头 比如：需要获取响应头时使用该属性
           isReturnNativeResponse: false,
           // 需要对返回数据进行处理
-          isTransformResponse: true,
+          isTransformResponse: false,
           // post请求的时候添加参数到url
           joinParamsToUrl: false,
           // 格式化提交参数时间

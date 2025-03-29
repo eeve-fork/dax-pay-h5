@@ -14,14 +14,13 @@ export function getOrderAndConfig(orderNo) {
 /**
  * 发起支付
  */
-export function payOrder(data:payParam){
+export function payOrder(data: payParam) {
   return http.request<Result<payConfig>>({
     url: '/unipay/gateway/pay',
     method: 'POST',
     data,
   })
 }
-
 
 /**
  * 收银台配置
@@ -49,7 +48,7 @@ export interface GatewayOrder {
   description?: string
   /** 金额(元) */
   amount?: number
-  expiredTime?: string;
+  expiredTime?: string
 }
 /**
  * 聚合支付配置信息
@@ -100,26 +99,26 @@ export interface CashierConfig {
 /**
  * 支付配置项参数
  */
-export interface payParam{
+export interface payParam {
   // 订单号
-  orderNo?:string, 
-  //支付配置项ID
-  itemId?:number,
+  orderNo?: string
+  // 支付配置项ID
+  itemId?: number
   // 唯一标识
-  openId?:string,
+  openId?: string
   // 付款码
-  anthCode?:string,
-} 
+  anthCode?: string
+}
 /**
  * 支付配置项参数返回值
  */
-export interface payConfig{
+export interface payConfig {
   // 商户订单号
-  bizOrderNo?:string,
+  bizOrderNo?: string
   // 订单号
-  orderNo?:string,
-  //支付状态
-  status?:string,
-  //支付参数体
-  payBody?:string
+  orderNo?: string
+  // 支付状态
+  status?: string
+  // 支付参数体
+  payBody?: string
 }
