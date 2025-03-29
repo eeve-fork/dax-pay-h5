@@ -87,7 +87,7 @@ const transform: AxiosTransform = {
     }
 
     // 接口请求成功，直接返回相应结果
-    if (code) {
+    if (code==ResultEnum.SUCCESS) {
       return result
     }
     // 接口请求错误，统一提示错误信息 这里逻辑可以根据项目进行修改
@@ -103,7 +103,6 @@ const transform: AxiosTransform = {
     if (!isUrlStr && joinPrefix) {
       config.url = `${urlPrefix}${config.url}`
     }
-    console.log(config.url)
 
     if (!isUrlStr && apiUrl && isString(apiUrl)) {
     }

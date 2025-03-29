@@ -99,7 +99,7 @@ function formatTime(time: number) {
   return time.toString().padStart(2, "0");
 }
 //获取倒计时秒数
-function getDownTotalTime(expiredTime: string) {
+function getDownTotalTime(expiredTime: any) {
   let nowTime = new Date(); //获取当前时间
   let excessTime = new Date(expiredTime); //获取失效时间
   let interval = excessTime.getTime() - nowTime.getTime(); //获取倒计时毫秒数
@@ -156,8 +156,7 @@ onUnmounted(() => {
  * 初始化
  */
 function init() {
-  getOrderAndConfig(orderNo)
-    .then(({ data, code, msg }) => {
+  getOrderAndConfig(orderNo).then(({ data, code, msg }) => {
       if (code != 0) {
         //如果异常，跳转异常页面
         router.replace({
@@ -167,7 +166,7 @@ function init() {
         return;
       }
       orderAndConfig.value = data; //赋值初始化数据
-      getDownTotalTime(data.order?.expiredTime); //计算倒计时
+      getDownTotalTime(data.order.expiredTime); //计算倒计时
       getMinter(); //先执行一下 解决进入页面一秒后才显示倒计时
       resume(); //开启倒计时
     })
