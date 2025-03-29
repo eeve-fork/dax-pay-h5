@@ -1,5 +1,5 @@
 <template>
-  <div class="aggeegateWeixin">
+  <div v-if="orderAndConfig" class="aggeegateWeixin">
     <div class="aggBox">
       <img src="@/assets/images/bill_logo.png" alt="">
       <div class="payPrice">
@@ -38,7 +38,25 @@
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import type { AggregateOrderAndConfig } from '@/views/daxpay/aggregate/Aggregate.api'
+import { getAggregateConfig } from '@/views/daxpay/aggregate/Aggregate.api'
 
+const route = useRoute()
+const { orderNo } = route.params
+
+const orderAndConfig = ref<AggregateOrderAndConfig>()
+
+onMounted(() => {
+  getAggregateConfig(orderNo, 'wechat_pay').then(({ data, code, msg }) => {
+    // 判断是否需要获取OpenId
+    if (data.aggregateConfig.needOpenId){
+
+    }
+    orderAndConfig.value = data
+  })
+})
 </script>
 
   <style scoped lang="less">

@@ -112,14 +112,15 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { OrderAndConfig, payConfig } from '@/views/daxpay/cashier/Cashier.api'
+import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
 import { getOrderAndConfig, payOrder } from '@/views/daxpay/cashier/Cashier.api'
+import { getBrowserUA } from '@/utils/uaUtil'
 
 const route = useRoute()
 const router = useRouter()
 
 // 获取传入的参数
-const { code: orderNo } = route.params
+const { orderNo } = route.params
 // 储存初始化的数据
 const orderAndConfig = ref<OrderAndConfig>()
 
@@ -279,7 +280,15 @@ function init() {
       })
       return
     }
+    //  如果自动升级聚合支付, 判断是否在对应环境中, 自动进行升级
+    if (data.config.h5AutoUpgrade) {
+      if (getBrowserUA() !== 'browser') {
+        router.replace({ path: `/aggregate/${orderNo}`, replace: true })
+        return;
+      }
+    }
     orderAndConfig.value = data // 赋值初始化数据
+
     getDownTotalTime(data.order.expiredTime) // 计算倒计时
     getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
     resume() // 开启倒计时

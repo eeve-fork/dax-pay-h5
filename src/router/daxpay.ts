@@ -27,7 +27,7 @@ export const DaxPayRoute: RouteRecordRaw = {
       },
     },
     {
-      path: '/cashier/:code',
+      path: '/cashier/:orderNo',
       name: 'CashierCode',
       component: () => import('@/views/daxpay/cashier/Cashier.vue'),
       meta: {
@@ -35,7 +35,7 @@ export const DaxPayRoute: RouteRecordRaw = {
       },
     },
     {
-      path: '/aggregate/:code',
+      path: '/aggregate/:orderNo',
       name: 'CheckAggregate',
       component: () => import('@/views/daxpay/aggregate/Aggregate.vue'),
       meta: {
@@ -43,7 +43,7 @@ export const DaxPayRoute: RouteRecordRaw = {
       },
     },
     {
-      path: '/aggregate/alipay/:code',
+      path: '/aggregate/alipay/:orderNo',
       name: 'AliCheckout',
       component: () => import('@/views/daxpay/aggregate/alipay/AlipayAggregate.vue'),
       meta: {
@@ -51,7 +51,7 @@ export const DaxPayRoute: RouteRecordRaw = {
       },
     },
     {
-      path: '/aggregate/wechat/:code',
+      path: '/aggregate/wechat/:orderNo',
       name: 'WechatCheckout',
       component: () => import('@/views/daxpay/aggregate/wechat/WechatAggregate.vue'),
       meta: {

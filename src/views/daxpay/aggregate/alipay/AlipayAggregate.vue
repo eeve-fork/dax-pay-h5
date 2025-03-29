@@ -5,7 +5,7 @@
       <div class="payPrice">
         <span class="unit">￥</span>
         <div class="price">
-          1288
+          {{ 1288 }}
         </div>
       </div>
       <div class="excessTime">
@@ -38,7 +38,17 @@
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import { getAggregateConfig } from '@/views/daxpay/aggregate/Aggregate.api'
 
+const route = useRoute()
+const { orderNo } = route.params
+
+onMounted(() => {
+  getAggregateConfig(orderNo, 'alipay').then(({ data, code, msg }) => {
+    console.log(data)
+  })
+})
 </script>
 
 <style scoped lang="less">

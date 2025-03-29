@@ -1,24 +1,25 @@
 import type { AuthResult } from '../auth/ChannelAuth.api'
 import { http } from '@/utils/http/axios'
 import type { Result } from '#/axios'
+import type { GatewayOrder, GatewayPayConfig } from '@/views/daxpay/cashier/Cashier.api'
 
 /**
- * 获取收银台配置信息
+ * 获取聚合支付相关订单和配置信息
  */
-export function getCashierTypeConfig(cashierType: string, cashierCode: string) {
-  return http.request<Result<CashierTypeConfigResult>>({
-    url: '/unipay/cashier/code/findByCashierType',
+export function getAggregateConfig(orderNo, aggregateType) {
+  return http.request<Result<AggregateOrderAndConfig>>({
+    url: '/unipay/gateway/getAggregateConfig',
     method: 'GET',
-    params: { cashierType, cashierCode },
+    params: { orderNo, aggregateType },
   })
 }
 
 /**
  * 获取收银台所需授权链接, 用于获取OpenId一类的信息
  */
-export function generateAuthUrl(param: CashierAuthUrlParam) {
+export function generateAuthUrl(param: GatewayAuthUrlParam) {
   return http.request<Result<string>>({
-    url: '/unipay/cashier/code/generateAuthUrl',
+    url: '/unipay/gateway/generateAuthUrl',
     method: 'POST',
     data: param,
   })
@@ -27,9 +28,9 @@ export function generateAuthUrl(param: CashierAuthUrlParam) {
 /**
  * 获取授权信息
  */
-export function auth(param: CashierAuthParam) {
+export function auth(param: GatewayAuthCodeParam) {
   return http.request<Result<AuthResult>>({
-    url: '/unipay/cashier/code/auth',
+    url: '/unipay/gateway/auth',
     method: 'POST',
     data: param,
   })
@@ -38,7 +39,7 @@ export function auth(param: CashierAuthParam) {
 /**
  * 发起支付
  */
-export function cashierPay(param: CashierPayParam) {
+export function aggregatePay(param: AggregatePayParam) {
   return http.request<Result<PayResult>>({
     url: '/unipay/cashier/code/pay',
     method: 'POST',
@@ -47,23 +48,53 @@ export function cashierPay(param: CashierPayParam) {
 }
 
 /**
+ * 网关聚合支付订单和配置信息
+ */
+export interface AggregateOrderAndConfig {
+  /** 订单信息 */
+  order: GatewayOrder
+  /** 收银台配置信息 */
+  config: GatewayPayConfig
+  /** 聚合支付配置信息 */
+  aggregateConfig: AggregateConfig
+}
+
+/**
+ * 收银台聚合配置信息
+ */
+export interface AggregateConfig {
+  /** 支付类型 */
+  aggregateType?: string
+  /** 通道 */
+  channel?: string
+  /** 支付方式 */
+  payMethod?: string
+  /** 其他支付方式 */
+  otherMethod?: string
+  /** 自动拉起支付 */
+  autoLaunch?: boolean
+  /** 需要获取OpenId */
+  needOpenId?: boolean
+}
+
+/**
  * 获取认证URL参数
  */
-export interface CashierAuthUrlParam {
-  // 应用号
-  cashierCode?: string
-  // 收银台类型
-  cashierType?: string
+export interface GatewayAuthUrlParam {
+  // 订单号
+  orderNo?: string
+  // 聚合支付类型
+  aggregateType?: string
 }
 
 /**
  * 认证参数
  */
-export interface CashierAuthParam {
-  // 应用号
-  cashierCode?: string
-  // 收银台类型
-  cashierType?: string
+export interface GatewayAuthCodeParam {
+  // 订单号
+  orderNo?: string
+  // 聚合支付类型
+  aggregateType?: string
   // 授权码
   authCode?: string
 }
@@ -71,17 +102,13 @@ export interface CashierAuthParam {
 /**
  * 通道收银支付参数
  */
-export interface CashierPayParam {
-  // 应用号
-  cashierCode?: string
-  // 收银台类型
-  cashierType?: string
-  // 支付金额
-  amount?: number
+export interface AggregatePayParam {
+  // 订单
+  orderNo?: string
+  // 聚合支付类型
+  aggregateType?: string
   // 唯一标识
   openId?: string
-  // 支付描述
-  description?: string
 }
 
 /**
@@ -114,20 +141,4 @@ export interface WxJsapiSignResult {
   signType?: string
   // 微信签名
   paySign?: string
-}
-
-/**
- * 收银码牌配置信息
- */
-export interface CashierTypeConfigResult {
-  // 应用号
-  appId?: string
-  // 码牌名称
-  name?: string
-  // 支付通道
-  channel?: string
-  // 支付方式
-  payMethod?: string
-  // 是否开启分账
-  allocation?: boolean
 }
