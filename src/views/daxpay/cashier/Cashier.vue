@@ -34,14 +34,12 @@
       <h2>请选择支付方式</h2>
       <div class="payGoupList">
         <div
-          v-for="item in orderAndConfig.groupConfigs[0].items"
-          :key="item.id"
-          class="payMethodsItem"
+          v-for="item in orderAndConfig.groupConfigs[0].items" :key="item.id" class="payMethodsItem"
           @click="payTypeClick(item)"
         >
           <div class="itemType">
-            <img v-if="item.icon == 'wechat'" src="@/assets/images/new_wx_pay.png" alt="">
-            <img v-if="item.icon == 'alipay'" src="@/assets/images/zfb_pay.png" alt="">
+            <img v-if="item.icon === 'wechat'" src="@/assets/images/new_wx_pay.png" alt="">
+            <img v-if="item.icon === 'alipay'" src="@/assets/images/zfb_pay.png" alt="">
             <!-- <img src="@/assets/images/quick_pay.png" alt=""> -->
             <p>{{ item.name }}</p>
             <span v-if="item.recommend"> 推荐</span>
@@ -73,7 +71,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
+import type { OrderAndConfig, payConfig } from '@/views/daxpay/cashier/Cashier.api'
 import { getOrderAndConfig, payOrder } from '@/views/daxpay/cashier/Cashier.api'
 
 const route = useRoute()
@@ -130,6 +128,7 @@ function getMinter() {
 watch(
   () => orderTime.totalTme,
   (newValue) => {
+    // eslint-disable-next-line eqeqeq
     if (newValue == 0) {
       router.replace('/PayExcessTime')
     }
@@ -195,6 +194,7 @@ function init() {
   display: flex;
   flex-direction: column;
   gap: 1.5%;
+
   .cash_topBox {
     height: 30%;
     background-color: #ffffff;
@@ -204,26 +204,32 @@ function init() {
     align-items: center;
     justify-content: flex-end;
     padding-bottom: 1.875rem;
+
     .payPrice {
       margin-bottom: 1.25rem;
       display: flex;
       gap: 0.425rem;
       font-size: 2rem;
+
       .unit {
         transform: translateY(0.125rem) scale(1, 0.8);
       }
     }
+
     .excessTime {
       display: flex;
       align-items: center;
       gap: 0.3125rem;
+
       .exTitle {
         color: #9fa1a2;
         margin-right: 0.3125rem;
       }
+
       .point {
         font-weight: 700;
       }
+
       .number {
         display: block;
         background-color: #ffece8;
@@ -231,25 +237,30 @@ function init() {
         padding: 0.1875rem;
       }
     }
+
     .payMessItem {
       display: flex;
       gap: 0.5125rem;
       color: #9fa1a2;
     }
   }
+
   .cash_bodyBox {
     height: 68.5%;
     font-weight: 600;
     background-color: #ffffff;
     padding: 0.9375rem 1.625rem;
     position: relative;
+
     h2 {
       margin-bottom: 1.25rem;
     }
+
     .payGoupList {
       width: 100%;
       overflow: scroll;
       height: calc(100% - 6.9375rem);
+
       .payMethodsItem {
         height: 3.75rem;
         line-height: 3.75rem;
@@ -258,14 +269,17 @@ function init() {
         display: flex;
         justify-content: space-between;
         align-items: center;
+
         .itemType {
           display: flex;
           gap: 0.625rem;
           align-items: center;
+
           img {
             width: 1.25rem;
             height: 1.25rem;
           }
+
           span {
             border: 1px solid #3882c2;
             color: #3882c2;
@@ -275,6 +289,7 @@ function init() {
             border-radius: 0.3125rem;
           }
         }
+
         .selectBox {
           width: 1.25rem;
           height: 1.25rem;
@@ -282,6 +297,7 @@ function init() {
           border-radius: 50%;
           overflow: hidden;
           border: 1px solid #ccc;
+
           img {
             width: 100%;
             height: 100%;
@@ -289,6 +305,7 @@ function init() {
         }
       }
     }
+
     .payBtnBox {
       width: 90%;
       margin: 0 auto;
@@ -303,10 +320,12 @@ function init() {
       line-height: 3.25rem;
       border-radius: 0.625rem;
     }
+
     .noSelect {
       background-color: #ccc;
     }
   }
+
   /* loading */
   .loadingMask {
     position: fixed;
@@ -320,6 +339,7 @@ function init() {
     background: rgba(0, 0, 0, 0.5);
     z-index: 99;
     border-radius: 0 0 0.2rem 0.2rem;
+
     .content {
       position: absolute;
       width: 15rem;
@@ -336,28 +356,34 @@ function init() {
       flex-direction: column;
       align-items: center;
     }
+
     .loadingImg {
       width: 1.6rem;
       height: 1.6rem;
       margin-top: 2rem;
       animation: 1.6s linear ratate infinite;
     }
+
     .loadingTxt {
       font-size: 1.125rem;
       color: #22242e;
       margin-top: 1.2rem;
       margin-bottom: 2rem;
     }
+
     @keyframes ratate {
       0% {
         transform: rotate(0deg);
       }
+
       40% {
         transform: rotate(144deg);
       }
+
       80% {
         transform: rotate(288deg);
       }
+
       100% {
         transform: rotate(360deg);
       }

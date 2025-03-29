@@ -1,19 +1,19 @@
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
-import type { AxiosResponse } from "axios";
-import axios from "axios";
-import { showDialog, showFailToast } from "vant";
-import { VAxios } from "./Axios";
-import type { AxiosTransform } from "./axiosTransform";
-import { checkStatus } from "./checkStatus";
-import { formatRequestDate, joinTimestamp } from "./helper";
-import type { CreateAxiosOptions, RequestOptions } from "./types";
-import { ContentTypeEnum, RequestEnum, ResultEnum } from "@/enums/httpEnum";
-import { useGlobSetting } from "@/hooks/setting";
+import type { AxiosResponse } from 'axios'
+import axios from 'axios'
+import { showDialog, showFailToast } from 'vant'
+import { VAxios } from './Axios'
+import type { AxiosTransform } from './axiosTransform'
+import { checkStatus } from './checkStatus'
+import { formatRequestDate, joinTimestamp } from './helper'
+import type { CreateAxiosOptions, RequestOptions } from './types'
+import { ContentTypeEnum, RequestEnum, ResultEnum } from '@/enums/httpEnum'
+import { useGlobSetting } from '@/hooks/setting'
 
-import { isString } from "@/utils/is/";
-import { deepMerge, isUrl } from "@/utils";
-import { setObjToUrlParams } from "@/utils/urlUtils";
-import type { Result } from "#/axios";
+import { isString } from '@/utils/is/'
+import { deepMerge, isUrl } from '@/utils'
+import { setObjToUrlParams } from '@/utils/urlUtils'
+import type { Result } from '#/axios'
 
 const globSetting = useGlobSetting()
 const urlPrefix = globSetting.urlPrefix
@@ -55,7 +55,7 @@ const transform: AxiosTransform = {
       throw new Error('请求出错，请稍候重试')
     }
     //  这里 code，result，message为 后台统一的字段，需要修改为项目自己的接口返回格式
-    const { code, msg, data } = result
+    const { code, msg } = result
     // 请求成功
     const hasSuccess = result && Reflect.has(result, 'code') && code === ResultEnum.SUCCESS
     // 是否显示提示信息
@@ -83,6 +83,7 @@ const transform: AxiosTransform = {
     }
 
     // 接口请求成功，直接返回相应结果
+    // eslint-disable-next-line eqeqeq
     if (code == ResultEnum.SUCCESS) {
       return result
     }
@@ -99,8 +100,7 @@ const transform: AxiosTransform = {
       config.url = `${urlPrefix}${config.url}`
     }
 
-    if (!isUrlStr && apiUrl && isString(apiUrl)) {
-    }
+    if (!isUrlStr && apiUrl && isString(apiUrl)) { /* empty */ }
     const params = config.params || {}
     const data = config.data || false
     if (config.method?.toUpperCase() === RequestEnum.GET) {
@@ -116,6 +116,7 @@ const transform: AxiosTransform = {
     }
     else {
       if (!isString(params)) {
+        // eslint-disable-next-line ts/no-unused-expressions
         formatDate && formatRequestDate(params)
         if (
           Reflect.has(config, 'data')
@@ -165,8 +166,8 @@ const transform: AxiosTransform = {
           title: '网络异常',
           message: '请检查您的网络连接是否正常',
         })
-          .then(() => {})
-          .catch(() => {})
+          .then(() => { })
+          .catch(() => { })
         return Promise.reject(error)
       }
     }
