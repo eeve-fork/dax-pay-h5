@@ -5,21 +5,21 @@
       <div class="payPrice">
         <span class="unit">￥</span>
         <div class="price">
-          1288
+          {{ orderAndConfig?.order.amount }}
         </div>
       </div>
-      <div class="excessTime">
+      <div v-show="!isAutoLaunch" class="excessTime">
         <span class="exTitle">剩余支付时间</span>
-        <span class="number">05</span>
+        <span class="number">{{ orderTime.currentMinute }}</span>
         <span class="point">:</span>
-        <span class="number">05</span>
+        <span class="number">{{ orderTime.currentSeconds }}</span>
       </div>
       <div class="payMessItem">
         <div class="itemTitle">
           标题:
         </div>
         <div class="itemContent">
-          qweqweq
+          {{ orderAndConfig?.order.title }}
         </div>
       </div>
       <div class="payMessItem">
@@ -27,17 +27,18 @@
           订单编号:
         </div>
         <div class="itemContent">
-          qweqweqweq
+          {{ orderAndConfig?.order.orderNo }}
         </div>
       </div>
     </div>
-    <div class="payBtnBox">
-      支付1288
+    <div v-show="!isAutoLaunch" class="payBtnBox">
+      支付{{ orderAndConfig?.order.amount }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { title } from 'node:process'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
 import type {
@@ -48,14 +49,14 @@ import type {
 } from '@/views/daxpay/aggregate/Aggregate.api'
 import { aggregatePay, auth, generateAuthUrl, getAggregateConfig } from '@/views/daxpay/aggregate/Aggregate.api'
 
-import { AggregateEnum, GatewayCallTypeEnum } from "@/enums/daxpay/DaxPayEnum";
+import { AggregateEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 
 const route = useRoute()
 const { orderNo } = route.params
 const { code: authCode } = route.query
 const show = ref<boolean>(false)
-
+const isAutoLaunch = ref<boolean>(true)
 const orderAndConfig = ref<AggregateOrderAndConfig>()
 const openId = ref<string>('')
 const loading = ref<boolean>(false)
@@ -66,8 +67,56 @@ const authParam = ref<GatewayAuthCodeParam>({
   aggregateType: AggregateEnum.WECHAT,
 })
 
+// 倒计时对象
+const orderTime = reactive({
+  totalTme: 0, // 总共时间
+  currentMinute: '00', // 当前分钟
+  currentSeconds: '00', // 当前秒数
+  // 获取倒计时秒数
+  getDownTotalTime: (expiredTime: any) => {
+    const nowTime = new Date() // 获取当前时间
+    const excessTime = new Date(expiredTime) // 获取失效时间
+    const interval = excessTime.getTime() - nowTime.getTime() // 获取倒计时毫秒数
+    if (interval > 0) {
+      orderTime.totalTme = Math.floor(interval / 1000)
+    }
+    else {
+      console.log('失效了')
+    }
+  },
+  // 获取分秒
+  getMinter: () => {
+    orderTime.totalTme--
+    orderTime.currentMinute = orderTime.formatTime(Math.floor(orderTime.totalTme / 60))
+    orderTime.currentSeconds = orderTime.formatTime(Math.floor(orderTime.totalTme % 60))
+  },
+  // 格式化时间
+  formatTime: (time: number) => {
+    return time.toString().padStart(2, '0')
+  },
+})
+
+// 定时器
+const { pause, resume } = useIntervalFn(() => {
+  orderTime.getMinter() // 每秒获取分秒方法
+}, 1000)
+
+// 监听倒计时，到时间跳转超时页面
+watch(
+  () => orderTime.totalTme,
+  (newValue) => {
+    // eslint-disable-next-line eqeqeq
+    if (newValue == 0) {
+      router.replace('/PayFail')
+    }
+  },
+)
+
 onMounted(() => {
   init()
+})
+onUnmounted(() => {
+  pause()
 })
 
 /**
@@ -75,7 +124,15 @@ onMounted(() => {
  */
 function init() {
   // 获取订单和配置信息
-  getAggregateConfig(orderNo, 'wechat_pay').then(async ({ data, code, msg }) => {
+  getAggregateConfig(orderNo, 'wechat_pay').then(async ({ data, msg, code }) => {
+    if (code !== 0) {
+      // 如果异常，跳转异常页面
+      router.replace({
+        path: '/payFail',
+        query: { msg },
+      })
+      return
+    }
     // 判断是否需要获取OpenId
     if (data.aggregateConfig.needOpenId) {
       // 判断是否已经获取到了authCode, 如果没有则重定向进行获取authCode
@@ -84,9 +141,20 @@ function init() {
           orderNo: orderNo as string,
           aggregateType: AggregateEnum.WECHAT,
         }).then((res) => {
+          if (res.code !== 0) {
+            // 如果异常，跳转异常页面
+            router.replace({
+              path: '/payFail',
+              query: { msg },
+            })
+            return
+          }
           location.replace(res.data)
         }).catch((res) => {
-          router.push({ name: 'ErrorResult', query: { msg: res.message }, replace: true })
+          router.replace({
+            path: '/payFail',
+            query: { msg: res.message },
+          })
         })
         return
       }
@@ -100,6 +168,14 @@ function init() {
     orderAndConfig.value = data
     // 判断是否自动拉起支付
     if (orderAndConfig.value.aggregateConfig.autoLaunch) {
+      isAutoLaunch.value = true
+      pay()
+    }
+    else {
+      isAutoLaunch.value = false // 控制是否显示倒计时和时间
+      orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
+      orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
+      resume() // 开启倒计时
       pay()
     }
   })
@@ -122,7 +198,7 @@ async function wxAuth() {
  */
 function pay() {
   loading.value = true
-  if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi){
+  if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
     const from = {
       orderNo: orderNo as string,
       aggregateType: AggregateEnum.WECHAT,
@@ -154,14 +230,24 @@ function jsapiPay(data: WxJsapiSignResult) {
   WeixinJSBridge.invoke('getBrandWCPayRequest', form, (res) => {
     if (res.err_msg === 'get_brand_wcpay_request:ok') {
       // 跳转到成功页面
-      router.push({ name: 'SuccessResult', query: { msg: '支付成功' }, replace: true })
+      router.replace({
+        path: '/paySuccess',
+        query: { title: '支付成功', orderNo },
+      })
+    }
+    else {
+      // 跳转到失败页面
+      router.replace({
+        path: '/payFail',
+        query: { msg: '支付已取消' },
+      })
     }
   })
 }
 </script>
 
-  <style scoped lang="less">
-  .aggeegateWeixin {
+<style scoped lang="less">
+.aggeegateWeixin {
   width: 100%;
   height: 100%;
   position: relative;
@@ -223,6 +309,7 @@ function jsapiPay(data: WxJsapiSignResult) {
       color: #9fa1a2;
     }
   }
+
   .payBtnBox {
     width: 90%;
     margin: 0 auto;

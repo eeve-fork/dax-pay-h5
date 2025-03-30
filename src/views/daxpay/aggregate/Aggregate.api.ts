@@ -37,6 +37,17 @@ export function auth(param: GatewayAuthCodeParam) {
 }
 
 /**
+ * 支付成功获取信息
+ */
+export function getSuccessOrder(orderNo) {
+  return http.request<Result<paySuccess>>({
+    url: '/unipay/gateway/findStatusByOrderNo',
+    method: 'POST',
+    params: { orderNo },
+  })
+}
+
+/**
  * 发起支付
  */
 export function aggregatePay(param: AggregatePayParam) {
@@ -143,4 +154,23 @@ export interface WxJsapiSignResult {
   signType?: string
   // 微信签名
   paySign?: string
+}
+
+/**
+ * 支付成功返回信息
+ */
+
+export interface paySuccess {
+  // 商户订单号
+  bizOrderNo: string
+  // 订单号
+  orderNo: string
+  //  标题
+  title: string
+  // 描述
+  description: string
+  // 金额
+  amount: number
+  // 超时时间
+  expiredTime
 }

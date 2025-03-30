@@ -2,7 +2,7 @@
   <div class="payFail">
     <div class="payLogo">
       <img src="@/assets/images/fail1.png" alt="">
-      <p>支付失败</p>
+      <p>{{ title ? title : "支付失败" }}</p>
       <span>{{ errorMsg ? errorMsg : "支付失败,请重试!" }}</span>
     </div>
 
@@ -16,11 +16,20 @@
 import { useRoute, useRouter } from 'vue-router'
 // 获取路由参数
 const route = useRoute()
-const { msg: errorMsg } = route.query
+const { msg: errorMsg, title } = route.query
 
 // 点击关闭
 function closeClick() {
-  window.close()
+  try {
+    WeixinJSBridge.call('closeWindow')
+  }
+  catch {
+
+  }
+  try {
+    AlipayJSBridge.call('closeWebview')
+  }
+  catch {}
 }
 </script>
 

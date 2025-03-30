@@ -112,9 +112,11 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { showFailToast } from 'vant'
 import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
 import { getOrderAndConfig, payOrder } from '@/views/daxpay/cashier/Cashier.api'
 import { getBrowserUA } from '@/utils/uaUtil'
+import { GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 
 const route = useRoute()
 const router = useRouter()
@@ -126,44 +128,45 @@ const orderAndConfig = ref<OrderAndConfig>()
 
 // 选中的支付方式
 const selectId = ref<string>()
+// 选中的支付类型
+const callType = ref<string>()
 function payTypeClick(item) {
   selectId.value = item.id
+  callType.value = item.callType
 }
 // 倒计时对象
 const orderTime = reactive({
   totalTme: 0, // 总共时间
   currentMinute: '00', // 当前分钟
   currentSeconds: '00', // 当前秒数
+  // 获取倒计时秒数
+  getDownTotalTime: (expiredTime: any) => {
+    const nowTime = new Date() // 获取当前时间
+    const excessTime = new Date(expiredTime) // 获取失效时间
+    const interval = excessTime.getTime() - nowTime.getTime() // 获取倒计时毫秒数
+    if (interval > 0) {
+      orderTime.totalTme = Math.floor(interval / 1000)
+    }
+    else {
+      console.log('失效了')
+    }
+  },
+  // 获取分秒
+  getMinter: () => {
+    orderTime.totalTme--
+    orderTime.currentMinute = orderTime.formatTime(Math.floor(orderTime.totalTme / 60))
+    orderTime.currentSeconds = orderTime.formatTime(Math.floor(orderTime.totalTme % 60))
+  },
+  // 格式化时间
+  formatTime: (time: number) => {
+    return time.toString().padStart(2, '0')
+  },
 })
 
 // 定时器
 const { pause, resume } = useIntervalFn(() => {
-  getMinter() // 每秒获取分秒方法
+  orderTime.getMinter() // 每秒获取分秒方法
 }, 1000)
-
-// 格式化时间
-function formatTime(time: number) {
-  return time.toString().padStart(2, '0')
-}
-// 获取倒计时秒数
-function getDownTotalTime(expiredTime: any) {
-  const nowTime = new Date() // 获取当前时间
-  const excessTime = new Date(expiredTime) // 获取失效时间
-  const interval = excessTime.getTime() - nowTime.getTime() // 获取倒计时毫秒数
-  if (interval > 0) {
-    orderTime.totalTme = Math.floor(interval / 1000)
-  }
-  else {
-    console.log('失效了')
-  }
-}
-
-// 获取分秒
-function getMinter() {
-  orderTime.totalTme--
-  orderTime.currentMinute = formatTime(Math.floor(orderTime.totalTme / 60))
-  orderTime.currentSeconds = formatTime(Math.floor(orderTime.totalTme % 60))
-}
 
 // 监听倒计时，到时间跳转超时页面
 watch(
@@ -171,35 +174,41 @@ watch(
   (newValue) => {
     // eslint-disable-next-line eqeqeq
     if (newValue == 0) {
-      router.replace('/PayExcessTime')
+      router.replace('/PayFail')
     }
   },
 )
 // 控制加载弹窗
 const loading = ref(false)
+
 // 发起支付
 function payClick() {
-  loading.value = true
-  const form = {
-    orderNo,
-    itemId: selectId.value,
+  if (callType.value === GatewayCallTypeEnum.link) {
+    loading.value = true
+    const form = {
+      orderNo,
+      itemId: selectId.value,
+    }
+    payOrder(form as any)
+      .then(({ data, code, msg }) => {
+        if (code !== 0) {
+          // 如果异常，跳转错误页面
+          router.replace({
+            path: '/payFail',
+            query: { msg },
+          })
+          return
+        }
+        loading.value = false
+        location.replace(data.payBody as any)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
-  payOrder(form as any)
-    .then(({ data, code, msg }) => {
-      if (code !== 0) {
-        // 如果异常，跳转错误页面
-        router.replace({
-          path: '/payFail',
-          query: { msg },
-        })
-        return
-      }
-      loading.value = false
-      location.replace(data.payBody as any)
-    })
-    .catch((error) => {
-      console.log(error)
-    })
+  else {
+    showFailToast('暂不支持！')
+  }
 }
 
 // 返回弹窗对象
@@ -284,13 +293,12 @@ function init() {
     if (data.config.h5AutoUpgrade) {
       if (getBrowserUA() !== 'browser') {
         router.replace({ path: `/aggregate/${orderNo}`, replace: true })
-        return;
+        return
       }
     }
     orderAndConfig.value = data // 赋值初始化数据
-
-    getDownTotalTime(data.order.expiredTime) // 计算倒计时
-    getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
+    orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
+    orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
     resume() // 开启倒计时
   })
     .catch((error) => {

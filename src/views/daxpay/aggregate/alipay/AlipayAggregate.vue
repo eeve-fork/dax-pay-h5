@@ -1,25 +1,25 @@
 <template>
-  <div class="aggeegateAlipay">
+  <div v-if="show" class="aggeegateAli">
     <div class="aggBox">
       <img src="@/assets/images/bill_logo.png" alt="">
       <div class="payPrice">
         <span class="unit">￥</span>
         <div class="price">
-          {{ 1288 }}
+          {{ orderAndConfig?.order.amount }}
         </div>
       </div>
-      <div class="excessTime">
+      <div v-show="!isAutoLaunch" class="excessTime">
         <span class="exTitle">剩余支付时间</span>
-        <span class="number">05</span>
+        <span class="number">{{ orderTime.currentMinute }}</span>
         <span class="point">:</span>
-        <span class="number">05</span>
+        <span class="number">{{ orderTime.currentSeconds }}</span>
       </div>
       <div class="payMessItem">
         <div class="itemTitle">
           标题:
         </div>
         <div class="itemContent">
-          qweqweq
+          {{ orderAndConfig?.order.title }}
         </div>
       </div>
       <div class="payMessItem">
@@ -27,32 +27,147 @@
           订单编号:
         </div>
         <div class="itemContent">
-          qweqweqweq
+          {{ orderAndConfig?.order.orderNo }}
         </div>
       </div>
     </div>
-    <div class="payBtnBox">
-      支付1288
+    <div v-show="!isAutoLaunch" class="payBtnBox">
+      支付{{ orderAndConfig?.order.amount }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { getAggregateConfig } from '@/views/daxpay/aggregate/Aggregate.api'
+import { ref } from 'vue'
+import type {
+  AggregateOrderAndConfig,
+  AggregatePayParam,
+} from '@/views/daxpay/aggregate/Aggregate.api'
+import { aggregatePay, getAggregateConfig } from '@/views/daxpay/aggregate/Aggregate.api'
+
+import { AggregateEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 
 const route = useRoute()
+const router = useRouter()
 const { orderNo } = route.params
+const show = ref<boolean>(false)
+const isAutoLaunch = ref<boolean>(true)
+const orderAndConfig = ref<AggregateOrderAndConfig>()
+const loading = ref<boolean>(false)
+
+// 倒计时对象
+const orderTime = reactive({
+  totalTme: 0, // 总共时间
+  currentMinute: '00', // 当前分钟
+  currentSeconds: '00', // 当前秒数
+  // 获取倒计时秒数
+  getDownTotalTime: (expiredTime: any) => {
+    const nowTime = new Date() // 获取当前时间
+    const excessTime = new Date(expiredTime) // 获取失效时间
+    const interval = excessTime.getTime() - nowTime.getTime() // 获取倒计时毫秒数
+    if (interval > 0) {
+      orderTime.totalTme = Math.floor(interval / 1000)
+    }
+    else {
+      console.log('失效了')
+    }
+  },
+  // 获取分秒
+  getMinter: () => {
+    orderTime.totalTme--
+    orderTime.currentMinute = orderTime.formatTime(Math.floor(orderTime.totalTme / 60))
+    orderTime.currentSeconds = orderTime.formatTime(Math.floor(orderTime.totalTme % 60))
+  },
+  // 格式化时间
+  formatTime: (time: number) => {
+    return time.toString().padStart(2, '0')
+  },
+})
+
+// 定时器
+const { pause, resume } = useIntervalFn(() => {
+  orderTime.getMinter() // 每秒获取分秒方法
+}, 1000)
+
+// 监听倒计时，到时间跳转超时页面
+watch(
+  () => orderTime.totalTme,
+  (newValue) => {
+    // eslint-disable-next-line eqeqeq
+    if (newValue == 0) {
+      router.replace('/PayFail')
+    }
+  },
+)
+
+/**
+ * 初始化
+ */
+function init() {
+  // 获取订单和配置信息
+  getAggregateConfig(orderNo, 'alipay').then(async ({ data, code, msg }) => {
+    if (code !== 0) {
+      // 如果异常，跳转异常页面
+      router.replace({
+        path: '/payFail',
+        query: { msg },
+      })
+      return
+    }
+    show.value = true
+    orderAndConfig.value = data
+    // 判断是否自动拉起支付
+    if (orderAndConfig.value.aggregateConfig.autoLaunch) {
+      isAutoLaunch.value = true
+      pay()
+    }
+    else {
+      isAutoLaunch.value = false // 控制是否显示倒计时和时间
+      orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
+      orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
+      resume() // 开启倒计时
+      pay()
+    }
+  })
+}
+
+/**
+ * 调起支付, 需要根据调用类型发起
+ */
+function pay() {
+  loading.value = true
+  if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
+    const from = {
+      orderNo: orderNo as string,
+      aggregateType: AggregateEnum.ALI,
+    } as AggregatePayParam
+    aggregatePay(from)
+      .then(({ data, code, msg }) => {
+        if (code !== 0) {
+          // 如果异常，跳转异常页面
+          router.replace({
+            path: '/payFail',
+            query: { msg },
+          })
+          return
+        }
+        loading.value = false
+        location.replace(data.payBody as any)
+      })
+  }
+}
 
 onMounted(() => {
-  getAggregateConfig(orderNo, 'alipay').then(({ data, code, msg }) => {
-    console.log(data)
-  })
+  init()
+})
+onUnmounted(() => {
+  pause()
 })
 </script>
 
 <style scoped lang="less">
-.aggeegateAlipay {
+.aggeegateAli {
   width: 100%;
   height: 100%;
   position: relative;
@@ -114,10 +229,11 @@ onMounted(() => {
       color: #9fa1a2;
     }
   }
+
   .payBtnBox {
     width: 90%;
     margin: 0 auto;
-    background-color: #0d6eff;
+    background-color: #89d961;
     color: #fff;
     height: 3.25rem;
     position: absolute;

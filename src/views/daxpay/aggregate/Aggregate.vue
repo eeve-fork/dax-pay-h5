@@ -1,4 +1,5 @@
 <template>
+  <div />
 </template>
 
 <script setup lang="ts">
@@ -17,9 +18,11 @@ else if (ua === 'alipay') {
   router.push({ path: `/aggregate/alipay/${orderNo}`, replace: true })
 }
 else {
-  router.push({ name: 'ErrorResult', query: { msg: '请使用支付宝、微信等软件进行扫码支付' }, replace: true })
+  router.replace({
+    path: '/payFail',
+    query: { msg: '请使用支付宝、微信等软件进行扫码支付' },
+  })
 }
 </script>
 
-<style scoped lang="less">
-</style>
+<style scoped lang="less"></style>
