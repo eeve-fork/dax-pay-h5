@@ -26,7 +26,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { CheckoutAggregateEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import type {
   AggregateOrderAndConfigResult, CheckoutAggregatePayParam,
@@ -49,7 +49,7 @@ const openId = ref<string>('')
 // 认证参数
 const authParam = ref<CheckoutAuthCodeParam>({
   orderNo: orderNo as string,
-  aggregateType: CheckoutAggregateEnum.WECHAT,
+  aggregateType: AggregateEnum.WECHAT,
 })
 
 const aggregateInfo = ref<AggregateOrderAndConfigResult>({
@@ -69,7 +69,7 @@ function init() {
   // 如果不是重定向跳转过来， 跳转到到重定向授权地址
   if (!authCode) {
     // 重定向跳转到微信授权地址
-    generateAuthUrl({ orderNo: orderNo as string, aggregateType: CheckoutAggregateEnum.WECHAT }).then((res) => {
+    generateAuthUrl({ orderNo: orderNo as string, aggregateType: AggregateEnum.WECHAT }).then((res) => {
       const url = res.data
       location.replace(url)
     }).catch((res) => {
@@ -89,7 +89,7 @@ function init() {
 async function initData() {
   show.value = true
   // 获取聚合配置
-  getAggregateConfig(orderNo, CheckoutAggregateEnum.WECHAT).then(({ data }) => {
+  getAggregateConfig(orderNo, AggregateEnum.WECHAT).then(({ data }) => {
     aggregateInfo.value = data
   }).catch((res) => {
     router.push({ name: 'ErrorResult', query: { msg: res.message }, replace: true })
@@ -114,7 +114,7 @@ function pay() {
   loading.value = true
   const from = {
     orderNo: orderNo as string,
-    aggregateType: CheckoutAggregateEnum.WECHAT,
+    aggregateType: AggregateEnum.WECHAT,
     openId: openId.value,
   } as CheckoutAggregatePayParam
   aggregatePay(from)

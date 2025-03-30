@@ -42,7 +42,7 @@ import {
   , getOrderAndConfig,
 } from './CheckoutPay.api'
 
-import { CheckoutTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+import { CashierTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 
 const route = useRoute()
@@ -69,7 +69,7 @@ onMounted(() => {
  */
 async function initData() {
   // 获取收银台配置
-  await getOrderAndConfig(orderNo, CheckoutTypeEnum.H5).then(({ data }) => {
+  await getOrderAndConfig(orderNo, CashierTypeEnum.H5).then(({ data }) => {
     orderAndConfig.value = data
   }).catch((res) => {
     router.push({ name: 'ErrorResult', query: { msg: res.message }, replace: true })

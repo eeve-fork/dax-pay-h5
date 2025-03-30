@@ -23,14 +23,6 @@ export enum PayMethodEnum {
  * 收银台类型
  */
 export enum CashierTypeEnum {
-  WECHAT_PAY = 'wechat_pay',
-  ALIPAY = 'alipay',
-}
-
-/**
- * 收银台类型
- */
-export enum CheckoutTypeEnum {
   H5 = 'h5',
   PC = 'pc',
   MINI_APP = 'mini_app',
@@ -40,7 +32,19 @@ export enum CheckoutTypeEnum {
 /**
  * 收银台聚合支付类型
  */
-export enum CheckoutAggregateEnum {
+export enum AggregateEnum {
   ALI = 'alipay',
   WECHAT = 'wechat_pay',
+}
+
+/**
+ * 网关支付调用类型
+ */
+export enum GatewayCallTypeEnum {
+  // 跳转链接
+  link = 'link',
+  // JSAPI
+  jsapi = 'jsapi',
+  // 表单方式
+  from = 'from',
 }

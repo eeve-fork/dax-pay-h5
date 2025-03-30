@@ -41,7 +41,7 @@ export function auth(param: GatewayAuthCodeParam) {
  */
 export function aggregatePay(param: AggregatePayParam) {
   return http.request<Result<PayResult>>({
-    url: '/unipay/cashier/code/pay',
+    url: '/unipay/gateway/aggregatePay',
     method: 'POST',
     data: param,
   })
@@ -75,6 +75,8 @@ export interface AggregateConfig {
   autoLaunch?: boolean
   /** 需要获取OpenId */
   needOpenId?: boolean
+  /** 调起方式 */
+  callType?: string
 }
 
 /**

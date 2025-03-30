@@ -26,7 +26,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { CheckoutAggregateEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import type {
   AggregateOrderAndConfigResult,
@@ -56,7 +56,7 @@ onMounted(() => {
  */
 async function initData() {
   // 查询订单和配置
-  await getAggregateConfig(orderNo, CheckoutAggregateEnum.ALI).then(({ data }) => {
+  await getAggregateConfig(orderNo, AggregateEnum.ALI).then(({ data }) => {
     aggregateInfo.value = data
   }).catch((res) => {
     router.push({ name: 'ErrorResult', query: { msg: res.message }, replace: true })
@@ -74,7 +74,7 @@ function pay() {
   loading.value = true
   const from = {
     orderNo: aggregateInfo.value.order.orderNo,
-    aggregateType: CheckoutAggregateEnum.ALI,
+    aggregateType: AggregateEnum.ALI,
   } as CheckoutAggregatePayParam
   aggregatePay(from)
     .then(({ data }) => {
