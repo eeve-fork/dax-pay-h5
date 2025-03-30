@@ -4,7 +4,7 @@
       <img v-if="isWeiPay === 'wei'" src="@/assets/images/weiSuccess.png" alt="">
       <img v-else src="@/assets/images/success1.png" alt="">
       <p :class="{ textColor: isWeiPay === 'wei' }">
-        {{ title ? title : "支付成功" }}
+        支付成功
       </p>
     </div>
     <div class="payPrice">
@@ -39,13 +39,15 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { getSuccessOrder } from '@/views/daxpay/aggregate/Aggregate.api'
 import type { paySuccess } from '@/views/daxpay/aggregate/Aggregate.api'
 import { getBrowserUA } from '@/utils/uaUtil'
 // 获取路由参数
+
 const route = useRoute()
-const { title, orderNo } = route.query
+
+const { orderNo } = route.params
 const orderAndConfig = ref<paySuccess>()
 const isWeiPay = ref<string>()
 
