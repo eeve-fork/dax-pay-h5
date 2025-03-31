@@ -29,13 +29,13 @@ import { useRoute } from 'vue-router'
 import { AggregateEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import type {
-  AggregateOrderAndConfigResult, CheckoutAggregatePayParam,
-  CheckoutAuthCodeParam} from '@/views/daxpay/checkout/CheckoutPay.api';
-import { aggregatePay,
- auth, generateAuthUrl, getAggregateConfig } from '@/views/daxpay/checkout/CheckoutPay.api'
+  AggregateOrderAndConfigResult,
+  CheckoutAggregatePayParam,
+  CheckoutAuthCodeParam,
+} from '@/views/daxpay/h5/checkout/CheckoutPay.api'
+import { aggregatePay, auth, generateAuthUrl, getAggregateConfig } from '@/views/daxpay/h5/checkout/CheckoutPay.api'
 
-
-import type { WxJsapiSignResult } from '@/views/daxpay/aggregate/Aggregate.api'
+import type { WxJsapiSignResult } from '@/views/daxpay/h5/aggregate/Aggregate.api'
 
 const route = useRoute()
 const { orderNo } = route.params

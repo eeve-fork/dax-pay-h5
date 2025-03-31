@@ -1,7 +1,7 @@
 import { http } from '@/utils/http/axios'
 import type { Result } from '#/axios'
-import type { AuthResult } from '@/views/daxpay/auth/ChannelAuth.api'
-import type { PayResult } from '@/views/daxpay/aggregate/Aggregate.api'
+import type { AuthResult } from '@/views/daxpay/h5/auth/ChannelAuth.api'
+import type { PayResult } from '@/views/daxpay/h5/aggregate/Aggregate.api'
 
 /**
  * 获取收银台订单和配置信息

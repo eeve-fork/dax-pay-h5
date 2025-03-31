@@ -1,7 +1,7 @@
 import type { AuthResult } from '../auth/ChannelAuth.api'
 import { http } from '@/utils/http/axios'
 import type { Result } from '#/axios'
-import type { GatewayOrder, GatewayPayConfig } from '@/views/daxpay/cashier/Cashier.api'
+import type { GatewayOrder, GatewayPayConfig } from '@/views/daxpay/h5/cashier/Cashier.api'
 
 /**
  * 获取聚合支付相关订单和配置信息

@@ -113,8 +113,8 @@
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showFailToast } from 'vant'
-import type { OrderAndConfig } from '@/views/daxpay/cashier/Cashier.api'
-import { getOrderAndConfig, payOrder } from '@/views/daxpay/cashier/Cashier.api'
+import type { OrderAndConfig } from '@/views/daxpay/h5/cashier/Cashier.api'
+import { getOrderAndConfig, payOrder } from '@/views/daxpay/h5/cashier/Cashier.api'
 import { getBrowserUA } from '@/utils/uaUtil'
 import { GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 

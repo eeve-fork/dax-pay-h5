@@ -31,11 +31,11 @@ import router from '@/router'
 import type {
   AggregateOrderAndConfigResult,
   CheckoutAggregatePayParam,
-} from '@/views/daxpay/checkout/CheckoutPay.api'
+} from '@/views/daxpay/h5/checkout/CheckoutPay.api'
 import {
   aggregatePay,
   getAggregateConfig,
-} from '@/views/daxpay/checkout/CheckoutPay.api'
+} from '@/views/daxpay/h5/checkout/CheckoutPay.api'
 
 const route = useRoute()
 const { orderNo } = route.params

@@ -1,8 +1,8 @@
 <template>
   <div class="paySuccess">
     <div class="payLogo">
-      <img v-if="isWeiPay === 'wei'" src="@/assets/images/weiSuccess.png" alt="">
-      <img v-else src="@/assets/images/success1.png" alt="">
+      <img v-if="isWeiPay === 'wei'" src="../../../../assets/images/weiSuccess.png" alt="">
+      <img v-else src="../../../../assets/images/success1.png" alt="">
       <p :class="{ textColor: isWeiPay === 'wei' }">
         支付成功
       </p>
@@ -40,8 +40,8 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { getSuccessOrder } from '@/views/daxpay/aggregate/Aggregate.api'
-import type { paySuccess } from '@/views/daxpay/aggregate/Aggregate.api'
+import { getSuccessOrder } from '@/views/daxpay/h5/aggregate/Aggregate.api'
+import type { paySuccess } from '@/views/daxpay/h5/aggregate/Aggregate.api'
 import { getBrowserUA } from '@/utils/uaUtil'
 // 获取路由参数
 

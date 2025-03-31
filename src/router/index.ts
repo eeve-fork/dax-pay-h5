@@ -5,11 +5,12 @@ import { BusinessRoute, ErrorPageRoute, routeModuleList } from '@/router/base'
 import { useRouteStoreWidthOut } from '@/store/modules/route'
 
 // 菜单
-import { DaxPayRoute } from '@/router/daxpay'
+import { DaxPayH5Route, DaxPayPcRoute } from '@/router/daxpay'
 
 // 普通路由
 export const constantRouter: RouteRecordRaw[] = [
-  DaxPayRoute,
+  DaxPayH5Route,
+  DaxPayPcRoute,
   ErrorPageRoute,
   BusinessRoute,
 ]
