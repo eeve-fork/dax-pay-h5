@@ -11,7 +11,7 @@
           <div class="payPrice">
             <span class="unit">￥</span>
             <div class="price">
-              0.02
+              {{ orderObj?.order.amount }}
             </div>
           </div>
           <div class="excessTime">
@@ -25,7 +25,7 @@
               订单编号:
             </div>
             <div class="itemContent">
-              207592561289848484
+              {{ orderObj?.order.orderNo }}
             </div>
           </div>
         </div>
@@ -33,11 +33,8 @@
         <div class="payMethodBox">
           <div class="methodBox">
             <div
-              v-for="item in payMethObj.payTypeList"
-              :key="item.name"
-              class="methodItem"
-              :class="{ methodItemClick: payMethObj.payClickItem === item.name }"
-              @click="payMethObj.payClick(item)"
+              v-for="item in orderObj?.groupConfigs" :key="item.id" class="methodItem"
+              :class="{ methodItemClick: payMethObj.payClickItemId === item.id }" @click="payMethObj.payClick(item)"
             >
               <img :src="item.icon" alt="">
               <span>{{ item.name }}</span>
@@ -47,9 +44,15 @@
             </div>
           </div>
           <div class="payMethodChildBox">
-            <div v-for="item in 8" :key="item" class="payMethodChildItem">
-              <img src="@/assets/images/netbank_company_icon.png" alt="">
-              <span>支付方式</span>
+            <div v-for="item in childRenList" :key="item.id" class="payMethodChildItem">
+              <img :src="getImageUrl(item.icon)" alt="">
+              <!-- <img v-if="item.icon === 'wechat'" src="@/assets/images/wechat.png" alt="">
+              <img v-if="item.icon === 'alipay'" src="@/assets/images/alipay.png" alt="">
+              <img v-if="item.icon === 'union'" src="@/assets/images/union_pay.png" alt="">
+              <img v-if="item.icon === 'datarmb'" src="@/assets/images/datarmb_pay.png" alt="">
+              <img v-if="item.icon === 'quick'" src="@/assets/images/quick_pay.png" alt="">
+              <img v-if="item.icon === 'net_bank_pay'" src="@/assets/images/net_bank_pay.png" alt=""> -->
+              <span>{{ item.name }}</span>
             </div>
           </div>
         </div>
@@ -61,15 +64,22 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import weiXin from '@/assets/images/new_wx_pay.png'
-import zhifuBao from '@/assets/images/zfb_pay.png'
-import yinlian from '@/assets/images/union_pay.png'
-import shuZhi from '@/assets/images/datarmb_pay.png'
-import quick from '@/assets/images/quick_pay.png'
-import wangYin from '@/assets/images/net_bank_pay.png'
+import { showDialog, showFailToast } from 'vant'
+import { getOrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
+import type { CashierGroupConfig, OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
 
-// const route = useRoute()
+// 动态生成图片路径
+function getImageUrl(icon) {
+  return new URL(`../../../../assets/images/${icon}.png`, import.meta.url).href
+}
+
+const { orderNo } = useRoute().params
 const router = useRouter()
+// 页面信息对象
+const orderObj = ref<OrderAndConfig>()
+// 分组下的支付列表
+const childRenList = ref<any>([])
+
 // 倒计时对象
 const orderTime = reactive({
   totalTme: 0, // 总共时间
@@ -116,42 +126,18 @@ watch(
 // 支付类型对象
 const payMethObj = reactive({
   // 判断点击的哪一个
-  payClickItem: '',
+  payClickItemId: '',
   payClick: (item: any) => {
-    payMethObj.payClickItem = item.name
+    payMethObj.payClickItemId = item.id
   },
-  payTypeList: [
-    {
-      name: '微信',
-      recommend: false,
-      icon: weiXin,
-    },
-    {
-      name: '支付宝',
-      recommend: true,
-      icon: zhifuBao,
-    },
-    {
-      name: '银联支付',
-      recommend: false,
-      icon: yinlian,
-    },
-    {
-      name: '数字人民币',
-      recommend: false,
-      icon: shuZhi,
-    },
-    {
-      name: '快捷',
-      recommend: false,
-      icon: quick,
-    },
-    {
-      name: '网银',
-      recommend: false,
-      icon: wangYin,
-    },
-  ],
+})
+
+// 监听点击的是哪个分组
+watch(() => payMethObj.payClickItemId, (newValue) => {
+  if (newValue) {
+    // 查找点击的分组下面的子项
+    childRenList.value = orderObj.value?.groupConfigs.find(item => item.id === newValue)?.items
+  }
 })
 
 onMounted(() => {
@@ -161,10 +147,24 @@ onUnmounted(() => {
   pause()
 })
 
+// 初始化
 function init() {
-  orderTime.getDownTotalTime(new Date().setHours(new Date().getHours() + 1)) // 计算倒计时
-  orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
-  resume() // 开启倒计时
+  getOrderAndConfig(orderNo).then(({ code, msg, data }) => {
+    if (code !== 0) {
+      showDialog({
+        title: '提示',
+        message: msg,
+      }).then(() => { })
+      return
+    }
+    orderObj.value = data
+    payMethObj.payClickItemId = orderObj.value.groupConfigs[0].id || ''// 赋值第一个
+    orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
+    orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
+    resume() // 开启倒计时
+  }).catch((error) => {
+    console.log(error)
+  })
 }
 </script>
 
@@ -217,12 +217,14 @@ function init() {
       flex-direction: column;
       align-items: center;
       gap: 2.6042vw;
+
       .orderBox {
         width: 100%;
         display: flex;
         justify-content: center;
         flex-direction: column;
         align-items: center;
+
         .payPrice {
           font-size: 0.625vw;
           margin-bottom: 1.0417vw;
@@ -256,18 +258,22 @@ function init() {
             padding: 0.1563vw;
           }
         }
+
         .payMessItem {
           display: flex;
           gap: 0.4167vw;
           color: #9fa1a2;
         }
       }
+
       .payMethodBox {
         width: 100%;
+
         .methodBox {
           display: flex;
           justify-content: center;
           border-bottom: 0.0521vw solid #ccc;
+
           .methodItem {
             box-sizing: border-box;
             min-width: 8.8542vw;
@@ -279,6 +285,7 @@ function init() {
             gap: 0.325rem;
             align-items: center;
             position: relative;
+
             .recommon {
               position: absolute;
               right: 30%;
@@ -299,6 +306,7 @@ function init() {
               font-weight: 500;
             }
           }
+
           .methodItemClick {
             border-radius: 0.5208vw 0.5208vw 0 0;
             background-color: #ffffff;
@@ -308,11 +316,13 @@ function init() {
             border-bottom: none;
           }
         }
+
         .payMethodChildBox {
           padding: 2.0833vw 0 2.0833vw 15.625vw;
           display: flex;
           flex-wrap: wrap;
           gap: 1.8417vw;
+
           .payMethodChildItem {
             width: 13.0208vw;
             height: 5.6042vw;
@@ -325,15 +335,17 @@ function init() {
             border-radius: 0.5208vw; // 添加圆角，使阴影更柔和
             box-shadow: 0 0.2604vw 0.5208vw rgba(0, 0, 0, 0.1); // 添加四周阴影
             transition: all 0.3s ease; // 添加过渡动画
-            font-size: 0.9375vw;
+            font-size: 1.2375vw;
             letter-spacing: 0.0521vw;
+
             &:hover {
               box-shadow: 0 0.5208vw 1.0417vw rgba(0, 0, 0, 0.15); // 鼠标悬停时增强阴影效果
               transform: translateY(-0.2604vw); // 添加轻微上移效果
             }
+
             img {
-              width: 0.7813vw;
-              height: 0.7813vw;
+              width: 1.813vw;
+              height: 1.813vw;
             }
           }
         }
