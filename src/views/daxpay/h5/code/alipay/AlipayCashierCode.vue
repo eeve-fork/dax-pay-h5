@@ -16,20 +16,45 @@
     </div>
     <div class="notes">
       <div class="remark" @click="showRemark = true">
-        <div v-if="!description">添加备注</div>
+        <div v-if="!description">
+          添加备注
+        </div>
         <div v-else style="max-width: 75vw">
           <van-text-ellipsis :content="`备注: ${description}`" />
           <div />
         </div>
       </div>
     </div>
-    <van-dialog v-model:show="showRemark" title="支付备注" confirm-button-text="保存" cancel-button-text="清除"
-      confirm-button-color="#108ee9" cancel-button-color="red" show-cancel-button @cancel="description = ''">
-      <van-field v-model="description" rows="2" autosize label="" type="textarea" :maxlength="50"
-        placeholder="请输入支付备注内容" show-word-limit />
+    <van-dialog
+      v-model:show="showRemark"
+      title="支付备注"
+      confirm-button-text="保存"
+      cancel-button-text="清除"
+      confirm-button-color="#108ee9"
+      cancel-button-color="red"
+      show-cancel-button
+      @cancel="description = ''"
+    >
+      <van-field
+        v-model="description"
+        rows="2"
+        autosize
+        label=""
+        type="textarea"
+        :maxlength="50"
+        placeholder="请输入支付备注内容"
+        show-word-limit
+      />
     </van-dialog>
-    <van-number-keyboard :show="true" theme="custom" extra-key="." close-button-text="付款" @close="pay" @input="input"
-      @delete="del" />
+    <van-number-keyboard
+      :show="true"
+      theme="custom"
+      extra-key="."
+      close-button-text="付款"
+      @close="pay"
+      @input="input"
+      @delete="del"
+    />
   </div>
 </template>
 
