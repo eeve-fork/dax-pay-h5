@@ -33,10 +33,14 @@
         <div class="payMethodBox">
           <div class="methodBox">
             <div
-              v-for="item in orderObj?.groupConfigs" :key="item.id" class="methodItem"
-              :class="{ methodItemClick: payMethObj.payClickItemId === item.id }" @click="payMethObj.payClick(item)"
+              v-for="item in orderObj?.groupConfigs"
+              :key="item.id"
+              class="methodItem"
+              :class="{ methodItemClick: payMethObj.payClickItemId === item.id }"
+              @click="payMethObj.payClick(item)"
             >
-              <img :src="item.icon" alt="">
+              <!-- <img :src="item.icon" alt=""> -->
+              <img src="@/assets/images/alipay.png" alt="">
               <span>{{ item.name }}</span>
               <div v-if="item.recommend" class="recommon">
                 推荐
@@ -44,14 +48,13 @@
             </div>
           </div>
           <div class="payMethodChildBox">
-            <div v-for="item in childRenList" :key="item.id" class="payMethodChildItem">
+            <div
+              v-for="item in childRenList"
+              :key="item.id"
+              class="payMethodChildItem"
+              @click="payMethObj.toPayTypeClick(item)"
+            >
               <img :src="getImageUrl(item.icon)" alt="">
-              <!-- <img v-if="item.icon === 'wechat'" src="@/assets/images/wechat.png" alt="">
-              <img v-if="item.icon === 'alipay'" src="@/assets/images/alipay.png" alt="">
-              <img v-if="item.icon === 'union'" src="@/assets/images/union_pay.png" alt="">
-              <img v-if="item.icon === 'datarmb'" src="@/assets/images/datarmb_pay.png" alt="">
-              <img v-if="item.icon === 'quick'" src="@/assets/images/quick_pay.png" alt="">
-              <img v-if="item.icon === 'net_bank_pay'" src="@/assets/images/net_bank_pay.png" alt=""> -->
               <span>{{ item.name }}</span>
             </div>
           </div>
@@ -75,6 +78,7 @@ function getImageUrl(icon) {
 
 const { orderNo } = useRoute().params
 const router = useRouter()
+
 // 页面信息对象
 const orderObj = ref<OrderAndConfig>()
 // 分组下的支付列表
@@ -112,13 +116,13 @@ const orderTime = reactive({
 const { pause, resume } = useIntervalFn(() => {
   orderTime.getMinter() // 每秒获取分秒方法
 }, 1000)
+
 // 监听倒计时，到时间跳转超时页面
 watch(
   () => orderTime.totalTme,
   (newValue) => {
-    // eslint-disable-next-line eqeqeq
-    if (newValue == 0) {
-      router.replace('/PayFail')
+    if (newValue === 0) {
+      // router.replace('/PayFail')
     }
   },
 )
@@ -127,18 +131,26 @@ watch(
 const payMethObj = reactive({
   // 判断点击的哪一个
   payClickItemId: '',
+  // 点击切换类型
   payClick: (item: any) => {
     payMethObj.payClickItemId = item.id
+  },
+  // 点击支付
+  toPayTypeClick: (item) => {
+    console.log(item)
   },
 })
 
 // 监听点击的是哪个分组
-watch(() => payMethObj.payClickItemId, (newValue) => {
-  if (newValue) {
-    // 查找点击的分组下面的子项
-    childRenList.value = orderObj.value?.groupConfigs.find(item => item.id === newValue)?.items
-  }
-})
+watch(
+  () => payMethObj.payClickItemId,
+  (newValue) => {
+    if (newValue) {
+      // 查找点击的分组下面的子项
+      childRenList.value = orderObj.value?.groupConfigs.find(item => item.id === newValue)?.items
+    }
+  },
+)
 
 onMounted(() => {
   init()
@@ -149,22 +161,24 @@ onUnmounted(() => {
 
 // 初始化
 function init() {
-  getOrderAndConfig(orderNo).then(({ code, msg, data }) => {
-    if (code !== 0) {
-      showDialog({
-        title: '提示',
-        message: msg,
-      }).then(() => { })
-      return
-    }
-    orderObj.value = data
-    payMethObj.payClickItemId = orderObj.value.groupConfigs[0].id || ''// 赋值第一个
-    orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
-    orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
-    resume() // 开启倒计时
-  }).catch((error) => {
-    console.log(error)
-  })
+  getOrderAndConfig(orderNo)
+    .then(({ code, msg, data }) => {
+      if (code !== 0) {
+        showDialog({
+          title: '提示',
+          message: msg,
+        }).then(() => {})
+        return
+      }
+      orderObj.value = data
+      payMethObj.payClickItemId = orderObj.value.groupConfigs[0].id || '' // 赋值第一个
+      orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
+      orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
+      resume() // 开启倒计时
+    })
+    .catch((error) => {
+      console.log(error)
+    })
 }
 </script>
 
@@ -337,12 +351,12 @@ function init() {
             transition: all 0.3s ease; // 添加过渡动画
             font-size: 1.2375vw;
             letter-spacing: 0.0521vw;
-
+            position: relative;
+            overflow: hidden;
             &:hover {
               box-shadow: 0 0.5208vw 1.0417vw rgba(0, 0, 0, 0.15); // 鼠标悬停时增强阴影效果
               transform: translateY(-0.2604vw); // 添加轻微上移效果
             }
-
             img {
               width: 1.813vw;
               height: 1.813vw;
