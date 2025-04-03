@@ -47,4 +47,6 @@ export enum GatewayCallTypeEnum {
   jsapi = 'jsapi',
   // 表单方式
   from = 'from',
+  // 二维码
+  qr_code = 'qr_code',
 }

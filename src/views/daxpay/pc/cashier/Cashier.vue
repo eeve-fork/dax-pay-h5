@@ -60,7 +60,20 @@
           </div>
         </div>
       </div>
+      <van-popup v-model:show="codeshow" round closeable :close-on-click-overlay="false">
+        <template #default>
+          <div class="codeBox">
+            <div class="title">
+              请尽快完成支付
+            </div>
+            <div class="code">
+              <vue-qr v-if="codeLink" :text="codeLink" :size="200" />
+            </div>
+          </div>
+        </template>
+      </van-popup>
     </div>
+    <!-- 二维码弹窗 -->
   </div>
 </template>
 
@@ -68,21 +81,29 @@
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showDialog, showFailToast } from 'vant'
-import { getOrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
+import { result } from 'lodash-es'
+import vueQr from 'vue-qr/src/packages/vue-qr.vue'
+import { getOrderAndConfig, orderStatus, payOrder } from '@/views/daxpay/pc/cashier/Cashier.api'
 import type { CashierGroupConfig, OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
+import { GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+
+// 实例化路由
+const route = useRoute()
+const router = useRouter()
+const { orderNo } = route.params
+// 页面信息对象
+const orderObj = ref<OrderAndConfig>()
+// 分组下的支付列表
+const childRenList = ref<any>([])
 
 // 动态生成图片路径
 function getImageUrl(icon) {
   return new URL(`../../../../assets/images/${icon}.png`, import.meta.url).href
 }
-
-const { orderNo } = useRoute().params
-const router = useRouter()
-
-// 页面信息对象
-const orderObj = ref<OrderAndConfig>()
-// 分组下的支付列表
-const childRenList = ref<any>([])
+// 控制二维码弹窗
+const codeshow = ref<boolean>(false)
+// 二维码链接
+const codeLink = ref<string>('')
 
 // 倒计时对象
 const orderTime = reactive({
@@ -122,7 +143,7 @@ watch(
   () => orderTime.totalTme,
   (newValue) => {
     if (newValue === 0) {
-      // router.replace('/PayFail')
+      router.replace({ path: `/pc/payFail`, replace: true })
     }
   },
 )
@@ -137,7 +158,21 @@ const payMethObj = reactive({
   },
   // 点击支付
   toPayTypeClick: (item) => {
-    console.log(item)
+    payOrder({ orderNo: orderNo as string, itemId: item.id }).then(({ code, data, msg }) => {
+      if (code !== 0) {
+        router.replace({ path: `/pc/payFail`, query: { msg } })
+        return
+      }
+      // 如果是二维码方式 打开支付弹窗
+      if (item.callType === GatewayCallTypeEnum.qr_code) {
+        codeshow.value = true
+        codeLink.value = data.payBody as string
+      }
+      // 如果是跳转支付直接跳转支付页面
+      if (item.callType === GatewayCallTypeEnum.link) {
+        router.replace(data.payBody as string)
+      }
+    })
   },
 })
 
@@ -152,11 +187,15 @@ watch(
   },
 )
 
+// 轮询定时器
+const timer = ref()
 onMounted(() => {
-  init()
+  init() //  初始化数据
 })
 onUnmounted(() => {
   pause()
+  timer.value = null
+  clearInterval(timer.value)
 })
 
 // 初始化
@@ -164,12 +203,10 @@ function init() {
   getOrderAndConfig(orderNo)
     .then(({ code, msg, data }) => {
       if (code !== 0) {
-        showDialog({
-          title: '提示',
-          message: msg,
-        }).then(() => {})
+        router.replace({ path: `/pc/payFail`, query: { msg } })
         return
       }
+      queryOrderStatus() // 查询订单状态开启
       orderObj.value = data
       payMethObj.payClickItemId = orderObj.value.groupConfigs[0].id || '' // 赋值第一个
       orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
@@ -180,7 +217,46 @@ function init() {
       console.log(error)
     })
 }
+
+// 查询订单状态
+function queryOrderStatus() {
+  timer.value = setInterval(() => {
+    orderStatus(orderNo).then((res) => {
+      // 判断订单是否支付成功
+      if (res.data) {
+        codeshow.value = false
+        router.replace({ path: `/pc/paySuccess/${orderNo}`, replace: true })
+      }
+    })
+  }, 3000) as unknown as number
+}
 </script>
+
+<style lang="less">
+.pcPayTai {
+  .van-overlay {
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .van-popup {
+    width: 20.8333vw;
+    height: 20.8333vw;
+    .codeBox {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+
+      .title {
+        font-size: 1vw;
+      }
+    }
+  }
+}
+</style>
 
 <style scoped lang="less">
 @primary-color: #80c1ff; // 主色调：深紫色

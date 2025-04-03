@@ -22,6 +22,15 @@ export function payOrder(data: payParam) {
   })
 }
 
+// 查询订单状态
+export function orderStatus(orderNo) {
+  return http.request<Result<boolean>>({
+    url: '/unipay/gateway/findStatusByOrderNo',
+    method: 'GET',
+    params: { orderNo },
+  })
+}
+
 /**
  * 收银台配置
  */
