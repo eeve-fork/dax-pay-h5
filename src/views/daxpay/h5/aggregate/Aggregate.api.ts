@@ -37,12 +37,23 @@ export function auth(param: GatewayAuthCodeParam) {
 }
 
 /**
- * 支付成功获取信息
+ * 支付成功获取状态
  */
-export function getSuccessOrder(orderNo) {
+export function getSuccessOrderStatus(orderNo) {
   return http.request<Result<paySuccess>>({
     url: '/unipay/gateway/findStatusByOrderNo',
     method: 'POST',
+    params: { orderNo },
+  })
+}
+
+/**
+ * 支付成功获取信息
+ */
+export function getSuccessOrderMessage(orderNo) {
+  return http.request<Result<paySuccess>>({
+    url: '/unipay/gateway/findOrderByOrderNo',
+    method: 'get',
     params: { orderNo },
   })
 }

@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { getSuccessOrder } from '@/views/daxpay/h5/aggregate/Aggregate.api'
+import { getSuccessOrderMessage } from '@/views/daxpay/h5/aggregate/Aggregate.api'
 import type { paySuccess } from '@/views/daxpay/h5/aggregate/Aggregate.api'
 import { getBrowserUA } from '@/utils/uaUtil'
 // 获取路由参数
@@ -70,7 +70,7 @@ onMounted(() => {
 })
 
 function init() {
-  getSuccessOrder(orderNo).then(({ data }) => {
+  getSuccessOrderMessage(orderNo).then(({ data }) => {
     orderAndConfig.value = data
   })
 }

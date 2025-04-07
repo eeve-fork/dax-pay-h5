@@ -30,7 +30,14 @@ export function orderStatus(orderNo) {
     params: { orderNo },
   })
 }
-
+// 查询订单信息
+export function orderMessage(orderNo) {
+  return http.request<Result<boolean>>({
+    url: '/unipay/gateway/findOrderByOrderNo',
+    method: 'GET',
+    params: { orderNo },
+  })
+}
 /**
  * 收银台配置
  */
@@ -41,6 +48,8 @@ export interface OrderAndConfig {
   config: GatewayPayConfig
   /** 收银台分类配置信息 */
   groupConfigs: CashierGroupConfig[]
+  /** 聚合二维码 */
+  aggregateUrl?: string
 }
 
 /**

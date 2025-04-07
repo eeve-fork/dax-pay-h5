@@ -2,7 +2,9 @@
   <div class="pcPayTai">
     <div class="pcPayBox">
       <img src="@/assets/images/fail1.png" alt="">
-      <p class="errMessage">{{ msg ? msg : "支付失败,请重新尝试！" }}</p>
+      <p class="errMessage">
+        {{ msg ? msg : "支付失败,请重新尝试！" }}
+      </p>
     </div>
   </div>
 </template>

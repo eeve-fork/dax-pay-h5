@@ -1,5 +1,13 @@
 <template>
   <div class="pcPayTai">
+    <van-overlay :show="loading" class-name="loadingOverlay">
+      <div class="loading-wrapper" @click.stop>
+        <van-loading size="24px">
+          请稍后...
+        </van-loading>
+      </div>
+    </van-overlay>
+
     <div class="pcPayBox">
       <div class="header">
         <h1>支付收银台</h1>
@@ -39,15 +47,19 @@
               :class="{ methodItemClick: payMethObj.payClickItemId === item.id }"
               @click="payMethObj.payClick(item)"
             >
-              <!-- <img :src="item.icon" alt=""> -->
-              <img src="@/assets/images/alipay.png" alt="">
+              <img v-if="item.icon === 'aggregate-pay'" :src="getImageUrl(item.icon)" alt="">
+              <img v-else src="@/assets/images/alipay.png" alt="">
               <span>{{ item.name }}</span>
               <div v-if="item.recommend" class="recommon">
                 推荐
               </div>
             </div>
           </div>
-          <div class="payMethodChildBox">
+          <!-- 聚合支付 -->
+          <div v-if="isAggregateShow" class="payMethodCode">
+            <vue-qr :text="orderObj?.aggregateUrl" :size="200" />
+          </div>
+          <div v-else class="payMethodChildBox">
             <div
               v-for="item in childRenList"
               :key="item.id"
@@ -60,7 +72,13 @@
           </div>
         </div>
       </div>
-      <van-popup v-model:show="codeshow" round closeable :close-on-click-overlay="false">
+      <van-popup
+        v-model:show="codeshow"
+        round
+        closeable
+        :close-on-click-overlay="false"
+        @click-close-icon="closeCode"
+      >
         <template #default>
           <div class="codeBox">
             <div class="title">
@@ -80,7 +98,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { showDialog, showFailToast } from 'vant'
+import { showConfirmDialog, showDialog, showFailToast } from 'vant'
 import { result } from 'lodash-es'
 import vueQr from 'vue-qr/src/packages/vue-qr.vue'
 import { getOrderAndConfig, orderStatus, payOrder } from '@/views/daxpay/pc/cashier/Cashier.api'
@@ -91,6 +109,7 @@ import { GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 const route = useRoute()
 const router = useRouter()
 const { orderNo } = route.params
+const loading = ref<boolean>(false)
 // 页面信息对象
 const orderObj = ref<OrderAndConfig>()
 // 分组下的支付列表
@@ -104,6 +123,25 @@ function getImageUrl(icon) {
 const codeshow = ref<boolean>(false)
 // 二维码链接
 const codeLink = ref<string>('')
+// 判断是否含有聚合支付
+const isAggregateShow = ref<boolean>(false)
+
+// 关闭菜单触发
+function closeCode() {
+  showConfirmDialog({
+    title: '是否关闭支付弹窗?',
+    message: '关闭弹窗后该订单会被取消',
+    className: 'confirmDialogPC',
+    overlayClass: 'confirmOverlayPC',
+  })
+    .then(() => {
+      codeshow.value = false
+      router.replace({ path: `/pc/payFail`, query: { msg: '订单已取消，请重新发起支付！' } })
+    })
+    .catch(() => {
+      codeshow.value = true
+    })
+}
 
 // 倒计时对象
 const orderTime = reactive({
@@ -133,17 +171,21 @@ const orderTime = reactive({
     return time.toString().padStart(2, '0')
   },
 })
-// 定时器
-const { pause, resume } = useIntervalFn(() => {
+// 倒计时定时器
+const { pause: timePause, resume: timeResume } = useIntervalFn(() => {
   orderTime.getMinter() // 每秒获取分秒方法
 }, 1000)
 
+// 轮询监听定时器
+const { pause: lunPause, resume: lunResume } = useIntervalFn(() => {
+  queryOrderStatus() // 执行订单状态查询
+}, 3000)
 // 监听倒计时，到时间跳转超时页面
 watch(
   () => orderTime.totalTme,
   (newValue) => {
     if (newValue === 0) {
-      router.replace({ path: `/pc/payFail`, replace: true })
+      router.replace({ path: `/pc/payFail`, query: { msg: '支付超时，请重新发起支付！' } })
     }
   },
 )
@@ -158,11 +200,13 @@ const payMethObj = reactive({
   },
   // 点击支付
   toPayTypeClick: (item) => {
+    loading.value = true
     payOrder({ orderNo: orderNo as string, itemId: item.id }).then(({ code, data, msg }) => {
       if (code !== 0) {
         router.replace({ path: `/pc/payFail`, query: { msg } })
         return
       }
+      loading.value = false
       // 如果是二维码方式 打开支付弹窗
       if (item.callType === GatewayCallTypeEnum.qr_code) {
         codeshow.value = true
@@ -181,21 +225,24 @@ watch(
   () => payMethObj.payClickItemId,
   (newValue) => {
     if (newValue) {
+      // 判断是否为聚合支付
+      if (newValue === '111111111111111111') {
+        isAggregateShow.value = true
+        return
+      }
+      isAggregateShow.value = false
       // 查找点击的分组下面的子项
       childRenList.value = orderObj.value?.groupConfigs.find(item => item.id === newValue)?.items
     }
   },
 )
 
-// 轮询定时器
-const timer = ref()
 onMounted(() => {
   init() //  初始化数据
 })
 onUnmounted(() => {
-  pause()
-  timer.value = null
-  clearInterval(timer.value)
+  timePause() //  关闭倒计时
+  lunPause() //  关闭轮询
 })
 
 // 初始化
@@ -206,12 +253,21 @@ function init() {
         router.replace({ path: `/pc/payFail`, query: { msg } })
         return
       }
-      queryOrderStatus() // 查询订单状态开启
+      lunResume() //  开始轮询查询状态
+      // 判断是否存在聚合支付
+      if (data.config.aggregateShow) {
+        data.groupConfigs.unshift({
+          id: '111111111111111111',
+          name: '聚合支付',
+          recommend: false,
+          icon: 'aggregate-pay',
+        })
+      }
       orderObj.value = data
       payMethObj.payClickItemId = orderObj.value.groupConfigs[0].id || '' // 赋值第一个
       orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
       orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
-      resume() // 开启倒计时
+      timeResume() // 开启倒计时
     })
     .catch((error) => {
       console.log(error)
@@ -220,19 +276,31 @@ function init() {
 
 // 查询订单状态
 function queryOrderStatus() {
-  timer.value = setInterval(() => {
-    orderStatus(orderNo).then((res) => {
-      // 判断订单是否支付成功
-      if (res.data) {
-        codeshow.value = false
-        router.replace({ path: `/pc/paySuccess/${orderNo}`, replace: true })
-      }
-    })
-  }, 3000) as unknown as number
+  orderStatus(orderNo).then((res) => {
+    // 判断订单是否支付成功
+    if (res.data) {
+      codeshow.value = false
+      router.replace({ path: `/pc/paySuccess/${orderNo}`, replace: true })
+    }
+  })
 }
 </script>
 
 <style lang="less">
+.loadingOverlay {
+  .van-loading__circular {
+    color: #fff;
+  }
+  .van-loading__text {
+    color: #fff;
+    font-weight: 400;
+  }
+}
+.confirmOverlayPC {
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 .pcPayTai {
   .van-overlay {
     left: 0;
@@ -406,7 +474,12 @@ function queryOrderStatus() {
             border-bottom: none;
           }
         }
-
+        .payMethodCode {
+          padding: 2.0833vw 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
         .payMethodChildBox {
           padding: 2.0833vw 0 2.0833vw 15.625vw;
           display: flex;

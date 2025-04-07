@@ -3,12 +3,63 @@
     <div class="pcPayBox">
       <img src="@/assets/images/success1.png" alt="">
       <p>支付成功</p>
+
+      <div class="payPrice">
+        <span class="unit">￥</span>
+        <div class="price">
+          {{ orderAndConfig?.amount }}
+        </div>
+      </div>
+      <div class="payMessBox">
+        <div class="payMessItem">
+          <div class="itemTitle">
+            支付标题：
+          </div>
+          <div class="itemContent">
+            {{ orderAndConfig?.title }}
+          </div>
+        </div>
+        <div class="payMessItem">
+          <div class="itemTitle">
+            订单编号：
+          </div>
+          <div class="itemContent">
+            {{ orderAndConfig?.orderNo }}
+          </div>
+        </div>
+      </div>
+      <div class="payBtnBox" @click="closeSuccessClick">
+        完成
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+import { onMounted } from 'vue'
+import { orderMessage } from '@/views/daxpay/pc/cashier/Cashier.api'
 
+const route = useRoute()
+const { orderNo } = route.params
+const orderAndConfig = ref()
+
+onMounted(() => {
+  init()
+  console.log(route)
+})
+
+// 初始化函数
+function init() {
+  orderMessage(orderNo).then(({ data }) => {
+    orderAndConfig.value = data
+  })
+}
+
+// 点击关闭
+function closeSuccessClick() {
+  window.close()
+}
 </script>
 
 <style scoped lang="less">
@@ -35,13 +86,67 @@
     overflow: hidden; // 防止内容溢出
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    padding: 7.2083vw 0;
     align-items: center;
     gap: 1.5625vw;
     p {
       font-size: 1.25vw;
       color: #1e90ff;
     }
+  }
+  .payPrice {
+    display: flex;
+    gap: 0.2604vw;
+    align-items: center;
+
+    .unit {
+      font-size: 0.625vw;
+      transform: translateY(0.4167vw);
+    }
+
+    .price {
+      font-size: 1.6667vw;
+      font-weight: 700;
+    }
+  }
+
+  .payMessBox {
+    width: 100%;
+    padding: 0px 1.0417vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5208vw;
+
+    .payMessItem {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+
+      .itemTitle {
+        font-size: 0.8333vw;
+        color: #797d81;
+      }
+
+      .itemContent {
+        font-size: 0.8333vw;
+        font-weight: 500;
+        font-size: '微软雅黑';
+      }
+    }
+  }
+
+  .payBtnBox {
+    width: 20%;
+    margin: 0 auto;
+    background-color: #0d6eff;
+    color: #fff;
+    height: 2.7083vw;
+    position: absolute;
+    bottom: 7.6042vw;
+    text-align: center;
+    line-height: 2.7083vw;
+    border-radius: 0.5208vw;
+    cursor: pointer;
   }
 }
 </style>
