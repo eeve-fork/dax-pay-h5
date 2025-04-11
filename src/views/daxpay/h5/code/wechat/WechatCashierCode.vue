@@ -76,7 +76,7 @@ import {
   getMchName,
 } from '../CashierCode.api'
 
-import { AggregateEnum, CashierTypeEnum } from "@/enums/daxpay/DaxPayEnum";
+import { AggregateEnum, CashierTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
@@ -105,7 +105,6 @@ const { input, del } = useKeyboard(amount)
 onMounted(() => {
   // init()
   show.value = true
-
 })
 
 /**

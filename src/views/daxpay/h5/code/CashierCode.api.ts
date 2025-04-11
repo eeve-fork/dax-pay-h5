@@ -4,11 +4,11 @@ import type { Result } from '#/axios'
 /**
  * 获取商户名称
  */
-export function getMchName(mchNo: string) {
+export function getMchName(cashierCode, cashierType) {
   return http.request<Result<string>>({
-    url: '/unipay/ext/channel/cashier/getMchName',
+    url: '/unipay/gateway/getCashierCodeConfig',
     method: 'GET',
-    params: { mchNo },
+    params: { cashierCode, cashierType },
   })
 }
 
@@ -39,12 +39,11 @@ export function generateAuthUrl(param: CashierAuthParam) {
  */
 export function cashierPay(param: CashierPayParam) {
   return http.request<Result<PayResult>>({
-    url: '/unipay/ext/channel/cashier/pay',
+    url: '/unipay/gateway/cashierCodePay',
     method: 'POST',
     data: param,
   })
 }
-
 /**
  * 通道认证参数
  */
@@ -82,7 +81,6 @@ export interface CashierPayParam {
  * 支付结果
  */
 export interface PayResult {
-
   // 支付状态
   status: string
   // 支付参数体
@@ -131,4 +129,14 @@ export interface ChannelCashierConfigResult {
   allocation?: boolean
   // 自动分账
   autoAllocation?: boolean
+}
+
+// 码牌支付检查信息
+export interface getNameConfig {
+  // 商家名称
+  name: string
+  // 判断是否需要
+  needOpenId: boolean
+  // 备注
+  remark: string
 }

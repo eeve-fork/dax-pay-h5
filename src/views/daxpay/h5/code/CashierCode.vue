@@ -8,14 +8,14 @@ import { getBrowserUA } from '@/utils/uaUtil'
 import router from '@/router'
 
 const route = useRoute()
-const { orderNo } = route.params
+const { code } = route.params
 
 const ua = getBrowserUA()
 if (ua === 'wechat') {
-  router.push({ path: `/wechat/cashier/code/${orderNo}`, replace: true })
+  router.push({ path: `/wechat/cashier/code/${code}`, replace: true })
 }
 else if (ua === 'alipay') {
-  router.push({ path: `/alipay/cashier/code/${orderNo}`, replace: true })
+  router.push({ path: `/alipay/cashier/code/${code}`, replace: true })
 }
 else {
   router.replace({

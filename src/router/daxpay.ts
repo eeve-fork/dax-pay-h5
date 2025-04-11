@@ -34,9 +34,16 @@ export const DaxPayH5Route: RouteRecordRaw = {
         title: '收银台',
       },
     },
-
     {
-      path: '/alipay/cashier/code/:orderNo',
+      path: '/cashier/code/:code',
+      name: 'CashierCode',
+      component: () => import('@/views/daxpay/h5/code/CashierCode.vue'),
+      meta: {
+        title: '收银台',
+      },
+    },
+    {
+      path: '/alipay/cashier/code/:code',
       name: 'AlipayCashierCode',
       component: () => import('@/views/daxpay/h5/code/alipay/AlipayCashierCode.vue'),
       meta: {
@@ -44,7 +51,7 @@ export const DaxPayH5Route: RouteRecordRaw = {
       },
     },
     {
-      path: '/wechat/cashier/code/:orderNo',
+      path: '/wechat/cashier/code/:code',
       name: 'WechatCashierCode',
       component: () => import('@/views/daxpay/h5/code/wechat/WechatCashierCode.vue'),
       meta: {

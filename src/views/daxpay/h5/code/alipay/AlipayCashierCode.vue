@@ -3,7 +3,7 @@
     <div class="container">
       <div class="payName">
         <span>付款给</span>
-        <span class="paytext">杨家臭豆腐{{ mchName }}</span>
+        <span class="paytext">{{ cashierInfo?.name }}</span>
       </div>
       <div class="amount-display">
         <p class="title">
@@ -62,45 +62,41 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { showNotify } from 'vant'
-import type { CashierPayParam, ChannelCashierConfigResult } from '../CashierCode.api'
-import { cashierPay, getCashierInfo, getMchName } from '../CashierCode.api'
-import { AggregateEnum, CashierTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+import type { CashierPayParam, getNameConfig } from '../CashierCode.api'
+import { cashierPay, getMchName } from '../CashierCode.api'
+import { AggregateEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
 const route = useRoute()
-const { mchNo, appId } = route.params
+const { code } = route.params
 
-const showRemark = ref<boolean>(false)
-const loading = ref<boolean>(false)
-const cashierInfo = ref<ChannelCashierConfigResult>({})
-const amount = ref<string>('0')
-const description = ref<string>('')
-const mchName = ref<string>('')
+const showRemark = ref<boolean>(false) // 是否展示备注
+const loading = ref<boolean>(false) // 加载状态
+const cashierInfo = ref<getNameConfig>()
+const amount = ref<string>('0') // 金额
+const description = ref<string>('') // 描述
 
 const { input, del } = useKeyboard(amount)
 
 onMounted(() => {
-  // initData()
+  initData()
 })
 
 /**
  * 初始化数据
  */
 function initData() {
-  getCashierInfo(AggregateEnum.ALI, appId as string)
+  // 获取信息
+  loading.value = true
+  getMchName(code, AggregateEnum.ALI)
     .then(({ data }) => {
-      cashierInfo.value = data
+      loading.value = false
+      cashierInfo.value = data as any
     })
-    .catch((res) => {
-      router.push({ name: 'ErrorResult', query: { msg: res.message } })
-    })
-  getMchName(mchNo as string)
-    .then(({ data }) => {
-      mchName.value = data
-    })
-    .catch((res) => {
-      router.push({ name: 'ErrorResult', query: { msg: res.message } })
+    .catch((error) => {
+      console.log(error)
+      // router.push({ name: 'ErrorResult', query: { msg: res.message } })
     })
 }
 
@@ -116,10 +112,9 @@ function pay() {
   loading.value = true
   const from = {
     amount: amountValue,
-    appId,
-    cashierType: CashierTypeEnum.ALIPAY,
+    cashierCode: code,
+    cashierType: AggregateEnum.ALI,
     description: description.value,
-    mchNo,
   } as CashierPayParam
   cashierPay(from).then(({ data }) => {
     loading.value = false
