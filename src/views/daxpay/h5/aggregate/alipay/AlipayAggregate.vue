@@ -110,7 +110,7 @@ function init() {
     if (code !== 0) {
       // 如果异常，跳转异常页面
       router.replace({
-        path: '/payFail',
+        name: 'payFail',
         query: { msg },
       })
       return
@@ -147,7 +147,7 @@ function pay() {
         if (code !== 0) {
           // 如果异常，跳转异常页面
           router.replace({
-            path: '/payFail',
+            name: 'payFail',
             query: { msg },
           })
           return

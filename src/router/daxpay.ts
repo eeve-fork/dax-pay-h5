@@ -131,6 +131,5 @@ export const DaxPayPcRoute: RouteRecordRaw = {
         title: '支付失败页面',
       },
     },
-
   ],
 }
