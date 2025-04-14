@@ -36,6 +36,7 @@
     "qs": "^6.13.1",
     "vant": "^4.9.10",
     "vue": "^3.5.13",
+    "vue-qr": "^4.0.9",
     "vue-router": "4.2.5"
   },
   "devDependencies": {
