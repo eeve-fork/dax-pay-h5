@@ -1,7 +1,7 @@
 import type { App } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
-import { BusinessRoute, ErrorPageRoute, routeModuleList } from '@/router/base'
+import { ErrorPageRoute, routeModuleList } from '@/router/base'
 import { useRouteStoreWidthOut } from '@/store/modules/route'
 
 // 菜单
@@ -12,7 +12,6 @@ export const constantRouter: RouteRecordRaw[] = [
   DaxPayH5Route,
   DaxPayPcRoute,
   ErrorPageRoute,
-  BusinessRoute,
 ]
 
 const routeStore = useRouteStoreWidthOut()

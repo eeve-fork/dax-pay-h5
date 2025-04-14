@@ -1,12 +1,9 @@
 <template>
   <div v-if="show">
     <div class="container">
-      <div style="font-size: 28px;margin-top: 10px;">
-        {{ cashierInfo.cashierName || '微信收银台' }}
-      </div>
       <div class="amount-display">
         <p style="font-size: 20px">
-          付款给{{ mchName }}
+          付款给{{ cashierInfo?.name }}
         </p>
         <p style="font-size: 32px;">
           ¥ {{ amount }}
@@ -64,90 +61,75 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { showNotify } from 'vant'
 import type {
-  CashierAuthParam,
   CashierPayParam,
-  ChannelCashierConfigResult,
+  GatewayCashierConfig,
   WxJsapiSignResult,
 } from '../CashierCode.api'
+
 import {
+  auth,
   cashierPay,
   generateAuthUrl,
-  getCashierInfo,
-  getMchName,
+  getCashierCodeConfig,
 } from '../CashierCode.api'
 
-import { AggregateEnum, CashierTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum, CashierCodeTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
 const route = useRoute()
-const { mchNo, appId } = route.params
-const { code } = route.query
+const { code: cashierCode } = route.params
+const { code: authCode } = route.query
 
 const show = ref<boolean>(false)
 const showRemark = ref<boolean>(false)
 const loading = ref<boolean>(false)
-const cashierInfo = ref<ChannelCashierConfigResult>({})
+const cashierInfo = ref<GatewayCashierConfig>({})
 const amount = ref<string>('0')
 const description = ref<string>('')
-const mchName = ref<string>('')
 const openId = ref<string>('')
-
-// 认证参数
-const authParam = ref<CashierAuthParam>({
-  mchNo: mchNo as string,
-  appId: appId as string,
-  cashierType: AggregateEnum.WECHAT,
-})
 
 const { input, del } = useKeyboard(amount)
 
 onMounted(() => {
-  // init()
-  show.value = true
+  init()
 })
 
 /**
  * 初始化
  */
-function init() {
-  // 如果不是重定向跳转过来， 跳转到到重定向地址
-  if (!code) {
-    // 重定向跳转到微信授权地址
-    generateAuthUrl(authParam.value).then((res) => {
-      const url = res.data
-      location.replace(url)
-    }).catch((res) => {
-      router.push({ name: 'ErrorResult', query: { msg: res.message } })
+async function init() {
+  loading.value = true
+  getCashierCodeConfig(cashierCode, AggregateEnum.WECHAT)
+    .then(({ data }) => {
+      cashierInfo.value = data as any
+      // 判断是否需要获取OpenId
+      if (data.needOpenId) {
+        // 如果不是重定向跳转过来， 跳转到到重定向地址
+        if (!authCode) {
+          // 重定向跳转到微信授权地址
+          generateAuthUrl(cashierCode, CashierCodeTypeEnum.WECHAT_PAY).then((res) => {
+            const url = res.data
+            location.replace(url)
+          }).catch((res) => {
+            router.push({ name: 'payFail', query: { msg: res.message } })
+          })
+        }
+        else {
+          // 认证获取OpenId
+          auth({ cashierCode: cashierCode as string, cashierType: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string }).then(({ data }) => {
+            openId.value = data.openId as string
+            show.value = true
+          }).catch((res) => {
+            router.push({ name: 'payFail', query: { msg: res.message }, replace: true })
+          })
+        }
+      }
     })
-  }
-  else {
-    authParam.value.authCode = code as string
-    // 初始化数据
-    initData()
-  }
-}
-
-/**
- * 初始化数据
- */
-function initData() {
-  show.value = true
-  getCashierInfo(AggregateEnum.WECHAT, appId as string).then(({ data }) => {
-    cashierInfo.value = data
-  }).catch((res) => {
-    router.push({ name: 'ErrorResult', query: { msg: res.message } })
-  })
-  getMchName(mchNo as string).then(({ data }) => {
-    mchName.value = data
-  }).catch((res) => {
-    router.push({ name: 'ErrorResult', query: { msg: res.message } })
-  })
-  auth(authParam.value).then(({ data }) => {
-    openId.value = data.openId as string
-  }).catch((res) => {
-    router.push({ name: 'ErrorResult', query: { msg: res.message } })
-  })
+    .catch((error) => {
+      console.log(error)
+      router.push({ name: 'payFail', query: { msg: error } })
+    })
 }
 
 /**
@@ -163,11 +145,10 @@ function pay() {
   loading.value = true
   const from = {
     amount: amountValue,
-    appId,
+    cashierCode,
     openId: openId.value,
-    cashierType: CashierTypeEnum.WECHAT_PAY,
+    cashierType: CashierCodeTypeEnum.WECHAT_PAY,
     description: description.value,
-    mchNo,
   } as CashierPayParam
   cashierPay(from)
     .then(({ data }) => {

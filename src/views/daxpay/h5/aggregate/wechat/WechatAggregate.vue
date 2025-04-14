@@ -127,7 +127,7 @@ function init() {
     if (code !== 0) {
       // 如果异常，跳转异常页面
       router.replace({
-        path: '/payFail',
+        name: 'payFail',
         query: { msg },
       })
       return
@@ -143,7 +143,7 @@ function init() {
           if (res.code !== 0) {
             // 如果异常，跳转异常页面
             router.replace({
-              path: '/payFail',
+              name: 'payFail',
               query: { msg },
             })
             return
@@ -151,7 +151,7 @@ function init() {
           location.replace(res.data)
         }).catch((res) => {
           router.replace({
-            path: '/payFail',
+            name: 'payFail',
             query: { msg: res.message },
           })
         })
@@ -188,7 +188,7 @@ async function wxAuth() {
   await auth(authParam.value).then(({ data }) => {
     openId.value = data.openId as string
   }).catch((res) => {
-    router.push({ name: 'ErrorResult', query: { msg: res.message }, replace: true })
+    router.push({ name: 'payFail', query: { msg: res.message }, replace: true })
   })
 }
 
@@ -237,7 +237,7 @@ function jsapiPay(data: WxJsapiSignResult) {
     else {
       // 跳转到失败页面
       router.replace({
-        path: '/payFail',
+        name: 'payFail',
         query: { msg: '支付已取消' },
       })
     }

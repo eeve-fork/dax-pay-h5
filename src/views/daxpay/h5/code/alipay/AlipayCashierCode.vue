@@ -62,10 +62,9 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { showNotify } from 'vant'
-import type { CashierPayParam, getNameConfig } from '../CashierCode.api'
-import { cashierPay, getMchName } from '../CashierCode.api'
-import { AggregateEnum } from '@/enums/daxpay/DaxPayEnum'
-import router from '@/router'
+import type { CashierPayParam, GatewayCashierConfig } from '../CashierCode.api'
+import { cashierPay, getCashierCodeConfig } from '../CashierCode.api'
+import { AggregateEnum, CashierCodeTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
 const route = useRoute()
@@ -73,7 +72,7 @@ const { code } = route.params
 
 const showRemark = ref<boolean>(false) // 是否展示备注
 const loading = ref<boolean>(false) // 加载状态
-const cashierInfo = ref<getNameConfig>()
+const cashierInfo = ref<GatewayCashierConfig>()
 const amount = ref<string>('0') // 金额
 const description = ref<string>('') // 描述
 
@@ -89,14 +88,14 @@ onMounted(() => {
 function initData() {
   // 获取信息
   loading.value = true
-  getMchName(code, AggregateEnum.ALI)
+  getCashierCodeConfig(code, CashierCodeTypeEnum.ALIPAY)
     .then(({ data }) => {
       loading.value = false
       cashierInfo.value = data as any
     })
     .catch((error) => {
       console.log(error)
-      // router.push({ name: 'ErrorResult', query: { msg: res.message } })
+      // router.push({ name: 'payFail', query: { msg: res.message } })
     })
 }
 

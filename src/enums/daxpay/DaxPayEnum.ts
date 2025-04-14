@@ -50,3 +50,15 @@ export enum GatewayCallTypeEnum {
   // 二维码
   qr_code = 'qr_code',
 }
+
+/**
+ * 码牌类型
+ */
+export enum CashierCodeTypeEnum {
+  // 微信码牌
+  WECHAT_PAY = 'wechat_pay',
+  // 支付宝码牌
+  ALIPAY = 'alipay',
+  // 云闪付码牌
+  UNION_PAY = 'union_pay',
+}

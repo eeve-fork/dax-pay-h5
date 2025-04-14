@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 // 获取路由参数
 const route = useRoute()
 const { msg: errorMsg, title } = route.query
@@ -30,6 +30,11 @@ function closeClick() {
     AlipayJSBridge.call('closeWebview')
   }
   catch {}
+  try {
+    window.close()
+  }
+  catch {
+  }
 }
 </script>
 

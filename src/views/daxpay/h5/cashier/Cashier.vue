@@ -194,7 +194,7 @@ function payClick() {
         if (code !== 0) {
           // 如果异常，跳转错误页面
           router.replace({
-            path: '/payFail',
+            name: 'payFail',
             query: { msg },
           })
           return
@@ -284,7 +284,7 @@ function init() {
     if (code !== 0) {
       // 如果异常，跳转异常页面
       router.replace({
-        path: '/payFail',
+        name: 'payFail',
         query: { msg },
       })
       return
