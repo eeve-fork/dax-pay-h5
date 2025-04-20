@@ -27,6 +27,7 @@
     "@types/lodash-es": "^4.17.12",
     "@unocss/reset": "^0.58.9",
     "@vueuse/core": "^10.11.1",
+    "vue-qr": "^4.0.9",
     "axios": "^1.7.9",
     "date-fns": "^3.6.0",
     "lodash-es": "^4.17.21",

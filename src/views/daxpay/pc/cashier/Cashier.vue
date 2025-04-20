@@ -98,11 +98,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { showConfirmDialog, showDialog, showFailToast } from 'vant'
-import { result } from 'lodash-es'
+import { showConfirmDialog } from 'vant'
 import vueQr from 'vue-qr/src/packages/vue-qr.vue'
 import { getOrderAndConfig, orderStatus, payOrder } from '@/views/daxpay/pc/cashier/Cashier.api'
-import type { CashierGroupConfig, OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
+import type { OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
 import { GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 
 // 实例化路由
