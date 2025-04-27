@@ -47,8 +47,7 @@
               :class="{ methodItemClick: payMethObj.payClickItemId === item.id }"
               @click="payMethObj.payClick(item)"
             >
-              <img v-if="item.icon === 'aggregate-pay'" :src="getImageUrl(item.icon)" alt="">
-              <img v-else src="@/assets/images/alipay.png" alt="">
+              <img :src="getImageUrl(item.icon)" alt="">
               <span>{{ item.name }}</span>
               <div v-if="item.recommend" class="recommon">
                 推荐
@@ -116,6 +115,7 @@ const childRenList = ref<any>([])
 
 // 动态生成图片路径
 function getImageUrl(icon) {
+  console.log(icon)
   return new URL(`../../../../assets/images/${icon}.png`, import.meta.url).href
 }
 // 控制二维码弹窗
@@ -225,7 +225,7 @@ watch(
   (newValue) => {
     if (newValue) {
       // 判断是否为聚合支付
-      if (newValue === '111111111111111111') {
+      if (newValue === 'agg') {
         isAggregateShow.value = true
         return
       }
@@ -256,10 +256,10 @@ function init() {
       // 判断是否存在聚合支付
       if (data.config.aggregateShow) {
         data.groupConfigs.unshift({
-          id: '111111111111111111',
-          name: '聚合支付',
+          id: 'agg',
+          name: '聚合扫码',
           recommend: false,
-          icon: 'aggregate-pay',
+          icon: 'aggregate',
         })
       }
       orderObj.value = data
