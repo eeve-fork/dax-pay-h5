@@ -16,7 +16,7 @@ export function getOrderAndConfig(orderNo) {
  */
 export function payOrder(data: payParam) {
   return http.request<Result<payConfig>>({
-    url: '/unipay/gateway/pay',
+    url: '/unipay/gateway/cashier/pay',
     method: 'POST',
     data,
   })
