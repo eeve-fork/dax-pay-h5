@@ -213,7 +213,8 @@ const payMethObj = reactive({
       }
       // 如果是跳转支付直接跳转支付页面
       if (item.callType === GatewayCallTypeEnum.link) {
-        router.replace(data.payBody as string)
+        loading.value = false
+        location.replace(data.payBody as string)
       }
     })
   },

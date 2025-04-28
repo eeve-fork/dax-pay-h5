@@ -200,7 +200,7 @@ function payClick() {
           return
         }
         loading.value = false
-        location.replace(data.payBody as any)
+        location.replace(data.payBody as string)
       })
       .catch((error) => {
         console.log(error)
