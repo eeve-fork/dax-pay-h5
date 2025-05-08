@@ -73,7 +73,7 @@ import {
   getCashierCodeConfig,
 } from '../CashierCode.api'
 
-import { AggregateEnum, CashierCodeTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum, CashierCodeTypeEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
@@ -153,9 +153,14 @@ function pay() {
   cashierPay(from)
     .then(({ data }) => {
       loading.value = false
-      // 拉起jsapi支付
-      const json = JSON.parse(data.payBody)
-      jsapiPay(json)
+      // 根据类型拉起对应的支付。 支持跳转和jsapi
+      if (cashierInfo.value?.callType === GatewayCallTypeEnum.jsapi) {
+        const json = JSON.parse(data.payBody)
+        jsapiPay(json)
+      }
+      if (cashierInfo.value?.callType === GatewayCallTypeEnum.link) {
+        location.replace(data.payBody as any)
+      }
     })
 }
 

@@ -40,7 +40,7 @@
           <div class="itemType">
             <img v-if="item.icon === 'wechat'" src="@/assets/images/wechat.png" alt="">
             <img v-if="item.icon === 'alipay'" src="@/assets/images/alipay.png" alt="">
-            <img v-if="item.icon === 'aggregate'" src="@/assets/images/aggregate-pay.png" alt="">
+            <img v-if="item.icon === 'aggregate'" src="@/assets/images/aggregate.png" alt="">
             <!-- <img src="@/assets/images/quick_pay.png" alt=""> -->
             <p>{{ item.name }}</p>
             <span v-if="item.recommend"> 推荐</span>
@@ -200,7 +200,7 @@ function payClick() {
           return
         }
         loading.value = false
-        location.replace(data.payBody as any)
+        location.replace(data.payBody as string)
       })
       .catch((error) => {
         console.log(error)

@@ -30,9 +30,9 @@ export const ErrorPageRoute: RouteRecordRaw = {
  */
 export const routeModuleList: Array<RouteRecordRaw> = [
   {
-    path: '/dashboard',
+    path: '/',
     name: 'Dashboard',
-    redirect: '/dashboard/index',
+    redirect: '/index',
     component: Layout,
     meta: {
       title: '主控台',

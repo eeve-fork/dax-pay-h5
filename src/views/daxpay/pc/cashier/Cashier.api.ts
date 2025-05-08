@@ -16,7 +16,7 @@ export function getOrderAndConfig(orderNo) {
  */
 export function payOrder(data: payParam) {
   return http.request<Result<payConfig>>({
-    url: '/unipay/gateway/pay',
+    url: '/unipay/gateway/cashier/pay',
     method: 'POST',
     data,
   })
@@ -129,7 +129,7 @@ export interface payParam {
   // 唯一标识
   openId?: string
   // 付款码
-  anthCode?: string
+  authCode?: string
 }
 /**
  * 支付配置项参数返回值

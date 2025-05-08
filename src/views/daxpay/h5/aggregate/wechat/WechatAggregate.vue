@@ -205,10 +205,14 @@ function pay() {
     } as AggregatePayParam
     aggregatePay(from)
       .then(({ data }) => {
-        loading.value = false
-        // 拉起jsapi支付
-        const json = JSON.parse(data.payBody)
-        jsapiPay(json)
+        // 根据类型拉起对应的支付。 支持跳转和jsapi
+        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi){
+          const json = JSON.parse(data.payBody)
+          jsapiPay(json)
+        }
+        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link){
+          location.replace(data.payBody as any)
+        }
       })
   }
 }

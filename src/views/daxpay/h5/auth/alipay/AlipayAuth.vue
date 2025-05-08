@@ -60,7 +60,6 @@ async function init() {
 </script>
 
 <style scoped lang="less">
-
 .block {
   width: 120px;
   height: 120px;
