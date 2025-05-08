@@ -137,6 +137,9 @@ async function init() {
           })
         }
       }
+      else {
+        show.value = true
+      }
     })
     .catch((error) => {
       router.push({ name: 'payFail', query: { msg: error } })

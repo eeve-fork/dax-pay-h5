@@ -83,7 +83,7 @@ export const DaxPayH5Route: RouteRecordRaw = {
       },
     },
     {
-      path: '/paySuccess/:orderNo?',
+      path: '/paySuccess/:orderNo',
       name: 'PaySuccess',
       component: () => import('@/views/daxpay/h5/result/PaySuccess.vue'),
       meta: {
