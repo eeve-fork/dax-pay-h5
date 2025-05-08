@@ -1,13 +1,37 @@
 <template>
   <div v-if="show">
     <div class="container">
+      <div class="payName">
+        <span>付款给</span>
+        <span class="paytext">{{ cashierInfo?.name }}</span>
+      </div>
       <div class="amount-display">
-        <p style="font-size: 20px">
-          付款给{{ cashierInfo?.name }}
+        <p class="title">
+          金额
         </p>
-        <p style="font-size: 32px;">
-          ¥ {{ amount }}
+        <p style="font-size: 32px">
+          ¥{{ amount }}
         </p>
+      </div>
+    </div>
+    <div class="notes">
+      <div class="remark" @click="showRemark = true">
+        <div v-if="!description">
+          添加备注
+        </div>
+        <div v-else style="max-width: 75vw">
+          <van-text-ellipsis :content="`备注: ${description}`" />
+          <div />
+        </div>
+      </div>
+    </div>
+    <!-- loading -->
+    <div v-if="loading" id="loadingMask" class="loadingMask hide">
+      <div class="content">
+        <img class="loadingImg" src="@/assets/images/loading.png" alt="">
+        <div class="loadingTxt">
+          处理中，请耐心等待
+        </div>
       </div>
     </div>
     <van-dialog
@@ -32,27 +56,14 @@
       />
     </van-dialog>
     <van-number-keyboard
-      :show="true"
+      :show="!loading"
       theme="custom"
       extra-key="."
       close-button-text="付款"
       @close="pay"
       @input="input"
       @delete="del"
-    >
-      <template #title-left>
-        <div style="width: 100vw;display: flex; justify-content: center">
-          <div class="remark" @click="showRemark = true">
-            <div v-if="!description">
-              添加备注
-            </div>
-            <div v-else style="max-width: 75vw;">
-              <van-text-ellipsis :content="`备注: ${description}`" /><div />
-            </div>
-          </div>
-        </div>
-      </template>
-    </van-number-keyboard>
+    />
   </div>
 </template>
 
@@ -102,6 +113,7 @@ async function init() {
   loading.value = true
   getCashierCodeConfig(cashierCode, AggregateEnum.WECHAT)
     .then(({ data }) => {
+      loading.value = false
       cashierInfo.value = data as any
       // 判断是否需要获取OpenId
       if (data.needOpenId) {
@@ -127,7 +139,6 @@ async function init() {
       }
     })
     .catch((error) => {
-      console.log(error)
       router.push({ name: 'payFail', query: { msg: error } })
     })
 }
@@ -180,7 +191,10 @@ function jsapiPay(data: WxJsapiSignResult) {
   WeixinJSBridge.invoke('getBrandWCPayRequest', form, (res) => {
     if (res.err_msg === 'get_brand_wcpay_request:ok') {
       // 跳转到成功页面
-      router.push({ name: 'SuccessResult', query: { msg: '支付成功' }, replace: true })
+      router.replace({
+        path: '/paySuccess',
+        query: { title: '支付成功' },
+      })
     }
   })
 }
@@ -193,24 +207,118 @@ function jsapiPay(data: WxJsapiSignResult) {
   background: @color;
 }
 .container {
-  background-color: @color;
+  background: linear-gradient(to bottom, #07c160, #07c160, #ffffff); // 从蓝色渐变到白色
   width: 100%;
-  padding: 10px;
+  padding: 40px;
+  height: 40%;
   border-radius: 10px;
   text-align: center;
   color: white;
+
+  .payName {
+    margin: 5px 0;
+    font-size: 16px;
+
+    .paytext {
+      font-size: 20px;
+      margin-left: 5px;
+      font-weight: 600;
+    }
+  }
+
   .amount-display {
     background-color: white;
     color: @color;
     border-radius: 20px;
     padding: 20px;
     margin: 20px 0;
-  }
-  .amount-display p {
-    margin: 5px 0;
+    display: flex;
+    gap: 1.875rem;
+    align-items: center;
+
+    p {
+      font-size: 32px;
+    }
+
+    .title {
+      font-size: 20px;
+    }
   }
 }
-.remark {
-  color: @color;
+
+.notes {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .remark {
+    color: @color;
+    cursor: pointer;
+  }
+}
+
+/* loading */
+.loadingMask {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  border-radius: 0 0 0.2rem 0.2rem;
+
+  .content {
+    position: absolute;
+    width: 15rem;
+    border-radius: 0.2rem;
+    // box-shadow:
+    //   0px 12px 48px 16px rgba(0, 0, 0, 0.03),
+    //   0px 9px 28px 0px rgba(0, 0, 0, 0.05),
+    //   0px 6px 16px -8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .loadingImg {
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-top: 2rem;
+    animation: 1.6s linear ratate infinite;
+  }
+
+  .loadingTxt {
+    font-size: 1.125rem;
+    color: #22242e;
+    margin-top: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  @keyframes ratate {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    40% {
+      transform: rotate(144deg);
+    }
+
+    80% {
+      transform: rotate(288deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 }
 </style>

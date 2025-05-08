@@ -25,6 +25,15 @@
         </div>
       </div>
     </div>
+    <!-- loading -->
+    <div v-if="loading" id="loadingMask" class="loadingMask hide">
+      <div class="content">
+        <img class="loadingImg" src="@/assets/images/loading.png" alt="">
+        <div class="loadingTxt">
+          处理中，请耐心等待
+        </div>
+      </div>
+    </div>
     <van-dialog
       v-model:show="showRemark"
       title="支付备注"
@@ -47,7 +56,7 @@
       />
     </van-dialog>
     <van-number-keyboard
-      :show="true"
+      :show="!loading"
       theme="custom"
       extra-key="."
       close-button-text="付款"
@@ -60,7 +69,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { showNotify } from 'vant'
 import type { CashierPayParam, GatewayCashierConfig } from '../CashierCode.api'
 import { cashierPay, getCashierCodeConfig } from '../CashierCode.api'
@@ -68,6 +77,7 @@ import { AggregateEnum, CashierCodeTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
 const route = useRoute()
+const router = useRouter()
 const { code } = route.params
 
 const showRemark = ref<boolean>(false) // 是否展示备注
@@ -93,9 +103,8 @@ function initData() {
       loading.value = false
       cashierInfo.value = data as any
     })
-    .catch((error) => {
-      console.log(error)
-      // router.push({ name: 'payFail', query: { msg: res.message } })
+    .catch((res) => {
+      router.push({ name: 'payFail', query: { msg: res.message } })
     })
 }
 
@@ -180,6 +189,68 @@ function pay() {
   .remark {
     color: @color;
     cursor: pointer;
+  }
+}
+/* loading */
+.loadingMask {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  border-radius: 0 0 0.2rem 0.2rem;
+
+  .content {
+    position: absolute;
+    width: 15rem;
+    border-radius: 0.2rem;
+    // box-shadow:
+    //   0px 12px 48px 16px rgba(0, 0, 0, 0.03),
+    //   0px 9px 28px 0px rgba(0, 0, 0, 0.05),
+    //   0px 6px 16px -8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .loadingImg {
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-top: 2rem;
+    animation: 1.6s linear ratate infinite;
+  }
+
+  .loadingTxt {
+    font-size: 1.125rem;
+    color: #22242e;
+    margin-top: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  @keyframes ratate {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    40% {
+      transform: rotate(144deg);
+    }
+
+    80% {
+      transform: rotate(288deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
   }
 }
 </style>

@@ -7,13 +7,13 @@
         支付成功
       </p>
     </div>
-    <div class="payPrice">
+    <div v-if="orderAndConfig?.amount" class="payPrice">
       <span class="unit">￥</span>
       <div class="price">
         {{ orderAndConfig?.amount }}
       </div>
     </div>
-    <div class="payMessBox">
+    <div v-if="orderAndConfig?.amount" class="payMessBox">
       <div class="payMessItem">
         <div class="itemTitle">
           支付标题
@@ -70,9 +70,11 @@ onMounted(() => {
 })
 
 function init() {
-  getSuccessOrderMessage(orderNo).then(({ data }) => {
-    orderAndConfig.value = data
-  })
+  if (orderNo) {
+    getSuccessOrderMessage(orderNo).then(({ data }) => {
+      orderAndConfig.value = data
+    })
+  }
 }
 const ua = getBrowserUA()
 if (ua === 'wechat') {
