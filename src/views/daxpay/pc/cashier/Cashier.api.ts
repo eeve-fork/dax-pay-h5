@@ -129,7 +129,7 @@ export interface payParam {
   // 唯一标识
   openId?: string
   // 付款码
-  anthCode?: string
+  authCode?: string
 }
 /**
  * 支付配置项参数返回值
