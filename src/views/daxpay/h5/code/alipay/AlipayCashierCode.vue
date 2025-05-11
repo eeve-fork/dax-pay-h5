@@ -99,9 +99,13 @@ function initData() {
   // 获取信息
   loading.value = true
   getCashierCodeConfig(code, CashierCodeTypeEnum.ALIPAY)
-    .then(({ data }) => {
+    .then((res) => {
+      if (res.code) {
+        router.push({ name: 'payFail', query: { msg: res.msg } })
+        return
+      }
       loading.value = false
-      cashierInfo.value = data as any
+      cashierInfo.value = res.data as any
     })
     .catch((res) => {
       router.push({ name: 'payFail', query: { msg: res.message } })
@@ -124,10 +128,14 @@ function pay() {
     cashierType: AggregateEnum.ALI,
     description: description.value,
   } as CashierPayParam
-  cashierPay(from).then(({ data }) => {
+  cashierPay(from).then((res) => {
+    if (res.code) {
+      router.replace({ name: 'payFail', query: { msg: res.msg } })
+      return
+    }
     loading.value = false
     // 跳转到H5/付款码支付页面
-    location.replace(data.payBody)
+    location.replace(res.data.payBody)
   })
 }
 </script>

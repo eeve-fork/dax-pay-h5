@@ -192,11 +192,7 @@ function payClick() {
     payOrder(form as any)
       .then(({ data, code, msg }) => {
         if (code !== 0) {
-          // 如果异常，跳转错误页面
-          router.replace({
-            name: 'payFail',
-            query: { msg },
-          })
+          router.replace({ name: 'payFail', query: { msg } })
           return
         }
         loading.value = false
@@ -281,12 +277,8 @@ onUnmounted(() => {
  */
 function init() {
   getOrderAndConfig(orderNo).then(({ data, code, msg }) => {
-    if (code !== 0) {
-      // 如果异常，跳转异常页面
-      router.replace({
-        name: 'payFail',
-        query: { msg },
-      })
+    if (code) {
+      router.replace({ name: 'payFail', query: { msg } })
       return
     }
     //  如果自动升级聚合支付, 判断是否在对应环境中, 自动进行升级
@@ -300,10 +292,8 @@ function init() {
     orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
     orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
     resume() // 开启倒计时
+  }).catch(() => {
   })
-    .catch((error) => {
-      console.log(error)
-    })
 }
 </script>
 
