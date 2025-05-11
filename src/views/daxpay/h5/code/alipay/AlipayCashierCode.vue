@@ -84,7 +84,7 @@ const showRemark = ref<boolean>(false) // 是否展示备注
 const loading = ref<boolean>(false) // 加载状态
 const cashierInfo = ref<GatewayCashierConfig>()
 const amount = ref<string>('0') // 金额
-const description = ref<string>('') // 描述
+const description = ref<string>()
 
 const { input, del } = useKeyboard(amount)
 
@@ -101,14 +101,14 @@ function initData() {
   getCashierCodeConfig(code, CashierCodeTypeEnum.ALIPAY)
     .then((res) => {
       if (res.code) {
-        router.push({ name: 'payFail', query: { msg: res.msg } })
+        router.replace({ name: 'payFail', query: { msg: res.msg } })
         return
       }
       loading.value = false
       cashierInfo.value = res.data as any
     })
     .catch((res) => {
-      router.push({ name: 'payFail', query: { msg: res.message } })
+      router.replace({ name: 'payFail', query: { msg: res.message } })
     })
 }
 

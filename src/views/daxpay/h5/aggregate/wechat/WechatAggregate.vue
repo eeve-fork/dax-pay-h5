@@ -187,12 +187,12 @@ async function wxAuth() {
   // 认证获取OpenId
   await auth(authParam.value).then(({ data, code, msg }) => {
     if (code) {
-      router.push({ name: 'payFail', query: { msg }, replace: true })
+      router.replace({ name: 'payFail', query: { msg }, replace: true })
       return
     }
     openId.value = data.openId as string
   }).catch((res) => {
-    router.push({ name: 'payFail', query: { msg: res.message }, replace: true })
+    router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
   })
 }
 
@@ -210,7 +210,7 @@ function pay() {
     aggregatePay(from)
       .then(({ data, code, msg }) => {
         if (code) {
-          router.push({ name: 'payFail', query: { msg }, replace: true })
+          router.replace({ name: 'payFail', query: { msg }, replace: true })
           return
         }
         // 根据类型拉起对应的支付。 支持跳转和jsapi

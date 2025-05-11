@@ -97,8 +97,8 @@ const showRemark = ref<boolean>(false)
 const loading = ref<boolean>(false)
 const cashierInfo = ref<GatewayCashierConfig>({})
 const amount = ref<string>('0')
-const description = ref<string>('')
-const openId = ref<string>('')
+const description = ref<string>()
+const openId = ref<string>()
 
 const { input, del } = useKeyboard(amount)
 
@@ -141,13 +141,13 @@ async function init() {
           auth({ cashierCode: cashierCode as string, cashierType: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string })
             .then((res) => {
               if (res.code) {
-                router.push({ name: 'payFail', query: { msg: res.msg } })
+                router.replace({ name: 'payFail', query: { msg: res.msg } })
                 return
               }
               openId.value = res.data.openId as string
               show.value = true
             }).catch((res) => {
-              router.push({ name: 'payFail', query: { msg: res.message }, replace: true })
+              router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
             })
         }
       }
@@ -156,7 +156,7 @@ async function init() {
       }
     })
     .catch((error) => {
-      router.push({ name: 'payFail', query: { msg: error } })
+      router.replace({ name: 'payFail', query: { msg: error } })
     })
 }
 
@@ -181,7 +181,7 @@ function pay() {
   cashierPay(from)
     .then((res) => {
       if (res.code) {
-        router.push({ name: 'payFail', query: { msg: res.msg } })
+        router.replace({ name: 'payFail', query: { msg: res.msg } })
         return
       }
       loading.value = false
