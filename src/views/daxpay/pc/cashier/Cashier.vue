@@ -9,36 +9,30 @@
     </van-overlay>
 
     <div class="pcPayBox">
-      <div class="header">
-        <h1>支付收银台</h1>
-      </div>
-      <!-- 内容区域 -->
-      <div class="content">
-        <!-- 上方订单信息盒子 -->
-        <div class="orderBox">
-          <div class="payPrice">
-            <span class="unit">￥</span>
-            <div class="price">
-              {{ orderObj?.order.amount }}
-            </div>
-          </div>
+      <div class="topBox">
+        <img src="@/assets/images/cashierBack.png" alt="">
+        <div class="top_main">
           <div class="excessTime">
             <span class="exTitle">剩余支付时间</span>
             <span class="number">{{ orderTime.currentMinute }}</span>
             <span class="point">:</span>
             <span class="number">{{ orderTime.currentSeconds }}</span>
           </div>
-          <div class="payMessItem">
-            <div class="itemTitle">
-              订单编号:
-            </div>
-            <div class="itemContent">
-              {{ orderObj?.order.orderNo }}
-            </div>
+          <div class="orderTitle">
+            <!-- {{ orderObj?.order.title }} -->
+            我是标题
           </div>
-        </div>
-        <!-- 支付方式盒子 -->
-        <div class="payMethodBox">
+          <div class="orderPrice">
+            <span>收款金额：</span>
+            <p>
+              ￥90.00
+              <!-- {{ orderObj?.order.amount }} -->
+            </p>
+          </div>
+          <div class="orderId">
+            订单编号:48548552548548484
+            <!-- {{ orderObj?.order.orderNo }} -->
+          </div>
           <div class="methodBox">
             <div
               v-for="item in orderObj?.groupConfigs"
@@ -54,6 +48,12 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <!-- 内容区域 -->
+      <div class="content">
+        <!-- 支付方式盒子 -->
+        <div class="payMethodBox">
           <!-- 聚合支付 -->
           <div v-if="isAggregateShow" class="payMethodCode">
             <vue-qr :text="orderObj?.aggregateUrl" :size="200" />
@@ -161,9 +161,11 @@ const orderTime = reactive({
   },
   // 获取分秒
   getMinter: () => {
-    orderTime.totalTme--
-    orderTime.currentMinute = orderTime.formatTime(Math.floor(orderTime.totalTme / 60))
-    orderTime.currentSeconds = orderTime.formatTime(Math.floor(orderTime.totalTme % 60))
+    if (orderTime.totalTme > 0) {
+      orderTime.totalTme--
+      orderTime.currentMinute = orderTime.formatTime(Math.floor(orderTime.totalTme / 60))
+      orderTime.currentSeconds = orderTime.formatTime(Math.floor(orderTime.totalTme % 60))
+    }
   },
   // 格式化时间
   formatTime: (time: number) => {
@@ -183,8 +185,9 @@ const { pause: lunPause, resume: lunResume } = useIntervalFn(() => {
 watch(
   () => orderTime.totalTme,
   (newValue) => {
-    if (newValue === 0) {
-      router.replace({ path: `/pc/payFail`, query: { msg: '支付超时，请重新发起支付！' } })
+    if (newValue <= 0) {
+      timePause() //  关闭倒计时
+      // router.replace({ path: `/pc/payFail`, query: { msg: '支付超时，请重新发起支付！' } })
     }
   },
 )
@@ -249,10 +252,10 @@ onUnmounted(() => {
 function init() {
   getOrderAndConfig(orderNo)
     .then(({ code, msg, data }) => {
-      if (code !== 0) {
-        router.replace({ path: `/pc/payFail`, query: { msg } })
-        return
-      }
+      // if (code !== 0) {
+      //   router.replace({ path: `/pc/payFail`, query: { msg } })
+      //   return
+      // }
       lunResume() //  开始轮询查询状态
       // 判断是否存在聚合支付
       if (data.config.aggregateShow) {
@@ -336,14 +339,14 @@ function queryOrderStatus() {
 .pcPayTai {
   width: 100%;
   height: 100vh;
-  background: linear-gradient(to bottom, #1e90ff, @background-color); // 背景渐变色
+  background: #f0f4fb; // 背景渐变色
   display: flex;
   justify-content: center;
-  align-items: center;
 
   .pcPayBox {
-    width: 90%;
-    height: 90vh;
+    width: 51.875vw;
+    height: 37.6563vw;
+    transform: translateY(5.2083vw);
     border-radius: @border-radius;
     background-color: @white;
     box-shadow: 0 0.4167vw 1.0417vw rgba(0, 0, 0, 0.1); // 添加柔和阴影
@@ -351,24 +354,135 @@ function queryOrderStatus() {
     display: flex;
     flex-direction: column;
 
-    .header {
-      background: linear-gradient(135deg, lighten(@primary-color, 10%), @primary-color, lighten(@primary-color, 10%));
-      color: @white;
+    .topBox {
+      background: linear-gradient(305deg, #cfd0f3 0%, #ebf1ff 100%);
       padding: 1.25vw;
-      text-align: center;
+      width: 100%;
+      height: 18.5938vw;
+      position: relative;
+      img {
+        height: 100%;
+        width: auto;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 1;
+      }
+      .top_main {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        padding: 0vw 1.9271vw;
+        left: 0;
+        z-index: 2;
+        .excessTime {
+          position: absolute;
+          right: 1.5104vw;
+          top: 0vw;
+          display: flex;
+          align-items: center;
+          gap: 0.2604vw;
 
-      h1 {
-        font-size: 1.4583vw;
-        font-weight: bold;
-        letter-spacing: 2px; // 增加字间距
-        margin: 0;
+          .exTitle {
+            color: #9fa1a2;
+            font-size: 0.9896vw;
+            margin-right: 0.2604vw;
+          }
+
+          .point {
+            font-weight: 700;
+            font-size: 0.625vw;
+          }
+
+          .number {
+            display: block;
+            background-color: #ffece8;
+            color: #ff4d4f;
+            padding: 0vw 0.1563vw;
+            min-width: 1.5104vw;
+            height: 1.5104vw;
+            line-height: 1.5104vw;
+            text-align: center;
+            font-size: 1.0938vw;
+            border-radius: 0.2604vw;
+          }
+        }
+        .orderTitle {
+          font-size: 1.0938vw;
+          color: #000000;
+          font-weight: 600;
+        }
+        .orderPrice {
+          display: flex;
+          flex-direction: column;
+          margin-top: 2.2917vw;
+          margin-bottom: 1.6667vw;
+          p {
+            font-size: 2.3438vw;
+            color: #ff4d4f;
+            transform: translateX(-0.5208vw);
+          }
+          span {
+            font-size: 1.0938vw;
+            color: #303133;
+          }
+        }
+        .orderId {
+          font-size: 0.7813vw;
+          color: #909399;
+        }
+        .methodBox {
+          display: flex;
+          justify-content: center;
+          border-bottom: 0.0521vw solid #ccc;
+
+          .methodItem {
+            box-sizing: border-box;
+            min-width: 8.8542vw;
+            padding: 0.7813vw 2.0833vw;
+            text-align: center;
+            transform: translateY(1px);
+            cursor: pointer;
+            display: flex;
+            gap: 0.325rem;
+            align-items: center;
+            position: relative;
+
+            .recommon {
+              position: absolute;
+              right: 30%;
+              top: -0.7813vw;
+              padding: 0.1042vw 0.3646vw;
+              background-color: #e41937;
+              color: #ffffff;
+              border-radius: 0.7813vw 0 0.7813vw 0;
+            }
+
+            img {
+              width: 1.25rem;
+              height: 1.25rem;
+            }
+
+            span {
+              font-size: 0.9vw;
+              font-weight: 500;
+            }
+          }
+
+          .methodItemClick {
+            border-radius: 0.5208vw 0.5208vw 0 0;
+            background-color: #ffffff;
+            border-top: 1px solid #ccc;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            border-bottom: none;
+          }
+        }
       }
     }
 
     .content {
       flex: 1;
-      padding: 1.25vw;
-      padding-top: 8.25vw;
       background-color: @white;
       color: #333;
       display: flex;
@@ -392,28 +506,6 @@ function queryOrderStatus() {
 
           .unit {
             transform: translateY(0.1042vw) scale(1, 0.8);
-          }
-        }
-
-        .excessTime {
-          display: flex;
-          align-items: center;
-          gap: 0.2604vw;
-
-          .exTitle {
-            color: #9fa1a2;
-            margin-right: 0.2604vw;
-          }
-
-          .point {
-            font-weight: 700;
-          }
-
-          .number {
-            display: block;
-            background-color: #ffece8;
-            color: #f66662;
-            padding: 0.1563vw;
           }
         }
 
