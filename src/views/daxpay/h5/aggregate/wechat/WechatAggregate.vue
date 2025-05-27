@@ -185,10 +185,14 @@ function init() {
  */
 async function wxAuth() {
   // 认证获取OpenId
-  await auth(authParam.value).then(({ data }) => {
+  await auth(authParam.value).then(({ data, code, msg }) => {
+    if (code) {
+      router.replace({ name: 'payFail', query: { msg }, replace: true })
+      return
+    }
     openId.value = data.openId as string
   }).catch((res) => {
-    router.push({ name: 'payFail', query: { msg: res.message }, replace: true })
+    router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
   })
 }
 
@@ -204,13 +208,17 @@ function pay() {
       openId: openId.value,
     } as AggregatePayParam
     aggregatePay(from)
-      .then(({ data }) => {
+      .then(({ data, code, msg }) => {
+        if (code) {
+          router.replace({ name: 'payFail', query: { msg }, replace: true })
+          return
+        }
         // 根据类型拉起对应的支付。 支持跳转和jsapi
-        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi){
+        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
           const json = JSON.parse(data.payBody)
           jsapiPay(json)
         }
-        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link){
+        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
           location.replace(data.payBody as any)
         }
       })

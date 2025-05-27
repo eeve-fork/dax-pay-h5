@@ -43,6 +43,7 @@ async function init() {
     const param = ref<AuthCodeParam>({
       appId: appId as string,
       queryCode: queryCode as string,
+      authType: 'alipay',
       authCode: authCode as string,
       channel: channel as string,
     })

@@ -69,9 +69,6 @@ const orderTime = reactive({
     if (interval > 0) {
       orderTime.totalTme = Math.floor(interval / 1000)
     }
-    else {
-      console.log('失效了')
-    }
   },
   // 获取分秒
   getMinter: () => {
@@ -107,12 +104,8 @@ watch(
 function init() {
   // 获取订单和配置信息
   getAggregateConfig(orderNo, 'alipay').then(async ({ data, code, msg }) => {
-    if (code !== 0) {
-      // 如果异常，跳转异常页面
-      router.replace({
-        name: 'payFail',
-        query: { msg },
-      })
+    if (code) {
+      router.replace({ name: 'payFail', query: { msg } })
       return
     }
     show.value = true
@@ -145,11 +138,7 @@ function pay() {
     aggregatePay(from)
       .then(({ data, code, msg }) => {
         if (code !== 0) {
-          // 如果异常，跳转异常页面
-          router.replace({
-            name: 'payFail',
-            query: { msg },
-          })
+          router.replace({ name: 'payFail', query: { msg } })
           return
         }
         loading.value = false

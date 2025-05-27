@@ -23,6 +23,8 @@ export interface AuthCodeParam {
   authCode?: string
   // 查询Code
   queryCode?: string
+  // 认证类型
+  authType?: string
   // 应用号
   appId?: string
 }

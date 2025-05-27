@@ -21,6 +21,7 @@ const { code } = route.query
 const param = ref<AuthCodeParam>({
   appId: appId as string,
   queryCode: queryCode as string,
+  authType: 'wechat',
   authCode: code as string,
   channel: channel as string,
 })
