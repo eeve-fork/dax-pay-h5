@@ -225,7 +225,6 @@ const cancelObj = reactive({
   handlePopstate: () => {
     cancelObj.showCancelMask = true // 显示取消支付弹窗
   },
-
 })
 
 // 关闭弹窗对象

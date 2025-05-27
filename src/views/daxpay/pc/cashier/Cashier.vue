@@ -10,7 +10,7 @@
 
     <div class="pcPayBox">
       <div class="topBox">
-        <img src="@/assets/images/cashierBack.png" alt="">
+        <img src="@/assets/images/cashierBack.png" alt="" class="topBack">
         <div class="top_main">
           <div class="excessTime">
             <span class="exTitle">剩余支付时间</span>
@@ -43,31 +43,75 @@
             >
               <img :src="getImageUrl(item.icon)" alt="">
               <span>{{ item.name }}</span>
-              <div v-if="item.recommend" class="recommon">
-                推荐
-              </div>
             </div>
           </div>
         </div>
       </div>
       <!-- 内容区域 -->
       <div class="content">
-        <!-- 支付方式盒子 -->
-        <div class="payMethodBox">
-          <!-- 聚合支付 -->
-          <div v-if="isAggregateShow" class="payMethodCode">
-            <vue-qr :text="orderObj?.aggregateUrl" :size="200" />
+        <!-- 聚合支付 -->
+        <div v-if="isAggregateShow" class="payMethodCode">
+          <div class="qrBox">
+            <vue-qr :text="orderObj?.aggregateUrl" />
           </div>
-          <div v-else class="payMethodChildBox">
-            <div
-              v-for="item in childRenList"
-              :key="item.id"
-              class="payMethodChildItem"
-              @click="payMethObj.toPayTypeClick(item)"
-            >
-              <img :src="getImageUrl(item.icon)" alt="">
-              <span>{{ item.name }}</span>
+          <view class="payTitleBox">
+            <div class="payTitle_top">
+              <img src="@/assets/images/wechat.png" mode="scaleToFill">
+              <p>微信支付</p>
             </div>
+            <div class="payTitle_bottom">
+              手机微信支付，扫一扫进行付款
+            </div>
+          </view>
+        </div>
+        <!-- 非聚合 -->
+        <div v-else class="payMethodChildBox">
+          <!-- 常规跳转支付 -->
+          <template v-if="!codeshow">
+            <div class="topbox">
+              <div
+                v-for="item in childRenList"
+                :key="item.id"
+                class="payMethodChildItem"
+                :class="{ itemClick: payMethObj.itemClickObj.id === item.id }"
+                @click="payMethObj.itemBtnClick(item)"
+              >
+                <img :src="getImageUrl(item.icon)" alt="">
+                <span>{{ item.name }}</span>
+              </div>
+            </div>
+            <button
+              v-if="!payMethObj.itemClickObj.id"
+              class="payClickBtn grey"
+              :disabled="!payMethObj.itemClickObj.id"
+              hover-class="button-hover"
+            >
+              立即支付
+            </button>
+            <button
+              v-else
+              class="payClickBtn"
+              :disabled="!payMethObj.itemClickObj.id"
+              hover-class="button-hover"
+              @click="payMethObj.toPayTypeClick"
+            >
+              立即支付
+            </button>
+          </template>
+          <!-- 二维码扫码支付 -->
+          <div v-else class="qrCodePayBox">
+            <div class="qrCode">
+              <vue-qr :text="orderObj?.aggregateUrl" :size="200" />
+            </div>
+            <view class="payTitleBox">
+              <div class="payTitle_top">
+                <img src="@/assets/images/wechat.png" mode="scaleToFill">
+                <p>微信支付</p>
+              </div>
+              <div class="payTitle_bottom">
+                手机微信支付，扫一扫进行付款
+              </div>
+            </view>
           </div>
         </div>
       </div>
@@ -100,7 +144,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { showConfirmDialog } from 'vant'
 import vueQr from 'vue-qr/src/packages/vue-qr.vue'
 import { getOrderAndConfig, orderStatus, payOrder } from '@/views/daxpay/pc/cashier/Cashier.api'
-import type { OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
+import type { CashierConfig, OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
 import { GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 
 // 实例化路由
@@ -115,7 +159,6 @@ const childRenList = ref<any>([])
 
 // 动态生成图片路径
 function getImageUrl(icon) {
-  console.log(icon)
   return new URL(`../../../../assets/images/${icon}.png`, import.meta.url).href
 }
 // 控制二维码弹窗
@@ -187,39 +230,48 @@ watch(
   (newValue) => {
     if (newValue <= 0) {
       timePause() //  关闭倒计时
-      // router.replace({ path: `/pc/payFail`, query: { msg: '支付超时，请重新发起支付！' } })
+      router.replace({ path: `/pc/payFail`, query: { msg: '支付超时，请重新发起支付！' } })
     }
   },
 )
 
 // 支付类型对象
 const payMethObj = reactive({
-  // 判断点击的哪一个
+  // 判断点击的哪一个类型
   payClickItemId: '',
+  // 点击储存的哪一个选择项
+  itemClickObj: {} as CashierConfig,
   // 点击切换类型
   payClick: (item: any) => {
     payMethObj.payClickItemId = item.id
+    payMethObj.itemClickObj = {} // 将下方选中项重置
+  },
+  // 点击切换选项
+  itemBtnClick: (item) => {
+    payMethObj.itemClickObj = item
   },
   // 点击支付
-  toPayTypeClick: (item) => {
+  toPayTypeClick: () => {
     loading.value = true
-    payOrder({ orderNo: orderNo as string, itemId: item.id }).then(({ code, data, msg }) => {
-      if (code !== 0) {
-        router.replace({ path: `/pc/payFail`, query: { msg } })
-        return
-      }
-      loading.value = false
-      // 如果是二维码方式 打开支付弹窗
-      if (item.callType === GatewayCallTypeEnum.qr_code) {
-        codeshow.value = true
-        codeLink.value = data.payBody as string
-      }
-      // 如果是跳转支付直接跳转支付页面
-      if (item.callType === GatewayCallTypeEnum.link) {
+    payOrder({ orderNo: orderNo as string, itemId: payMethObj.itemClickObj?.id as any }).then(
+      ({ code, data, msg }) => {
+        if (code !== 0) {
+          router.replace({ path: `/pc/payFail`, query: { msg } })
+          return
+        }
         loading.value = false
-        location.replace(data.payBody as string)
-      }
-    })
+        // 如果是二维码方式 打开支付弹窗
+        if (payMethObj.itemClickObj?.callType === GatewayCallTypeEnum.qr_code) {
+          codeshow.value = true
+          codeLink.value = data.payBody as string
+        }
+        // 如果是跳转支付直接跳转支付页面
+        if (payMethObj.itemClickObj.callType === GatewayCallTypeEnum.link) {
+          loading.value = false
+          location.replace(data.payBody as string)
+        }
+      },
+    )
   },
 })
 
@@ -252,10 +304,10 @@ onUnmounted(() => {
 function init() {
   getOrderAndConfig(orderNo)
     .then(({ code, msg, data }) => {
-      // if (code !== 0) {
-      //   router.replace({ path: `/pc/payFail`, query: { msg } })
-      //   return
-      // }
+      if (code !== 0) {
+        router.replace({ path: `/pc/payFail`, query: { msg } })
+        return
+      }
       lunResume() //  开始轮询查询状态
       // 判断是否存在聚合支付
       if (data.config.aggregateShow) {
@@ -356,11 +408,11 @@ function queryOrderStatus() {
 
     .topBox {
       background: linear-gradient(305deg, #cfd0f3 0%, #ebf1ff 100%);
-      padding: 1.25vw;
+      padding: 0vw 1.25vw;
       width: 100%;
       height: 18.5938vw;
       position: relative;
-      img {
+      .topBack {
         height: 100%;
         width: auto;
         position: absolute;
@@ -372,13 +424,13 @@ function queryOrderStatus() {
         position: absolute;
         width: 100%;
         height: 100%;
-        padding: 0vw 1.9271vw;
+        padding: 1.25vw 1.9271vw 0vw;
         left: 0;
         z-index: 2;
         .excessTime {
           position: absolute;
           right: 1.5104vw;
-          top: 0vw;
+          top: 1.25vw;
           display: flex;
           align-items: center;
           gap: 0.2604vw;
@@ -435,37 +487,33 @@ function queryOrderStatus() {
           display: flex;
           justify-content: center;
           border-bottom: 0.0521vw solid #ccc;
-
+          position: absolute;
+          width: 100%;
+          left: 0;
+          bottom: 0vw;
           .methodItem {
             box-sizing: border-box;
             min-width: 8.8542vw;
             padding: 0.7813vw 2.0833vw;
             text-align: center;
-            transform: translateY(1px);
+            transform: translateY(0.0521vw);
             cursor: pointer;
             display: flex;
-            gap: 0.325rem;
+            gap: 0.2604vw;
             align-items: center;
             position: relative;
-
-            .recommon {
-              position: absolute;
-              right: 30%;
-              top: -0.7813vw;
-              padding: 0.1042vw 0.3646vw;
-              background-color: #e41937;
-              color: #ffffff;
-              border-radius: 0.7813vw 0 0.7813vw 0;
-            }
-
+            background-color: #dde0e5;
+            border-radius: 0.6771vw 0.6771vw 0vw 0vw;
+            margin-right: 0.6771vw;
             img {
-              width: 1.25rem;
-              height: 1.25rem;
+              width: 0.9896vw;
+              height: 0.8333vw;
             }
 
             span {
-              font-size: 0.9vw;
-              font-weight: 500;
+              font-size: 1.0938vw;
+              color: #000000;
+              font-weight: 600;
             }
           }
 
@@ -488,119 +536,138 @@ function queryOrderStatus() {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2.6042vw;
-
-      .orderBox {
+      padding: 1.5625vw 1.3542vw;
+      .payMethodCode {
         width: 100%;
+        height: 100%;
         display: flex;
-        justify-content: center;
-        flex-direction: column;
         align-items: center;
-
-        .payPrice {
-          font-size: 0.625vw;
-          margin-bottom: 1.0417vw;
-          display: flex;
-          gap: 0.3646vw;
-          font-size: 1.6667vw;
-
-          .unit {
-            transform: translateY(0.1042vw) scale(1, 0.8);
-          }
+        justify-content: center;
+        gap: 1.0417vw;
+        .qrBox {
+          padding: 0.3125vw;
+          background-color: #3699f7;
+          width: 7.7604vw;
+          height: 7.7604vw;
+          background: url('@/assets/images/qrCodeBorder.png');
+          background-size: 100% 100%;
         }
-
-        .payMessItem {
-          display: flex;
-          gap: 0.4167vw;
-          color: #9fa1a2;
+        .payTitleBox {
+          .payTitle_top {
+            display: flex;
+            gap: 0.2604vw;
+            align-items: center;
+            margin-bottom: 0.5208vw;
+            img {
+              width: 1.6146vw;
+              height: 1.4583vw;
+            }
+            p {
+              font-size: 0.8333vw;
+              color: #393939;
+            }
+          }
+          .payTitle_bottom {
+            font-size: 0.7813vw;
+            color: #000000;
+          }
         }
       }
-
-      .payMethodBox {
+      .payMethodChildBox {
         width: 100%;
+        height: 100%;
 
-        .methodBox {
+        .topbox {
+          width: 100%;
           display: flex;
-          justify-content: center;
-          border-bottom: 0.0521vw solid #ccc;
-
-          .methodItem {
-            box-sizing: border-box;
-            min-width: 8.8542vw;
-            padding: 0.7813vw 2.0833vw;
-            text-align: center;
-            transform: translateY(1px);
-            cursor: pointer;
+          gap: 0.5208vw;
+          .payMethodChildItem {
+            padding: 0.4167vw 0.8333vw;
             display: flex;
-            gap: 0.325rem;
+            justify-content: center;
             align-items: center;
-            position: relative;
-
-            .recommon {
-              position: absolute;
-              right: 30%;
-              top: -0.7813vw;
-              padding: 0.1042vw 0.3646vw;
-              background-color: #e41937;
-              color: #ffffff;
-              border-radius: 0.7813vw 0 0.7813vw 0;
+            gap: 0.2083vw;
+            border: 0.0521vw solid #dcdfe6;
+            border-radius: 0.3125vw;
+            height: 2.9271vw;
+            min-width: 8.3646vw;
+            cursor: pointer;
+            &:hover {
+              border: 0.0521vw solid #3699f7;
             }
-
             img {
-              width: 1.25rem;
-              height: 1.25rem;
+              width: 1.5625vw;
+              height: 1.5625vw;
             }
-
             span {
-              font-size: 0.9vw;
-              font-weight: 500;
+              font-size: 1.3021vw;
+              color: #303133;
             }
-          }
-
-          .methodItemClick {
-            border-radius: 0.5208vw 0.5208vw 0 0;
-            background-color: #ffffff;
-            border-top: 1px solid #ccc;
-            border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
-            border-bottom: none;
+            &.itemClick {
+              border: 0.0521vw solid #3699f7;
+              position: relative;
+              &::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 0.9375vw;
+                height: 0.9375vw;
+                background: url('@/assets/images/payItemRLogo.png');
+              }
+            }
           }
         }
-        .payMethodCode {
-          padding: 2.0833vw 0;
+        .payClickBtn {
+          width: 9.4271vw;
+          height: 2.5354vw;
           display: flex;
+          font-size: 0.7813vw;
           justify-content: center;
           align-items: center;
+          background-color: #4073e1;
+          color: #ffffff;
+          border-radius: 0.2083vw;
+          margin-top: 0.7292vw;
+          cursor: pointer;
+          &.grey {
+            background-color: #ccc;
+            cursor: default;
+          }
         }
-        .payMethodChildBox {
-          padding: 2.0833vw 0 2.0833vw 15.625vw;
+        .qrCodePayBox {
+          width: 100%;
+          height: 100%;
           display: flex;
-          flex-wrap: wrap;
-          gap: 1.8417vw;
-
-          .payMethodChildItem {
-            width: 13.0208vw;
-            height: 5.6042vw;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5208vw;
-            background-color: #ffffff;
-            border-radius: 0.5208vw; // 添加圆角，使阴影更柔和
-            box-shadow: 0 0.2604vw 0.5208vw rgba(0, 0, 0, 0.1); // 添加四周阴影
-            transition: all 0.3s ease; // 添加过渡动画
-            font-size: 1.2375vw;
-            letter-spacing: 0.0521vw;
-            position: relative;
-            overflow: hidden;
-            &:hover {
-              box-shadow: 0 0.5208vw 1.0417vw rgba(0, 0, 0, 0.15); // 鼠标悬停时增强阴影效果
-              transform: translateY(-0.2604vw); // 添加轻微上移效果
+          align-items: center;
+          justify-content: center;
+          gap: 2.1354vw;
+          .qrCode {
+            padding: 0.3125vw;
+            background-color: #3699f7;
+            width: 7.7604vw;
+            height: 7.7604vw;
+            background: url('@/assets/images/qrCodeBorder.png');
+            background-size: 100% 100%;
+          }
+          .payTitleBox {
+            .payTitle_top {
+              display: flex;
+              gap: 0.2604vw;
+              align-items: center;
+              margin-bottom: 0.5208vw;
+              img {
+                width: 1.6146vw;
+                height: 1.4583vw;
+              }
+              p {
+                font-size: 0.8333vw;
+                color: #393939;
+              }
             }
-            img {
-              width: 1.813vw;
-              height: 1.813vw;
+            .payTitle_bottom {
+              font-size: 0.7813vw;
+              color: #000000;
             }
           }
         }
