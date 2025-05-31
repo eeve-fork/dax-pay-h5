@@ -97,8 +97,8 @@ const showRemark = ref<boolean>(false)
 const loading = ref<boolean>(false)
 const cashierInfo = ref<GatewayCashierConfig>({})
 const amount = ref<string>('0')
-const description = ref<string>('')
-const openId = ref<string>('')
+const description = ref<string>()
+const openId = ref<string>()
 
 const { input, del } = useKeyboard(amount)
 
@@ -112,8 +112,13 @@ onMounted(() => {
 async function init() {
   loading.value = true
   getCashierCodeConfig(cashierCode, AggregateEnum.WECHAT)
-    .then(({ data }) => {
+    .then((res) => {
+      if (res.code) {
+        router.replace({ name: 'payFail', query: { msg: res.msg } })
+        return
+      }
       loading.value = false
+      const data = res.data
       cashierInfo.value = data as any
       // 判断是否需要获取OpenId
       if (data.needOpenId) {
@@ -121,20 +126,29 @@ async function init() {
         if (!authCode) {
           // 重定向跳转到微信授权地址
           generateAuthUrl(cashierCode, CashierCodeTypeEnum.WECHAT_PAY).then((res) => {
+            if (res.code) {
+              router.replace({ name: 'payFail', query: { msg: res.msg } })
+              return
+            }
             const url = res.data
             location.replace(url)
           }).catch((res) => {
-            router.push({ name: 'payFail', query: { msg: res.message } })
+            router.replace({ name: 'payFail', query: { msg: res.message } })
           })
         }
         else {
           // 认证获取OpenId
-          auth({ cashierCode: cashierCode as string, cashierType: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string }).then(({ data }) => {
-            openId.value = data.openId as string
-            show.value = true
-          }).catch((res) => {
-            router.push({ name: 'payFail', query: { msg: res.message }, replace: true })
-          })
+          auth({ cashierCode: cashierCode as string, cashierType: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string })
+            .then((res) => {
+              if (res.code) {
+                router.replace({ name: 'payFail', query: { msg: res.msg } })
+                return
+              }
+              openId.value = res.data.openId as string
+              show.value = true
+            }).catch((res) => {
+              router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
+            })
         }
       }
       else {
@@ -142,7 +156,7 @@ async function init() {
       }
     })
     .catch((error) => {
-      router.push({ name: 'payFail', query: { msg: error } })
+      router.replace({ name: 'payFail', query: { msg: error } })
     })
 }
 
@@ -165,15 +179,19 @@ function pay() {
     description: description.value,
   } as CashierPayParam
   cashierPay(from)
-    .then(({ data }) => {
+    .then((res) => {
+      if (res.code) {
+        router.replace({ name: 'payFail', query: { msg: res.msg } })
+        return
+      }
       loading.value = false
       // 根据类型拉起对应的支付。 支持跳转和jsapi
       if (cashierInfo.value?.callType === GatewayCallTypeEnum.jsapi) {
-        const json = JSON.parse(data.payBody)
+        const json = JSON.parse(res.data.payBody)
         jsapiPay(json)
       }
       if (cashierInfo.value?.callType === GatewayCallTypeEnum.link) {
-        location.replace(data.payBody as any)
+        location.replace(res.data.payBody as any)
       }
     })
 }
