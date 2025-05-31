@@ -33,13 +33,26 @@
             订单编号:48548552548548484
             <!-- {{ orderObj?.order.orderNo }} -->
           </div>
-          <div class="methodBox">
+          <!-- 点击支付前的按钮 -->
+          <div v-if="!codeLink" class="methodBox">
             <div
               v-for="item in orderObj?.groupConfigs"
               :key="item.id"
               class="methodItem"
               :class="{ methodItemClick: payMethObj.payClickItemId === item.id }"
               @click="payMethObj.payClick(item)"
+            >
+              <img :src="getImageUrl(item.icon)" alt="">
+              <span>{{ item.name }}</span>
+            </div>
+          </div>
+          <!-- 点击支付后的失效按钮 -->
+          <div v-else class="methodBox">
+            <div
+              v-for="item in orderObj?.groupConfigs"
+              :key="item.id"
+              class="methodItem disable"
+              :class="{ methodItemClick: payMethObj.payClickItemId === item.id }"
             >
               <img :src="getImageUrl(item.icon)" alt="">
               <span>{{ item.name }}</span>
@@ -56,18 +69,18 @@
           </div>
           <view class="payTitleBox">
             <div class="payTitle_top">
-              <img src="@/assets/images/wechat.png" mode="scaleToFill">
-              <p>微信支付</p>
+              <!-- <img src="@/assets/images/wechat.png" mode="scaleToFill"> -->
+              <p>手机支付，扫一扫进行付款</p>
             </div>
             <div class="payTitle_bottom">
-              手机微信支付，扫一扫进行付款
+              <!-- 手机支付，扫一扫进行付款 -->
             </div>
           </view>
         </div>
         <!-- 非聚合 -->
         <div v-else class="payMethodChildBox">
           <!-- 常规跳转支付 -->
-          <template v-if="!codeshow">
+          <template v-if="!codeLink">
             <div class="topbox">
               <div
                 v-for="item in childRenList"
@@ -101,40 +114,21 @@
           <!-- 二维码扫码支付 -->
           <div v-else class="qrCodePayBox">
             <div class="qrCode">
-              <vue-qr :text="orderObj?.aggregateUrl" :size="200" />
+              <vue-qr v-if="codeLink" :text="codeLink" :size="200" />
             </div>
             <view class="payTitleBox">
               <div class="payTitle_top">
                 <img src="@/assets/images/wechat.png" mode="scaleToFill">
-                <p>微信支付</p>
+                <p>扫码支付</p>
               </div>
               <div class="payTitle_bottom">
-                手机微信支付，扫一扫进行付款
+                请尽快完成扫码支付
               </div>
             </view>
           </div>
         </div>
       </div>
-      <van-popup
-        v-model:show="codeshow"
-        round
-        closeable
-        :close-on-click-overlay="false"
-        @click-close-icon="closeCode"
-      >
-        <template #default>
-          <div class="codeBox">
-            <div class="title">
-              请尽快完成支付
-            </div>
-            <div class="code">
-              <vue-qr v-if="codeLink" :text="codeLink" :size="200" />
-            </div>
-          </div>
-        </template>
-      </van-popup>
     </div>
-    <!-- 二维码弹窗 -->
   </div>
 </template>
 
@@ -161,29 +155,11 @@ const childRenList = ref<any>([])
 function getImageUrl(icon) {
   return new URL(`../../../../assets/images/${icon}.png`, import.meta.url).href
 }
-// 控制二维码弹窗
-const codeshow = ref<boolean>(false)
-// 二维码链接
+
+// 点击支付后非聚合支付二维码链接
 const codeLink = ref<string>('')
 // 判断是否含有聚合支付
 const isAggregateShow = ref<boolean>(false)
-
-// 关闭菜单触发
-function closeCode() {
-  showConfirmDialog({
-    title: '是否关闭支付弹窗?',
-    message: '关闭弹窗后该订单会被取消',
-    className: 'confirmDialogPC',
-    overlayClass: 'confirmOverlayPC',
-  })
-    .then(() => {
-      codeshow.value = false
-      router.replace({ path: `/pc/payFail`, query: { msg: '订单已取消，请重新发起支付！' } })
-    })
-    .catch(() => {
-      codeshow.value = true
-    })
-}
 
 // 倒计时对象
 const orderTime = reactive({
@@ -245,6 +221,7 @@ const payMethObj = reactive({
   payClick: (item: any) => {
     payMethObj.payClickItemId = item.id
     payMethObj.itemClickObj = {} // 将下方选中项重置
+    codeLink.value = ''
   },
   // 点击切换选项
   itemBtnClick: (item) => {
@@ -262,7 +239,6 @@ const payMethObj = reactive({
         loading.value = false
         // 如果是二维码方式 打开支付弹窗
         if (payMethObj.itemClickObj?.callType === GatewayCallTypeEnum.qr_code) {
-          codeshow.value = true
           codeLink.value = data.payBody as string
         }
         // 如果是跳转支付直接跳转支付页面
@@ -334,7 +310,6 @@ function queryOrderStatus() {
   orderStatus(orderNo).then((res) => {
     // 判断订单是否支付成功
     if (res.data) {
-      codeshow.value = false
       router.replace({ path: `/pc/paySuccess/${orderNo}`, replace: true })
     }
   })
@@ -505,6 +480,9 @@ function queryOrderStatus() {
             background-color: #dde0e5;
             border-radius: 0.6771vw 0.6771vw 0vw 0vw;
             margin-right: 0.6771vw;
+            &.disable {
+              cursor: default;
+            }
             img {
               width: 0.9896vw;
               height: 0.8333vw;
