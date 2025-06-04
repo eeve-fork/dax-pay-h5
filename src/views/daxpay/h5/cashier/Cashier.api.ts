@@ -38,6 +38,7 @@ export interface OrderAndConfig {
  * 订单信息
  */
 export interface GatewayOrder {
+
   /** 商户订单号 */
   bizOrderNo?: string
   /** 订单号 */

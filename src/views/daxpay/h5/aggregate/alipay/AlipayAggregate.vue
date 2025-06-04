@@ -1,38 +1,55 @@
 <template>
   <div v-if="show" class="aggeegateAli">
     <div class="aggBox">
-      <img src="@/assets/images/bill_logo.png" alt="">
-      <div class="payPrice">
-        <span class="unit">￥</span>
-        <div class="price">
-          {{ orderAndConfig?.order.amount }}
+      <div class="topBox">
+        <!-- 支付金额 -->
+        <div class="payPrice">
+          <span class="unit">￥</span>
+          <div class="price">
+            {{ orderAndConfig?.order.amount }}
+          </div>
         </div>
-      </div>
-      <div v-show="!isAutoLaunch" class="excessTime">
-        <span class="exTitle">剩余支付时间</span>
-        <span class="number">{{ orderTime.currentMinute }}</span>
-        <span class="point">:</span>
-        <span class="number">{{ orderTime.currentSeconds }}</span>
-      </div>
-      <div class="payMessItem">
-        <div class="itemTitle">
-          标题:
+        <!-- 支付时间 -->
+        <div v-show="!isAutoLaunch" class="excessTime">
+          <span class="exTitle">剩余支付时间</span>
+          <span class="number">{{ orderTime.currentMinute }}</span>
+          <span class="point">:</span>
+          <span class="number">{{ orderTime.currentSeconds }}</span>
         </div>
-        <div class="itemContent">
-          {{ orderAndConfig?.order.title }}
-        </div>
-      </div>
-      <div class="payMessItem">
-        <div class="itemTitle">
-          订单编号:
-        </div>
-        <div class="itemContent">
-          {{ orderAndConfig?.order.orderNo }}
+        <!-- 订单详情 -->
+        <div class="infoBox">
+          <div class="payMessItem titleOne">
+            {{ orderAndConfig?.order.title }}
+          </div>
+          <div class="payMessItem">
+            <div class="itemTitle">
+              订单编号
+            </div>
+            <div class="itemContent">
+              {{ orderAndConfig?.order.orderNo }}
+            </div>
+          </div>
+          <div class="payMessItem">
+            <div class="itemTitle">
+              商户订单号
+            </div>
+            <div class="itemContent">
+              {{ orderAndConfig?.order.bizOrderNo }}
+            </div>
+          </div>
+          <div class="payMessItem">
+            <div class="itemTitle">
+              订单结束时间
+            </div>
+            <div class="itemContent">
+              {{ orderAndConfig?.order.expiredTime }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <div v-show="!isAutoLaunch" class="payBtnBox">
-      支付{{ orderAndConfig?.order.amount }}
+      立即支付
     </div>
   </div>
 </template>
@@ -135,15 +152,14 @@ function pay() {
       orderNo: orderNo as string,
       aggregateType: AggregateEnum.ALI,
     } as AggregatePayParam
-    aggregatePay(from)
-      .then(({ data, code, msg }) => {
-        if (code !== 0) {
-          router.replace({ name: 'payFail', query: { msg } })
-          return
-        }
-        loading.value = false
-        location.replace(data.payBody as any)
-      })
+    aggregatePay(from).then(({ data, code, msg }) => {
+      if (code !== 0) {
+        router.replace({ name: 'payFail', query: { msg } })
+        return
+      }
+      loading.value = false
+      location.replace(data.payBody as any)
+    })
   }
 }
 
@@ -158,80 +174,105 @@ onUnmounted(() => {
 <style scoped lang="less">
 .aggeegateAli {
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  background-color: #f6f6f6;
   position: relative;
   display: flex;
-  align-items: center;
+  justify-content: center;
 
   .aggBox {
     width: 100%;
     height: auto;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    transform: translateY(-50%);
 
-    img {
-      width: 4.125rem;
-      height: 4.125rem;
-    }
-
-    .payPrice {
-      margin: 1.25rem 0;
+    flex-direction: column;
+    padding-top: 8.25rem;
+    .topBox {
+      width: 100%;
       display: flex;
-      gap: 0.425rem;
-      font-size: 2rem;
-
-      .unit {
-        font-size: 22px;
-        transform: scale(1, 0.8);
-        display: flex;
-        align-items: flex-end;
-      }
-    }
-
-    .excessTime {
-      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.3125rem;
-
-      .exTitle {
-        color: #9fa1a2;
-        margin-right: 0.3125rem;
+      .payPrice {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 0.425rem;
+        font-size: 2.625rem;
+        .unit {
+          font-size: 1rem;
+          transform: scale(1, 0.8);
+          display: flex;
+          align-items: flex-end;
+        }
       }
 
-      .point {
-        font-weight: 700;
-      }
+      .excessTime {
+        margin: 0.8125rem 0rem 1.75rem;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.3125rem;
 
-      .number {
-        display: block;
-        background-color: #ffece8;
-        color: #f66662;
-        padding: 0.1875rem;
-      }
-    }
+        .exTitle {
+          color: #9fa1a2;
+          margin-right: 0.3125rem;
+        }
 
-    .payMessItem {
-      display: flex;
-      gap: 0.5125rem;
-      color: #9fa1a2;
+        .point {
+          font-weight: 700;
+        }
+
+        .number {
+          display: block;
+          background-color: #ffece8;
+          color: #f66662;
+          padding: 0.1875rem;
+        }
+      }
+      .infoBox {
+        width: 90%;
+        background-color: #ffffff;
+        border-radius: 0.625rem;
+        .payMessItem {
+          display: flex;
+          gap: 0.5125rem;
+          color: #9fa1a2;
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 0.875rem;
+          &:nth-child(1) {
+            justify-content: center;
+            font-size: 1rem;
+            color: #303133;
+            font-weight: 600;
+          }
+          .itemContent {
+            font-size: 0.875rem;
+            color: #303133;
+            font-weight: 600;
+          }
+        }
+      }
     }
   }
 
   .payBtnBox {
     width: 90%;
     margin: 0 auto;
-    background-color: #89d961;
+    background-color: #4072e1;
     color: #fff;
     height: 3.25rem;
+    border-radius: 2rem;
     position: absolute;
     bottom: 2.75rem;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
     line-height: 3.25rem;
-    border-radius: 0.625rem;
   }
 }
 </style>
