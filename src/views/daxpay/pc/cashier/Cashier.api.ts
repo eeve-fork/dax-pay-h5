@@ -31,7 +31,7 @@ export function orderStatus(orderNo) {
   })
 }
 // 查询订单信息
-export function orderMessage(orderNo) {
+export function findOrderByOrderNo(orderNo) {
   return http.request<Result<boolean>>({
     url: '/unipay/gateway/findOrderByOrderNo',
     method: 'GET',

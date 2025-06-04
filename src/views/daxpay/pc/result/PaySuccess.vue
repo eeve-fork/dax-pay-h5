@@ -7,7 +7,7 @@
       <div class="payPrice">
         <span class="unit">￥</span>
         <div class="price">
-          {{ orderAndConfig?.amount }}
+          {{ order?.amount }}
         </div>
       </div>
       <div class="payMessBox">
@@ -16,15 +16,24 @@
             支付标题：
           </div>
           <div class="itemContent">
-            {{ orderAndConfig?.title }}
+            {{ order?.title }}
           </div>
         </div>
+        <div v-if="order?.description" class="payMessItem">
+          <div class="itemTitle">
+            订单描述：
+          </div>
+          <div class="itemContent">
+            {{ order?.description }}
+          </div>
+        </div>
+
         <div class="payMessItem">
           <div class="itemTitle">
             订单编号：
           </div>
           <div class="itemContent">
-            {{ orderAndConfig?.orderNo }}
+            {{ order?.orderNo }}
           </div>
         </div>
       </div>
@@ -38,11 +47,11 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { onMounted } from 'vue'
-import { orderMessage } from '@/views/daxpay/pc/cashier/Cashier.api'
+import { findOrderByOrderNo } from '@/views/daxpay/pc/cashier/Cashier.api'
 
 const route = useRoute()
 const { orderNo } = route.params
-const orderAndConfig = ref()
+const order = ref()
 
 onMounted(() => {
   init()
@@ -51,8 +60,8 @@ onMounted(() => {
 
 // 初始化函数
 function init() {
-  orderMessage(orderNo).then(({ data }) => {
-    orderAndConfig.value = data
+  findOrderByOrderNo(orderNo).then(({ data }) => {
+    order.value = data
   })
 }
 

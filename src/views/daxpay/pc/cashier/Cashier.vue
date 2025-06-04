@@ -3,7 +3,7 @@
     <van-overlay :show="loading" class-name="loadingOverlay">
       <div class="loading-wrapper" @click.stop>
         <van-loading size="24px">
-          请稍后...
+          发起支付中，请稍后...
         </van-loading>
       </div>
     </van-overlay>
@@ -19,19 +19,19 @@
             <span class="number">{{ orderTime.currentSeconds }}</span>
           </div>
           <div class="orderTitle">
-            <!-- {{ orderObj?.order.title }} -->
-            我是标题
+            {{ orderObj?.order.title }}
           </div>
           <div class="orderPrice">
             <span>收款金额：</span>
             <p>
-              ￥90.00
-              <!-- {{ orderObj?.order.amount }} -->
+              ￥ {{ orderObj?.order.amount }}
             </p>
           </div>
           <div class="orderId">
-            订单编号:48548552548548484
-            <!-- {{ orderObj?.order.orderNo }} -->
+            订单编号: {{ orderObj?.order.orderNo }}
+          </div>
+          <div v-if=" orderObj?.order.description" class="orderId">
+            订单描述: {{ orderObj?.order.description }}
           </div>
           <!-- 点击支付前的按钮 -->
           <div v-if="!codeLink" class="methodBox">
@@ -69,11 +69,9 @@
           </div>
           <view class="payTitleBox">
             <div class="payTitle_top">
-              <!-- <img src="@/assets/images/wechat.png" mode="scaleToFill"> -->
-              <p>手机支付，扫一扫进行付款</p>
-            </div>
-            <div class="payTitle_bottom">
-              <!-- 手机支付，扫一扫进行付款 -->
+              <img src="@/assets/images/alipay.png" mode="scaleToFill">
+              <img src="@/assets/images/wechat.png" mode="scaleToFill">
+              <p>请使用扫一扫进行付款</p>
             </div>
           </view>
         </div>
@@ -118,7 +116,7 @@
             </div>
             <view class="payTitleBox">
               <div class="payTitle_top">
-                <img src="@/assets/images/wechat.png" mode="scaleToFill">
+                <img src="@/assets/images/success1.png" mode="scaleToFill">
                 <p>扫码支付</p>
               </div>
               <div class="payTitle_bottom">
@@ -135,7 +133,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { showConfirmDialog } from 'vant'
 import vueQr from 'vue-qr/src/packages/vue-qr.vue'
 import { getOrderAndConfig, orderStatus, payOrder } from '@/views/daxpay/pc/cashier/Cashier.api'
 import type { CashierConfig, OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
@@ -554,7 +551,7 @@ function queryOrderStatus() {
       .payMethodChildBox {
         width: 100%;
         height: 100%;
-
+        position: relative;
         .topbox {
           width: 100%;
           display: flex;
@@ -597,6 +594,9 @@ function queryOrderStatus() {
           }
         }
         .payClickBtn {
+          position: absolute;
+          right: 0;
+          bottom: 0;
           width: 9.4271vw;
           height: 2.5354vw;
           display: flex;
