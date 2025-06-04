@@ -49,6 +49,7 @@ export interface GatewayOrder {
   description?: string
   /** 金额(元) */
   amount?: number
+  /** 超时时间 */
   expiredTime?: string
 }
 /**

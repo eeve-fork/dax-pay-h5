@@ -37,6 +37,14 @@
               {{ orderAndConfig?.order.bizOrderNo }}
             </div>
           </div>
+          <div v-if="orderAndConfig?.order.description" class="payMessItem">
+            <div class="itemTitle">
+              订单描述
+            </div>
+            <div class="itemContent">
+              {{ orderAndConfig?.order.description }}
+            </div>
+          </div>
           <div class="payMessItem">
             <div class="itemTitle">
               订单结束时间
@@ -280,7 +288,6 @@ function jsapiPay(data: WxJsapiSignResult) {
   height: 100%;
   position: relative;
   display: flex;
-  align-items: center;
 
   .aggBox {
     width: 100%;
@@ -289,7 +296,7 @@ function jsapiPay(data: WxJsapiSignResult) {
     align-items: center;
 
     flex-direction: column;
-    padding-top: 8.25rem;
+    padding-top: 4.25rem;
     .topBox {
       width: 100%;
       display: flex;
@@ -300,9 +307,9 @@ function jsapiPay(data: WxJsapiSignResult) {
         display: flex;
         justify-content: center;
         gap: 0.425rem;
-        font-size: 2.625rem;
+        font-size: 3.25rem;
         .unit {
-          font-size: 1rem;
+          font-size: 2rem;
           transform: scale(1, 0.8);
           display: flex;
           align-items: flex-end;

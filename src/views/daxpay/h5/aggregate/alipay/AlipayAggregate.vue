@@ -37,6 +37,14 @@
               {{ orderAndConfig?.order.bizOrderNo }}
             </div>
           </div>
+          <div v-if="orderAndConfig?.order.description" class="payMessItem">
+            <div class="itemTitle">
+              订单描述
+            </div>
+            <div class="itemContent">
+              {{ orderAndConfig?.order.description }}
+            </div>
+          </div>
           <div class="payMessItem">
             <div class="itemTitle">
               订单结束时间
@@ -153,11 +161,10 @@ function pay() {
       aggregateType: AggregateEnum.ALI,
     } as AggregatePayParam
     aggregatePay(from).then(({ data, code, msg }) => {
-      if (code !== 0) {
+      if (code) {
         router.replace({ name: 'payFail', query: { msg } })
         return
       }
-      loading.value = false
       location.replace(data.payBody as any)
     })
   }
@@ -198,9 +205,9 @@ onUnmounted(() => {
         display: flex;
         justify-content: center;
         gap: 0.425rem;
-        font-size: 2.625rem;
+        font-size: 3.25rem;
         .unit {
-          font-size: 1rem;
+          font-size: 2rem;
           transform: scale(1, 0.8);
           display: flex;
           align-items: flex-end;
