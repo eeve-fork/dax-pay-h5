@@ -98,6 +98,14 @@ export const DaxPayH5Route: RouteRecordRaw = {
         title: '支付失败页面',
       },
     },
+    {
+      path: '/onboarded/leshua',
+      name: 'leshua',
+      component: () => import('@/views/daxpay/h5/onboarded/leshua/index.vue'),
+      meta: {
+        title: '乐刷进件',
+      },
+    },
   ],
 }
 /**

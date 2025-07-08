@@ -26,8 +26,8 @@
   "dependencies": {
     "@types/lodash-es": "^4.17.12",
     "@unocss/reset": "^0.58.9",
+    "@vant/area-data": "^2.0.0",
     "@vueuse/core": "^10.11.1",
-    "vue-qr": "^4.0.9",
     "axios": "^1.7.9",
     "date-fns": "^3.6.0",
     "lodash-es": "^4.17.21",
@@ -37,6 +37,7 @@
     "qs": "^6.13.1",
     "vant": "^4.9.10",
     "vue": "^3.5.13",
+    "vue-qr": "^4.0.9",
     "vue-router": "4.2.5"
   },
   "devDependencies": {
