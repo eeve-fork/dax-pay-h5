@@ -1,15 +1,20 @@
-<!-- eslint-disable vue/valid-attribute-name -->
-<!-- eslint-disable format/prettier -->
 <template>
   <div class="leshuaOnBoarded">
     <!-- 步骤页 -->
+    <van-overlay v-show="loading" :show="true">
+      <div class="loading-wrapper" @click.stop>
+        <van-loading size="24px">
+          获取中...
+        </van-loading>
+      </div>
+    </van-overlay>
     <div class="stepsBox">
       <span class="current">{{ currentObj.currentIndex }} </span>/{{ currentObj.date.length }}
       <span class="stepName"> {{ currentObj.currentTitle }}</span>
       <!-- 经营信息 结算账户 -->
     </div>
     <div class="formBox">
-      <van-form ref="formRef" @failed="onFailed">
+      <van-form ref="formRef">
         <!-- 第一模块 -->
         <template v-if="currentObj.currentIndex === 1">
           <div class="commonTitle">
@@ -248,13 +253,13 @@
               <template #input>
                 <!-- formData.mchApply.other.mccCodes -->
                 <van-field
-                  v-model="categoryStr"
+                  v-model="mccStr"
                   is-link
                   readonly
                   name="mccCodes"
                   placeholder="请选择经营类目"
                   :rules="rulesTwo.mccCodes"
-                  @click="cascaderObj.openCategotyBtn"
+                  @click="cascaderObj.openMccBtn"
                 />
               </template>
             </van-field>
@@ -367,8 +372,8 @@
           提交
         </van-button>
       </div>
-      <div class="btnBox">
-        <van-button type="primary" plain block @click="saveClick">
+      <div class="btnBox" style="margin-bottom: 20px">
+        <van-button type="primary" plain block @click="saveTemp">
           暂存
         </van-button>
       </div>
@@ -391,7 +396,7 @@
       <van-cascader
         v-if="cascaderObj.status === 'area'"
         v-model="cascaderObj.areaValue"
-        title="请选择"
+        title="请选择经营场所所在区县"
         :field-names="cascaderObj.fieldNames"
         :options="cascaderObj.areaOptions"
         @close="cascaderObj.closeDialog"
@@ -399,11 +404,11 @@
       />
       <!-- 类目 -->
       <van-cascader
-        v-if="cascaderObj.status === 'category'"
-        v-model="cascaderObj.cateoryValue"
-        title="请选择"
+        v-if="cascaderObj.status === 'mcc'"
+        v-model="cascaderObj.mccValue"
+        title="请选择经营类目"
         :field-names="cascaderObj.fieldNames"
-        :options="cascaderObj.cateoryOptions"
+        :options="cascaderObj.mccOptions"
         @close="cascaderObj.closeDialog"
         @finish="cascaderObj.onFinish"
       />
@@ -411,15 +416,28 @@
   </div>
 </template>
 
-<script setup>
-// import type { MerchantApply } from '../common/onBoarded.api.ts'
-import { useCascaderAreaData } from '@vant/area-data'
+<script setup lang="ts">
 import { showNotify } from 'vant'
-import upLoadView from '../components/upLoadView.vue'
-import { findAllProvinceAndCityAndArea, mccTree } from './leshua.api'
+import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import type { MerchantApply } from './leshua.api'
+import { findById, mccTree, save } from './leshua.api'
+import {
+  findAllProvinceAndCityAndArea,
+  submit,
+} from '@/views/daxpay/h5/onboarded/common/onBoarded.api.ts'
+import upLoadView from '@/components/upLoadView.vue'
+
+const route = useRoute()
+const { id: applyId, token, client } = route.query
+const headers = {
+  'AccessToken': token,
+  'x-client-code': client,
+}
+
 // 控制当前页面数据对象
 const currentObj = reactive({
-  currentIndex: 3, // 当前页面的值
+  currentIndex: 1, // 当前页面的值
   // 数据
   date: [
     {
@@ -436,16 +454,16 @@ const currentObj = reactive({
     },
   ],
   currentTitle: computed(() => {
-    const title = currentObj.date.find(item => item.index === currentObj.currentIndex).title
-    return title
+    return currentObj.date.find(item => item.index === currentObj.currentIndex).title
   }),
 })
+
 // 表单ref对象
-const formRef = ref(null)
+const formRef = ref<any>()
+const loading = ref<boolean>(false)
 
 // 表单数据对象
-// MerchantApply
-const formData = ref({
+const formData = ref<MerchantApply>({
   mchApply: {
     merchant: {},
     legal: {},
@@ -456,7 +474,10 @@ const formData = ref({
     other: {},
   },
 })
-// 格式化树装数据
+
+/**
+ * 格式化树装数据
+ */
 function formatDate(data) {
   if (!Array.isArray(data)) {
     return []
@@ -471,8 +492,10 @@ function formatDate(data) {
   })
 }
 
-const categoryStr = ref('') // 类目接收字段名
-const areaStr = ref('') // 地区接收字段名
+// 类目接收字段名
+const mccStr = ref('')
+// 地区接收字段名
+const areaStr = ref('')
 // 级联选择框对象
 const cascaderObj = reactive({
   showDialog: false, // 弹窗
@@ -483,12 +506,12 @@ const cascaderObj = reactive({
     children: 'children',
   }, // 自定义名
   areaOptions: [], // 区域数据
-  cateoryOptions: [], // 类目数据
+  mccOptions: [], // 类目数据
   areaValue: '', // 区域选择器的值
-  cateoryValue: '', // 类目选择器的值
-  openCategotyBtn: () => {
+  mccValue: '', // 类目选择器的值
+  openMccBtn: () => {
     // 打开类目弹窗
-    cascaderObj.status = 'category'
+    cascaderObj.status = 'mcc'
     cascaderObj.showDialog = true
   },
   openAreaBtn: () => {
@@ -503,9 +526,11 @@ const cascaderObj = reactive({
   },
   onFinish: (finish) => {
     // 选择完成事件
-    if (cascaderObj.status === 'category') {
-      formData.value.mchApply.other.mccCodes = finish.selectedOptions.map(item => item.code) // 赋值需要传参的数据
-      categoryStr.value = finish.selectedOptions.map(item => item.name).join('/') // 用于表单显示
+    if (cascaderObj.status === 'mcc') {
+      // 赋值需要传参的数据
+      formData.value.mchApply.other.mccCodes = finish.selectedOptions.map(item => item.code)
+      // 用于表单显示
+      mccStr.value = finish.selectedOptions.map(item => item.name).join('/')
     }
     if (cascaderObj.status === 'area') {
       formData.value.mchApply.shop.shopRegionCode = finish.selectedOptions.map(item => item.code) // 赋值需要传参的数据
@@ -514,9 +539,9 @@ const cascaderObj = reactive({
     cascaderObj.showDialog = false
   },
   // 获取类目数据
-  getCateoryData: () => {
+  getMccData: () => {
     mccTree().then(({ data }) => {
-      cascaderObj.cateoryOptions = formatDate(data)
+      cascaderObj.mccOptions = formatDate(data)
     })
   },
   // 获取地区树据
@@ -573,10 +598,10 @@ const rulesOne = reactive({
   // 身份证号码
   certNo: [
     { required: true, message: '请输入身份证号码' },
-    {
-      pattern: /^[1-9]\d{16}[0-9X]$/i,
-      message: '身份证号码格式错误',
-    },
+    // {
+    //   pattern: /^[1-9]\d{16}[0-9X]$/i,
+    //   message: '身份证号码格式错误',
+    // },
   ],
   // 开始时间
   certStartDate: [{ required: true, message: '请选择证件开始时间' }],
@@ -585,10 +610,10 @@ const rulesOne = reactive({
   // 手机号码
   contactPhone: [
     { required: true, message: '请输入手机号' },
-    {
-      pattern: /^1[3-9]\d{9}$/,
-      message: '手机号格式错误',
-    },
+    // {
+    //   pattern: /^1[3-9]\d{9}$/,
+    //   message: '手机号格式错误',
+    // },
   ],
 
   /* 营业执照信息 */
@@ -656,7 +681,36 @@ const rulesThree = reactive({
   ],
 })
 
-// 筛选出验证规则
+/**
+ * 初始化
+ */
+onMounted(async () => {
+  await initData()
+  getInfo()
+})
+
+/**
+ * 初始化数据
+ */
+function initData() {
+  cascaderObj.getMccData() // 获取类目
+  cascaderObj.getAreaDate() // 获取区域名
+}
+
+/**
+ * 获取数据
+ */
+function getInfo() {
+  findById(applyId, headers).then(({ data }) => {
+    formData.value = data
+    cascaderObj.mccValue = data.mchApply?.other?.mccCodes?.[2]
+    cascaderObj.areaValue = data.mchApply?.shop?.shopRegionCode?.[2]
+  })
+}
+
+/**
+ * 筛选出验证规则
+ */
 function getFieldsByStep(index) {
   switch (index) {
     case 1:
@@ -669,11 +723,17 @@ function getFieldsByStep(index) {
       return []
   }
 }
-// 点击上一步
+
+/**
+ * 点击上一步
+ */
 function prevClick() {
   currentObj.currentIndex--
 }
-// 点击下一步进行校验
+
+/**
+ * 点击下一步进行校验
+ */
 function nextClick() {
   const fieldsToValidate = getFieldsByStep(currentObj.currentIndex)
   formRef.value
@@ -682,41 +742,71 @@ function nextClick() {
       // 执行下一步操作
       currentObj.currentIndex++
     })
-    .catch((error) => {
-      console.log(error)
+    .catch(() => {
       showNotify({ type: 'danger', message: '还有必填项未填!请仔细检查' })
     })
 }
-// 提交
+
+function getLabelText(selectedValue, options) {
+  const labels = []
+  let currentLevel = options
+
+  for (let i = 0; i < selectedValue.length; i++) {
+    const val = selectedValue[i]
+    const node = currentLevel.find(item => item.id === val)
+    if (!node) {
+      break
+    }
+    labels.push(node.name)
+    currentLevel = node.children || []
+  }
+
+  return labels.join(' / ')
+}
+
+/**
+ * 提交
+ */
 function submitClick() {
   const fieldsToValidate = getFieldsByStep(currentObj.date.length) // 只验证最后一页
   formRef.value
     .validate(fieldsToValidate)
     .then(() => {
       // 执行下一步操作
-
+      submit(formData.value.applyId, headers).then(({ code, data }) => {
+        if (code !== 0) {
+          showNotify({ type: 'danger', message: data })
+        }
+        loading.value = false
+      })
     })
-    .catch((error) => {
-      console.log(error)
+    .catch(() => {
       showNotify({ type: 'danger', message: '还有必填项未填!请仔细检查' })
     })
 }
-// 暂存
-function saveClick() {
-  console.log('11')
-}
 
-onMounted(() => {
-  formData.value.mchApply.merchant.merchantType = 'micro' // 默认选择小微商户
-  cascaderObj.getCateoryData() // 获取类目
-  cascaderObj.getAreaDate() // 获取区域名
-})
+/**
+ * 暂存
+ */
+function saveTemp() {
+  loading.value = true
+  save(formData.value, headers).then(({ code, data }) => {
+    if (code !== 0) {
+      showNotify({ type: 'danger', message: data })
+    }
+    else {
+      showNotify({ type: 'success', message: '暂存成功' })
+    }
+    loading.value = false
+  })
+}
 </script>
 
 <style lang="less" scoped>
 .leshuaOnBoarded {
   width: 100%;
   height: 100%;
+  padding-bottom: env(safe-area-inset-bottom);
 
   .stepsBox {
     width: 100%;
@@ -773,70 +863,65 @@ onMounted(() => {
     }
   }
 }
-</style>
-
-<style lang="less">
-.leshuaOnBoarded {
-  .van-form {
-    .van-cell-group {
-      &.van-cell-group--inset {
-        margin: 0 !important;
+:deep(.van-form) {
+  .van-cell-group {
+    &.van-cell-group--inset {
+      margin: 0 !important;
+    }
+    .van-cell {
+      .van-cell__title {
+        &.van-field__label--top {
+          margin-bottom: 0.625rem !important;
+        }
       }
-      .van-cell {
-        .van-cell__title {
-          &.van-field__label--top {
-            margin-bottom: 0.625rem !important;
-          }
-        }
-        .van-cell__value {
-          // 单选
-          .van-radio-group {
-            .van-radio {
-              .van-radio__icon {
-                height: 1rem;
+      .van-cell__value {
+        // 单选
+        .van-radio-group {
+          .van-radio {
+            .van-radio__icon {
+              height: 1rem;
+              width: 1rem;
+              font-size: 1.125rem;
+              .van-icon {
                 width: 1rem;
-                font-size: 1.125rem;
-                .van-icon {
-                  width: 1rem;
-                  height: 1rem;
-                  line-height: 1;
-                }
-              }
-              .van-badge__wrapper {
-                &.van-icon {
-                  width: 1rem;
-                  height: 1rem;
-                }
+                height: 1rem;
+                line-height: 1;
               }
             }
-          }
-          .van-field__body {
-            input {
-              border: 0.0625rem solid #f5f5f5;
-              height: 3.125rem;
-              padding-left: 0.625rem;
-              padding-right: 2.5rem;
-            }
-            .van-field__clear {
-              position: absolute;
-              right: 0.625rem;
-            }
-            .van-switch {
-              .van-switch__node {
-                display: flex;
-                justify-content: center;
-                .vSwitch {
-                  font-size: 0.75rem;
-                }
+            .van-badge__wrapper {
+              &.van-icon {
+                width: 1rem;
+                height: 1rem;
               }
             }
           }
         }
-        &.van-cell--clickable {
-          padding: 0rem 0rem !important;
-          display: flex;
-          align-items: center;
+        .van-field__body {
+          input {
+            border: 0.0625rem solid #f5f5f5;
+            height: 3.125rem;
+            padding-left: 0.625rem;
+            padding-right: 2.5rem;
+          }
+          .van-field__clear {
+            position: absolute;
+            right: 0.625rem;
+          }
+          .van-switch {
+            .van-switch__node {
+              display: flex;
+              justify-content: center;
+              .vSwitch {
+                font-size: 0.75rem;
+              }
+            }
+          }
         }
+      }
+      &.van-cell--clickable {
+        padding: 0rem 0rem !important;
+        display: flex;
+        align-items: center;
       }
     }
   }

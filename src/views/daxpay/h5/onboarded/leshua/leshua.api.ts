@@ -1,3 +1,5 @@
+import { http } from '@/utils/http/axios'
+import type { Result } from '#/axios'
 import type {
   OnbBankAccountApply,
   OnbCardHolderApply,
@@ -5,29 +7,41 @@ import type {
   OnbLicenseApply,
   OnbMerchantApply,
   OnbShopApply,
-} from '../common/onBoarded.api'
-import { http } from '@/utils/http/axios'
-import type { Result } from '#/axios'
+} from '@/views/daxpay/h5/onboarded/common/base'
 
 /**
  * 查询
  */
-export function getInfo(id) {
+export function findById(id, headers) {
   return http.request<Result<MerchantApply>>({
     method: 'get',
     url: '/leshua/mch/apply/findById',
     params: { id },
+    headers,
   })
 }
 
 /**
  * 保存
  */
-export function save(param: MerchantApply) {
+export function save(param: MerchantApply, headers) {
   return http.request<Result<void>>({
     method: 'post',
     url: '/leshua/mch/apply/save',
     data: param,
+    headers,
+  })
+}
+
+/**
+ * 提交申请
+ */
+export function submit(id, headers){
+  return http.request<Result<void>>({
+    method: 'post',
+    url: '/leshua/mch/apply/save',
+    data: param,
+    headers,
   })
 }
 
@@ -41,15 +55,6 @@ export function mccTree() {
   })
 }
 
-/**
- * 地区树
- */
-export function findAllProvinceAndCityAndArea() {
-  return http.request<Result<Region[]>>({
-    url: '/china/region/findAllProvinceAndCityAndArea',
-    method: 'get',
-  })
-}
 /**
  * 乐刷商户申请参数
  */
@@ -110,16 +115,4 @@ export interface MccConst {
   parentCode: string
   /** 子类目 */
   children?: MccConst[]
-}
-
-/**
- * 区域
- */
-export interface Region {
-  code: string
-  name: string
-  /** 省市区街道 */
-  level: 1 | 2 | 3 | 4
-  isLeaf?: boolean
-  children: Region[]
 }
