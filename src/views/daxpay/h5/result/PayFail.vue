@@ -43,7 +43,7 @@ function closeClick() {
   padding: 3.5rem 0rem;
   width: 100%;
   height: 100vh;
-  background-color: #fff;
+  background-color: light-dark(#fff, --van-gray-8);
   display: flex;
   flex-direction: column;
   align-items: center;

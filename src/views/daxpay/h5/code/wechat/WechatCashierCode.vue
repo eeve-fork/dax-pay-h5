@@ -73,7 +73,7 @@ import { useRoute } from 'vue-router'
 import { showNotify } from 'vant'
 import type {
   CashierPayParam,
-  GatewayCashierConfig,
+  GatewayCashierCodeConfig,
   WxJsapiSignResult,
 } from '../CashierCode.api'
 
@@ -95,7 +95,7 @@ const { code: authCode } = route.query
 const show = ref<boolean>(false)
 const showRemark = ref<boolean>(false)
 const loading = ref<boolean>(false)
-const cashierInfo = ref<GatewayCashierConfig>({})
+const cashierInfo = ref<GatewayCashierCodeConfig>({})
 const amount = ref<string>('0')
 const description = ref<string>()
 const openId = ref<string>()
