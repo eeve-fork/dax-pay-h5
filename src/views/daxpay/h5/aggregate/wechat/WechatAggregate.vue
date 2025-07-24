@@ -59,6 +59,15 @@
     <div v-show="!isAutoLaunch" class="payBtnBox">
       立即支付
     </div>
+    <!-- loading -->
+    <div v-if="loading" id="loadingMask" class="loadingMask hide">
+      <div class="content">
+        <img class="loadingImg" src="@/assets/images/loading.png" alt="">
+        <div class="loadingTxt">
+          处理中，请耐心等待
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -71,7 +80,12 @@ import type {
   GatewayAuthCodeParam,
   WxJsapiSignResult,
 } from '@/views/daxpay/h5/aggregate/Aggregate.api'
-import { aggregatePay, auth, generateAuthUrl, getAggregateConfig } from '@/views/daxpay/h5/aggregate/Aggregate.api'
+import {
+  aggregatePay,
+  auth,
+  generateAuthUrl,
+  getAggregateConfig,
+} from '@/views/daxpay/h5/aggregate/Aggregate.api'
 
 import { AggregateEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
@@ -147,8 +161,10 @@ onUnmounted(() => {
  * 初始化
  */
 function init() {
+  loading.value = true
   // 获取订单和配置信息
   getAggregateConfig(orderNo, 'wechat_pay').then(async ({ data, msg, code }) => {
+    loading.value = false
     if (code !== 0) {
       // 如果异常，跳转异常页面
       router.replace({
@@ -164,22 +180,24 @@ function init() {
         generateAuthUrl({
           orderNo: orderNo as string,
           aggregateType: AggregateEnum.WECHAT,
-        }).then((res) => {
-          if (res.code !== 0) {
-            // 如果异常，跳转异常页面
+        })
+          .then((res) => {
+            if (res.code !== 0) {
+              // 如果异常，跳转异常页面
+              router.replace({
+                name: 'payFail',
+                query: { msg },
+              })
+              return
+            }
+            location.replace(res.data)
+          })
+          .catch((res) => {
             router.replace({
               name: 'payFail',
-              query: { msg },
+              query: { msg: res.message },
             })
-            return
-          }
-          location.replace(res.data)
-        }).catch((res) => {
-          router.replace({
-            name: 'payFail',
-            query: { msg: res.message },
           })
-        })
         return
       }
       else {
@@ -210,15 +228,17 @@ function init() {
  */
 async function wxAuth() {
   // 认证获取OpenId
-  await auth(authParam.value).then(({ data, code, msg }) => {
-    if (code) {
-      router.replace({ name: 'payFail', query: { msg }, replace: true })
-      return
-    }
-    openId.value = data.openId as string
-  }).catch((res) => {
-    router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
-  })
+  await auth(authParam.value)
+    .then(({ data, code, msg }) => {
+      if (code) {
+        router.replace({ name: 'payFail', query: { msg }, replace: true })
+        return
+      }
+      openId.value = data.openId as string
+    })
+    .catch((res) => {
+      router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
+    })
 }
 
 /**
@@ -232,21 +252,21 @@ function pay() {
       aggregateType: AggregateEnum.WECHAT,
       openId: openId.value,
     } as AggregatePayParam
-    aggregatePay(from)
-      .then(({ data, code, msg }) => {
-        if (code) {
-          router.replace({ name: 'payFail', query: { msg }, replace: true })
-          return
-        }
-        // 根据类型拉起对应的支付。 支持跳转和jsapi
-        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
-          const json = JSON.parse(data.payBody)
-          jsapiPay(json)
-        }
-        if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
-          location.replace(data.payBody as any)
-        }
-      })
+    aggregatePay(from).then(({ data, code, msg }) => {
+      loading.value = false
+      if (code) {
+        router.replace({ name: 'payFail', query: { msg }, replace: true })
+        return
+      }
+      // 根据类型拉起对应的支付。 支持跳转和jsapi
+      if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
+        const json = JSON.parse(data.payBody)
+        jsapiPay(json)
+      }
+      if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
+        location.replace(data.payBody as any)
+      }
+    })
   }
 }
 
@@ -382,6 +402,68 @@ function jsapiPay(data: WxJsapiSignResult) {
     transform: translateX(-50%);
     text-align: center;
     line-height: 3.25rem;
+  }
+  /* loading */
+  .loadingMask {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    border-radius: 0 0 0.2rem 0.2rem;
+
+    .content {
+      position: absolute;
+      width: 15rem;
+      border-radius: 0.2rem;
+      // box-shadow:
+      //   0px 12px 48px 16px rgba(0, 0, 0, 0.03),
+      //   0px 9px 28px 0px rgba(0, 0, 0, 0.05),
+      //   0px 6px 16px -8px rgba(0, 0, 0, 0.08);
+      display: flex;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .loadingImg {
+      width: 1.6rem;
+      height: 1.6rem;
+      margin-top: 2rem;
+      animation: 1.6s linear ratate infinite;
+    }
+
+    .loadingTxt {
+      font-size: 1.125rem;
+      color: #22242e;
+      margin-top: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    @keyframes ratate {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      40% {
+        transform: rotate(144deg);
+      }
+
+      80% {
+        transform: rotate(288deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   }
 }
 </style>

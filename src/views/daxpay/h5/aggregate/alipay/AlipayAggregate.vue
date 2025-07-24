@@ -59,6 +59,15 @@
     <div v-show="!isAutoLaunch" class="payBtnBox">
       立即支付
     </div>
+    <!-- loading -->
+    <div v-if="loading" id="loadingMask" class="loadingMask hide">
+      <div class="content">
+        <img class="loadingImg" src="@/assets/images/loading.png" alt="">
+        <div class="loadingTxt">
+          处理中，请耐心等待
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -127,8 +136,10 @@ watch(
  * 初始化
  */
 function init() {
+  loading.value = true
   // 获取订单和配置信息
   getAggregateConfig(orderNo, 'alipay').then(async ({ data, code, msg }) => {
+    loading.value = false
     if (code) {
       router.replace({ name: 'payFail', query: { msg } })
       return
@@ -161,6 +172,7 @@ function pay() {
       aggregateType: AggregateEnum.ALI,
     } as AggregatePayParam
     aggregatePay(from).then(({ data, code, msg }) => {
+      loading.value = false
       if (code) {
         router.replace({ name: 'payFail', query: { msg } })
         return
@@ -280,6 +292,69 @@ onUnmounted(() => {
     transform: translateX(-50%);
     text-align: center;
     line-height: 3.25rem;
+  }
+
+  /* loading */
+  .loadingMask {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+    border-radius: 0 0 0.2rem 0.2rem;
+
+    .content {
+      position: absolute;
+      width: 15rem;
+      border-radius: 0.2rem;
+      // box-shadow:
+      //   0px 12px 48px 16px rgba(0, 0, 0, 0.03),
+      //   0px 9px 28px 0px rgba(0, 0, 0, 0.05),
+      //   0px 6px 16px -8px rgba(0, 0, 0, 0.08);
+      display: flex;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .loadingImg {
+      width: 1.6rem;
+      height: 1.6rem;
+      margin-top: 2rem;
+      animation: 1.6s linear ratate infinite;
+    }
+
+    .loadingTxt {
+      font-size: 1.125rem;
+      color: #22242e;
+      margin-top: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    @keyframes ratate {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      40% {
+        transform: rotate(144deg);
+      }
+
+      80% {
+        transform: rotate(288deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   }
 }
 </style>
