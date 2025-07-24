@@ -56,6 +56,7 @@
       />
     </van-dialog>
     <van-number-keyboard
+      v-if="cashierInfo.amountType === 'random'"
       :show="!loading"
       theme="custom"
       extra-key="."
@@ -82,7 +83,7 @@ const { code } = route.params
 
 const showRemark = ref<boolean>(false) // 是否展示备注
 const loading = ref<boolean>(false) // 加载状态
-const cashierInfo = ref<GatewayCashierCodeConfig>()
+const cashierInfo = ref<GatewayCashierCodeConfig>({})
 const amount = ref<string>('0') // 金额
 const description = ref<string>()
 
@@ -104,8 +105,19 @@ function initData() {
         router.replace({ name: 'payFail', query: { msg: res.msg } })
         return
       }
-      loading.value = false
       cashierInfo.value = res.data as any
+      // 是否启用
+      if (!cashierInfo.value?.enable) {
+        router.replace({ name: 'payFail', query: { msg: '收银码牌未启用' } })
+      }
+      // 判断类型
+      if (cashierInfo.value?.amountType === 'fixed') {
+        amount.value = res.data.amount as string
+      }
+      else {
+
+      }
+      loading.value = false
     })
     .catch((res) => {
       router.replace({ name: 'payFail', query: { msg: res.message } })

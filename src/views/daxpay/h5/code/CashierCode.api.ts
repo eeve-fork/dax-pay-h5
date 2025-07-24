@@ -100,6 +100,8 @@ export interface WxJsapiSignResult {
 export interface GatewayCashierCodeConfig {
   // 码牌名称
   name?: string
+  // 是否启用
+  enable?: boolean
   // 金额类型
   amountType?: string
   // 金额
@@ -108,7 +110,7 @@ export interface GatewayCashierCodeConfig {
   channel?: string
   // 支付调起方式
   callType?: string
-  // 判断是否需要
+  // 判断是否需要获取openId
   needOpenId?: boolean
   // 备注
   remark?: string

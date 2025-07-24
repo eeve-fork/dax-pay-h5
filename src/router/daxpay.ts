@@ -99,7 +99,7 @@ export const DaxPayH5Route: RouteRecordRaw = {
       },
     },
     {
-      path: '/onboarded/leshua',
+      path: '/onboarded/leshua_pay',
       name: 'leshua',
       component: () => import('@/views/daxpay/h5/onboarded/leshua/index.vue'),
       meta: {
