@@ -122,8 +122,8 @@ export interface GatewayCashierCodeConfig {
 export interface CashierCodeAuthParam {
   // 收银码牌编码
   cashierCode?: string
-  // 收银台类型
-  scene?: string
+  // 支付场景
+  cashierScene?: string
   // 授权码
   authCode: string
 }

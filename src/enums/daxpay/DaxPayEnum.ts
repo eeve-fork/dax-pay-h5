@@ -54,11 +54,11 @@ export enum GatewayCallTypeEnum {
 /**
  * 码牌类型
  */
-export enum CashierCodeTypeEnum {
-  // 微信码牌
+export enum CashierSceneEnum {
+  // 微信支付
   WECHAT_PAY = 'wechat_pay',
-  // 支付宝码牌
+  // 支付宝支付
   ALIPAY = 'alipay',
-  // 云闪付码牌
+  // 云闪付支付
   UNION_PAY = 'union_pay',
 }

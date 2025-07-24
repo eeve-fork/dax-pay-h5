@@ -84,7 +84,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { showNotify } from 'vant'
 import type { CashierPayParam, GatewayCashierCodeConfig } from '../CashierCode.api'
 import { cashierPay, getCashierCodeConfig } from '../CashierCode.api'
-import { AggregateEnum, CashierCodeTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum, CashierSceneEnum } from '@/enums/daxpay/DaxPayEnum'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
 const route = useRoute()
@@ -109,7 +109,7 @@ onMounted(() => {
 function initData() {
   // 获取信息
   loading.value = true
-  getCashierCodeConfig(code, CashierCodeTypeEnum.ALIPAY)
+  getCashierCodeConfig(code, CashierSceneEnum.ALIPAY)
     .then((res) => {
       if (res.code) {
         router.replace({ name: 'payFail', query: { msg: res.msg } })

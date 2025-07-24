@@ -90,7 +90,7 @@ import type {
 
 import { auth, cashierPay, generateAuthUrl, getCashierCodeConfig } from '../CashierCode.api'
 
-import { AggregateEnum, CashierCodeTypeEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum, CashierSceneEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
@@ -138,7 +138,7 @@ async function init() {
         // 如果不是重定向跳转过来， 跳转到到重定向地址
         if (!authCode) {
           // 重定向跳转到微信授权地址
-          generateAuthUrl(cashierCode, CashierCodeTypeEnum.WECHAT_PAY)
+          generateAuthUrl(cashierCode, CashierSceneEnum.WECHAT_PAY)
             .then((res) => {
               if (res.code) {
                 router.replace({ name: 'payFail', query: { msg: res.msg } })
@@ -155,7 +155,7 @@ async function init() {
           // 认证获取OpenId
           auth({
             cashierCode: cashierCode as string,
-            cashierType: CashierCodeTypeEnum.WECHAT_PAY,
+            cashierScene: CashierSceneEnum.WECHAT_PAY,
             authCode: authCode as string,
           })
             .then((res) => {
@@ -195,7 +195,7 @@ function pay() {
     amount: amountValue,
     cashierCode,
     openId: openId.value,
-    cashierType: CashierCodeTypeEnum.WECHAT_PAY,
+    cashierType: CashierSceneEnum.WECHAT_PAY,
     description: description.value,
   } as CashierPayParam
   cashierPay(from).then((res) => {
