@@ -20,7 +20,12 @@
           添加备注
         </div>
         <div v-else style="max-width: 75vw">
-          <van-text-ellipsis :content="`备注: ${description}`" />
+          <p style="text-align: center;">
+            备注：
+          </p>
+          <p class="remarkDecript">
+            {{ description }}
+          </p>
           <div />
         </div>
       </div>
@@ -293,6 +298,12 @@ function jsapiPay(data: WxJsapiSignResult) {
     .remark {
       color: @color;
       cursor: pointer;
+      .remarkDecript {
+        max-width: 75vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
   .redirectPayBtn {
