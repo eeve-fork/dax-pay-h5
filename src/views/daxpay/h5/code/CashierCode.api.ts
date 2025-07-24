@@ -5,22 +5,22 @@ import type { AuthResult } from '@/views/daxpay/h5/auth/ChannelAuth.api'
 /**
  * 获取码牌配置
  */
-export function getCashierCodeConfig(cashierCode, cashierType) {
-  return http.request<Result<GatewayCashierConfig>>({
+export function getCashierCodeConfig(cashierCode, scene) {
+  return http.request<Result<GatewayCashierCodeConfig>>({
     url: '/unipay/gateway/cashier/getCodeConfig',
     method: 'GET',
-    params: { cashierCode, cashierType },
+    params: { cashierCode, scene },
   })
 }
 
 /**
  * 获取码牌收银台所需授权链接, 用于获取OpenId一类的信息
  */
-export function generateAuthUrl(cashierCode, cashierType) {
+export function generateAuthUrl(cashierCode, scene) {
   return http.request<Result<string>>({
     url: '/unipay/gateway/cashier/code/generateAuthUrl',
     method: 'POST',
-    data: { cashierCode, cashierType },
+    data: { cashierCode, scene },
   })
 }
 
@@ -53,7 +53,7 @@ export interface CashierPayParam {
   // 收银码牌编码
   cashierCode?: string
   // 收银台类型
-  cashierType?: string
+  scene?: string
   // 支付金额
   amount?: number
   // 唯一标识
@@ -95,11 +95,17 @@ export interface WxJsapiSignResult {
 }
 
 /**
- * 收银台配置信息
+ * 码牌配置信息
  */
-export interface GatewayCashierConfig {
-  // 商家名称
+export interface GatewayCashierCodeConfig {
+  // 码牌名称
   name?: string
+  // 金额类型
+  amountType?: string
+  // 金额
+  amount?: string
+  // 支付通道
+  channel?: string
   // 支付调起方式
   callType?: string
   // 判断是否需要
@@ -115,7 +121,7 @@ export interface CashierCodeAuthParam {
   // 收银码牌编码
   cashierCode?: string
   // 收银台类型
-  cashierType?: string
+  scene?: string
   // 授权码
   authCode: string
 }

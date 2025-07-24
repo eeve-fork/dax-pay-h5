@@ -71,7 +71,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showNotify } from 'vant'
-import type { CashierPayParam, GatewayCashierConfig } from '../CashierCode.api'
+import type { CashierPayParam, GatewayCashierCodeConfig } from '../CashierCode.api'
 import { cashierPay, getCashierCodeConfig } from '../CashierCode.api'
 import { AggregateEnum, CashierCodeTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
@@ -82,7 +82,7 @@ const { code } = route.params
 
 const showRemark = ref<boolean>(false) // 是否展示备注
 const loading = ref<boolean>(false) // 加载状态
-const cashierInfo = ref<GatewayCashierConfig>()
+const cashierInfo = ref<GatewayCashierCodeConfig>()
 const amount = ref<string>('0') // 金额
 const description = ref<string>()
 
