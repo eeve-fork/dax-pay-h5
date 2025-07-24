@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mpPay">
     <div class="container">
       <div class="payName">
         <span>付款给</span>
@@ -65,6 +65,11 @@
       @input="input"
       @delete="del"
     />
+    <div v-if="cashierInfo.amountType === 'fixed'" class="redirectPayBtn" @click="pay">
+      <van-button type="primary">
+        付款
+      </van-button>
+    </div>
   </div>
 </template>
 
@@ -115,7 +120,7 @@ function initData() {
         amount.value = res.data.amount as string
       }
       else {
-
+        amount.value = '0'
       }
       loading.value = false
     })
@@ -159,58 +164,73 @@ function pay() {
   background: @color;
 }
 
-.container {
-  background: linear-gradient(to bottom, #1e90ff, #1e90ff, #ffffff); // 从蓝色渐变到白色
-  width: 100%;
-  padding: 40px;
-  height: 40%;
-  border-radius: 10px;
-  text-align: center;
-  color: white;
+.mpPay {
+  position: relative;
+  .container {
+    background: linear-gradient(to bottom, #1e90ff, #1e90ff, #ffffff); // 从蓝色渐变到白色
+    width: 100%;
+    padding: 40px;
+    height: 40%;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
 
-  .payName {
-    margin: 5px 0;
-    font-size: 16px;
+    .payName {
+      margin: 5px 0;
+      font-size: 16px;
 
-    .paytext {
-      font-size: 20px;
-      margin-left: 5px;
-      font-weight: 600;
+      .paytext {
+        font-size: 20px;
+        margin-left: 5px;
+        font-weight: 600;
+      }
+    }
+
+    .amount-display {
+      background-color: white;
+      color: @color;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 1.875rem;
+      align-items: center;
+
+      p {
+        font-size: 32px;
+      }
+
+      .title {
+        font-size: 20px;
+      }
     }
   }
 
-  .amount-display {
-    background-color: white;
-    color: @color;
-    border-radius: 20px;
-    padding: 20px;
-    margin: 20px 0;
+  .notes {
+    width: 100%;
+    height: 10%;
     display: flex;
-    gap: 1.875rem;
+    justify-content: center;
     align-items: center;
 
-    p {
-      font-size: 32px;
+    .remark {
+      color: @color;
+      cursor: pointer;
     }
-
-    .title {
-      font-size: 20px;
+  }
+  .redirectPayBtn {
+    width: 100%;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 3.125rem;
+    display: flex;
+    justify-content: center;
+    .van-button {
+      width: 90%;
     }
   }
 }
 
-.notes {
-  width: 100%;
-  height: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  .remark {
-    color: @color;
-    cursor: pointer;
-  }
-}
 /* loading */
 .loadingMask {
   position: fixed;

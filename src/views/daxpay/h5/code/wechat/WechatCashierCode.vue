@@ -1,5 +1,5 @@
 <template>
-  <div v-if="show">
+  <div v-if="show" class="wchatMpPay">
     <div class="container">
       <div class="payName">
         <span>付款给</span>
@@ -56,6 +56,7 @@
       />
     </van-dialog>
     <van-number-keyboard
+      v-if="cashierInfo.amountType === 'random'"
       :show="!loading"
       theme="custom"
       extra-key="."
@@ -64,6 +65,11 @@
       @input="input"
       @delete="del"
     />
+    <div v-if="cashierInfo.amountType === 'fixed'" class="redirectPayBtn" @click="pay">
+      <van-button type="success">
+        付款
+      </van-button>
+    </div>
   </div>
 </template>
 
@@ -77,12 +83,7 @@ import type {
   WxJsapiSignResult,
 } from '../CashierCode.api'
 
-import {
-  auth,
-  cashierPay,
-  generateAuthUrl,
-  getCashierCodeConfig,
-} from '../CashierCode.api'
+import { auth, cashierPay, generateAuthUrl, getCashierCodeConfig } from '../CashierCode.api'
 
 import { AggregateEnum, CashierCodeTypeEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
@@ -120,25 +121,38 @@ async function init() {
       loading.value = false
       const data = res.data
       cashierInfo.value = data as any
+      // 判断类型
+      if (cashierInfo.value?.amountType === 'fixed') {
+        amount.value = data.amount as string
+      }
+      else {
+        amount.value = '0'
+      }
       // 判断是否需要获取OpenId
       if (data.needOpenId) {
         // 如果不是重定向跳转过来， 跳转到到重定向地址
         if (!authCode) {
           // 重定向跳转到微信授权地址
-          generateAuthUrl(cashierCode, CashierCodeTypeEnum.WECHAT_PAY).then((res) => {
-            if (res.code) {
-              router.replace({ name: 'payFail', query: { msg: res.msg } })
-              return
-            }
-            const url = res.data
-            location.replace(url)
-          }).catch((res) => {
-            router.replace({ name: 'payFail', query: { msg: res.message } })
-          })
+          generateAuthUrl(cashierCode, CashierCodeTypeEnum.WECHAT_PAY)
+            .then((res) => {
+              if (res.code) {
+                router.replace({ name: 'payFail', query: { msg: res.msg } })
+                return
+              }
+              const url = res.data
+              location.replace(url)
+            })
+            .catch((res) => {
+              router.replace({ name: 'payFail', query: { msg: res.message } })
+            })
         }
         else {
           // 认证获取OpenId
-          auth({ cashierCode: cashierCode as string, cashierType: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string })
+          auth({
+            cashierCode: cashierCode as string,
+            cashierType: CashierCodeTypeEnum.WECHAT_PAY,
+            authCode: authCode as string,
+          })
             .then((res) => {
               if (res.code) {
                 router.replace({ name: 'payFail', query: { msg: res.msg } })
@@ -146,7 +160,8 @@ async function init() {
               }
               openId.value = res.data.openId as string
               show.value = true
-            }).catch((res) => {
+            })
+            .catch((res) => {
               router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
             })
         }
@@ -178,22 +193,21 @@ function pay() {
     cashierType: CashierCodeTypeEnum.WECHAT_PAY,
     description: description.value,
   } as CashierPayParam
-  cashierPay(from)
-    .then((res) => {
-      if (res.code) {
-        router.replace({ name: 'payFail', query: { msg: res.msg } })
-        return
-      }
-      loading.value = false
-      // 根据类型拉起对应的支付。 支持跳转和jsapi
-      if (cashierInfo.value?.callType === GatewayCallTypeEnum.jsapi) {
-        const json = JSON.parse(res.data.payBody)
-        jsapiPay(json)
-      }
-      if (cashierInfo.value?.callType === GatewayCallTypeEnum.link) {
-        location.replace(res.data.payBody as any)
-      }
-    })
+  cashierPay(from).then((res) => {
+    if (res.code) {
+      router.replace({ name: 'payFail', query: { msg: res.msg } })
+      return
+    }
+    loading.value = false
+    // 根据类型拉起对应的支付。 支持跳转和jsapi
+    if (cashierInfo.value?.callType === GatewayCallTypeEnum.jsapi) {
+      const json = JSON.parse(res.data.payBody)
+      jsapiPay(json)
+    }
+    if (cashierInfo.value?.callType === GatewayCallTypeEnum.link) {
+      location.replace(res.data.payBody as any)
+    }
+  })
 }
 
 /**
@@ -227,56 +241,70 @@ function jsapiPay(data: WxJsapiSignResult) {
 :deep(.van-key--blue) {
   background: @color;
 }
-.container {
-  background: linear-gradient(to bottom, #07c160, #07c160, #ffffff); // 从蓝色渐变到白色
-  width: 100%;
-  padding: 40px;
-  height: 40%;
-  border-radius: 10px;
-  text-align: center;
-  color: white;
+.wchatMpPay {
+  position: relative;
+  .container {
+    background: linear-gradient(to bottom, #07c160, #07c160, #ffffff); // 从蓝色渐变到白色
+    width: 100%;
+    padding: 40px;
+    height: 40%;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
 
-  .payName {
-    margin: 5px 0;
-    font-size: 16px;
+    .payName {
+      margin: 5px 0;
+      font-size: 16px;
 
-    .paytext {
-      font-size: 20px;
-      margin-left: 5px;
-      font-weight: 600;
+      .paytext {
+        font-size: 20px;
+        margin-left: 5px;
+        font-weight: 600;
+      }
+    }
+
+    .amount-display {
+      background-color: white;
+      color: @color;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 1.875rem;
+      align-items: center;
+
+      p {
+        font-size: 32px;
+      }
+
+      .title {
+        font-size: 20px;
+      }
     }
   }
 
-  .amount-display {
-    background-color: white;
-    color: @color;
-    border-radius: 20px;
-    padding: 20px;
-    margin: 20px 0;
+  .notes {
+    width: 100%;
+    height: 10%;
     display: flex;
-    gap: 1.875rem;
+    justify-content: center;
     align-items: center;
 
-    p {
-      font-size: 32px;
-    }
-
-    .title {
-      font-size: 20px;
+    .remark {
+      color: @color;
+      cursor: pointer;
     }
   }
-}
-
-.notes {
-  width: 100%;
-  height: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  .remark {
-    color: @color;
-    cursor: pointer;
+  .redirectPayBtn {
+    width: 100%;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 3.125rem;
+    display: flex;
+    justify-content: center;
+    .van-button {
+      width: 90%;
+    }
   }
 }
 
