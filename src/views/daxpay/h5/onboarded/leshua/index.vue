@@ -4,28 +4,27 @@
     <van-overlay v-show="loading" :show="true">
       <div class="loading-wrapper" @click.stop>
         <van-loading size="24px">
-          获取中...
+          操作中...
         </van-loading>
       </div>
     </van-overlay>
     <div class="stepsBox">
-      <span class="current">{{ currentObj.currentIndex }} </span>/{{ currentObj.date.length }}
-      <span class="stepName"> {{ currentObj.currentTitle }}</span>
-      <!-- 经营信息 结算账户 -->
+      <span class="current">{{ currentPage.currentIndex }} </span>/{{ currentPage.date.length }}
+      <span class="stepName"> {{ currentPage.currentTitle }}</span>
     </div>
     <div class="formBox">
-      <van-form ref="formRef">
+      <van-form ref="formRef" required colon>
         <!-- 第一模块 -->
-        <template v-if="currentObj.currentIndex === 1">
+        <template v-if="currentPage.currentIndex === 1">
           <div class="commonTitle">
             联系人信息
           </div>
           <van-cell-group inset>
             <!-- 商户类型 -->
-            <van-field name="merchantType" label="商户类型：" label-align="top" required>
+            <van-field name="merchantType" label="商户类型" label-align="top">
               <template #input>
                 <van-radio-group
-                  v-model="formData.mchApply.merchant.merchantType"
+                  v-model="form.mchApply.merchant.merchantType"
                   direction="horizontal"
                 >
                   <van-radio name="micro">
@@ -42,333 +41,476 @@
             </van-field>
             <!-- 商户简称 -->
             <van-field
-              v-model="formData.mchApply.merchant.merchantShortName"
+              v-model="form.mchApply.merchant.merchantShortName"
               label-align="top"
               name="merchantShortName"
               placeholder="请输入"
-              label="商户简称："
-              required
+              label="商户简称"
               clearable
-              :rules="rulesOne.merchantShortName"
+              :rules="[{ required: true, message: '请输入商户简称' }]"
             />
           </van-cell-group>
           <div class="commonTitle">
             法人信息
           </div>
           <van-cell-group inset>
-            <!-- 身份证正面： -->
-            <van-field name="checkboxGroup" label="身份证正面：" label-align="top" required>
+            <!-- 身份证正面 -->
+            <van-field
+              name="certFrontPicUrl"
+              label="身份证正面"
+              label-align="top"
+              :rules="[{ required: true, message: '请上传身份证正面图片' }]"
+            >
               <template #input>
-                <upLoadView />
+                <div class="readOcr">
+                  <BUpload
+                    v-model:pic-url="form.mchApply.legal.certFrontPicUrl"
+                    v-model:pic-id="form.mchApply.legal.certFrontPic"
+                    :web-header="headers"
+                  />
+                  <van-button
+                    v-if="form.mchApply.legal.certFrontPicUrl"
+                    class="readOcrBtn"
+                    hairline
+                    plain
+                    size="small"
+                    @click="ocrIdCardFront"
+                  >
+                    OCR识别
+                  </van-button>
+                </div>
               </template>
             </van-field>
-            <!-- 身份证反面： -->
-            <van-field name="checkboxGroup" label="身份证反面：" label-align="top" required>
+            <!-- 身份证反面 -->
+            <van-field
+              name="certBackPic"
+              label="身份证反面"
+              label-align="top"
+              :rules="[{ required: true, message: '请上传身份证反面图片' }]"
+            >
               <template #input>
-                <upLoadView />
+                <div class="readOcr">
+                  <BUpload
+                    v-model:pic-url="form.mchApply.legal.certBackPicUrl"
+                    v-model:pic-id="form.mchApply.legal.certBackPic"
+                    :web-header="headers"
+                  /><van-button
+                    v-if="form.mchApply.legal.certBackPicUrl"
+                    class="readOcrBtn"
+                    hairline
+                    plain
+                    size="small"
+                    @click="ocrIdCardBack"
+                  >
+                    OCR识别
+                  </van-button>
+                </div>
               </template>
             </van-field>
             <!-- 身份证姓名 -->
             <van-field
-              v-model="formData.mchApply.legal.legalName"
+              v-model="form.mchApply.legal.legalName"
               label-align="top"
               name="legalName"
               placeholder="请输入"
-              label="身份证姓名："
-              required
+              label="身份证姓名"
               clearable
-              :rules="rulesOne.legalName"
+              :rules="[{ required: true, message: '请输入身份证姓名' }]"
             />
             <!-- 身份证号码 -->
             <van-field
-              v-model="formData.mchApply.legal.certNo"
+              v-model="form.mchApply.legal.certNo"
               label-align="top"
               name="certNo"
               placeholder="请输入"
-              label="身份证号码："
-              required
+              label="身份证号码"
               clearable
-              :rules="rulesOne.certNo"
+              :rules="[{ required: true, message: '请输入身份证号码' }]"
             />
-            <!-- 身份证有效期： -->
-            <van-field label="身份证有效期：" label-align="top">
+            <!-- 身份证有效期 -->
+            <van-field label="长期有效" label-align="top">
               <template #input>
-                <van-switch v-model="formData.mchApply.legal.certPeriodLong">
-                  <template #node>
-                    <div class="vSwitch">
-                      {{ formData.mchApply.legal.certPeriodLong ? "长期" : "" }}
-                    </div>
-                  </template>
-                </van-switch>
+                <van-switch v-model="form.mchApply.legal.certPeriodLong" />
               </template>
             </van-field>
             <!-- 证件有效期开始日期 -->
-            <van-field
-              v-model="formData.mchApply.legal.certStartDate"
+            <BDatePicker
+              v-model="form.mchApply.legal.certStartDate"
               name="certStartDate"
-              label="证件有效期开始日期："
-              label-align="top"
-              readonly
-              placeholder="请选择"
-              required
-              :clearable="true"
-              :rules="rulesOne.certStartDate"
-              @click="datePickerObj.openPickObj('certStartDate')"
+              label="证件开始日期"
+              placeholder="请选择证件有效期开始日期"
+              :rules="[{ required: true, message: '请选择证件开始时间' }]"
             />
             <!-- 证件有效期结束日期 -->
-            <van-field
-              v-if="!formData.mchApply.legal.certPeriodLong"
-              v-model="formData.mchApply.legal.certEndDate"
-              readonly
+            <BDatePicker
+              v-if="!form.mchApply.legal.certPeriodLong"
+              v-model="form.mchApply.legal.certEndDate"
               name="certEndDate"
-              label="证件有效期结束日期："
-              placeholder="请选择"
-              label-align="top"
-              required
-              clearable
-              :rules="rulesOne.certEndDate"
-              @click="datePickerObj.openPickObj('certEndDate')"
+              label="证件有效期结束日期"
+              placeholder="请选择证件结束时间"
+              :rules="[{ required: true, message: '请选择证件结束时间' }]"
             />
-
             <!-- 联系人手机号 -->
             <van-field
-              v-model="formData.mchApply.other.contactPhone"
+              v-model="form.mchApply.other.contactPhone"
               label-align="top"
               name="contactPhone"
               placeholder="请输入"
-              label="联系人手机号："
-              required
+              label="联系人手机号"
               clearable
-              :rules="rulesOne.contactPhone"
+              :rules="[{ required: true, message: '请输入手机号' }]"
             />
           </van-cell-group>
           <template
-            v-if="['individual', 'enterprise'].includes(formData.mchApply.merchant.merchantType)"
+            v-if="['individual', 'enterprise'].includes(form.mchApply.merchant.merchantType as string)"
           >
             <div class="commonTitle">
               营业执照信息
             </div>
             <van-cell-group inset>
-              <!-- 营业执照照片： -->
-              <van-field name="licensePicUrl" label="营业执照照片：" label-align="top" required>
+              <!-- 营业执照照片 -->
+              <van-field name="licensePicUrl" label="营业执照照片" label-align="top">
                 <template #input>
-                  <upLoadView />
+                  <div class="readOcr">
+                    <BUpload
+                      v-model:pic-url="form.mchApply.license.licensePicUrl"
+                      v-model:pic-id="form.mchApply.license.licensePic"
+                      :web-header="headers"
+                    />
+                    <van-button
+                      v-if="form.mchApply.license.licensePicUrl"
+                      class="readOcrBtn"
+                      hairline
+                      plain
+                      size="small"
+                      @click="licenseInfoOcr"
+                    >
+                      OCR识别
+                    </van-button>
+                  </div>
                 </template>
               </van-field>
 
               <!-- 营业执照号 -->
               <van-field
-                v-model="formData.mchApply.license.licenseNo"
+                v-model="form.mchApply.license.licenseNo"
                 label-align="top"
                 name="licenseNo"
-                placeholder="请输入"
-                label="营业执照号："
-                required
+                placeholder="请输入营业执照号"
+                label="营业执照号"
                 clearable
-                :rules="rulesOne.licenseNo"
+                :rules="[{ required: true, message: '请输入营业执照号' }]"
               />
               <!-- 营业执照名称 -->
               <van-field
-                v-model="formData.mchApply.license.licenseName"
+                v-model="form.mchApply.license.licenseName"
                 label-align="top"
                 name="licenseName"
-                placeholder="请输入"
-                label="营业执照名称："
-                required
+                placeholder="请输入营业执照名称"
+                label="营业执照名称"
                 clearable
-                :rules="rulesOne.licenseName"
+                :rules="[{ required: true, message: '请输入营业执照名称' }]"
               />
               <!-- 营业执照详细地址 -->
               <van-field
-                v-model="formData.mchApply.license.licenseAddress"
+                v-model="form.mchApply.license.licenseAddress"
                 label-align="top"
                 name="licenseAddress"
-                placeholder="请输入"
-                label="营业执照详细地址："
-                required
+                placeholder="请输入营业执照详细地址"
+                label="营业执照详细地址"
                 clearable
-                :rules="rulesOne.licenseAddress"
+                :rules="[{ required: true, message: '请输入营业执照详细地址' }]"
               />
-              <!-- 注册有效期： -->
-              <van-field label="注册有效期：" label-align="top">
+              <!-- 注册有效期 -->
+              <van-field label="长期有效" label-align="top">
                 <template #input>
-                  <van-switch v-model="formData.mchApply.license.licensePeriodLong">
-                    <template #node>
-                      <div class="vSwitch">
-                        {{ formData.mchApply.license.licensePeriodLong ? "长期" : "" }}
-                      </div>
-                    </template>
-                  </van-switch>
+                  <van-switch v-model="form.mchApply.license.licensePeriodLong" />
                 </template>
               </van-field>
               <!-- 开始日期 -->
-              <van-field
-                v-model="formData.mchApply.license.licenseStartDate"
+              <BDatePicker
+                v-model="form.mchApply.license.licenseStartDate"
                 name="licenseStartDate"
-                label="开始日期："
-                label-align="top"
-                readonly
-                placeholder="请选择"
-                required
-                clearable
-                :rules="rulesOne.licenseStartDate"
-                @click="datePickerObj.openPickObj('licenseStartDate')"
+                label="开始日期"
+                placeholder="请选择注册开始日期"
+                :rules="[{ required: true, message: '请选择注册开始日期' }]"
               />
               <!-- 结束日期 -->
-              <van-field
-                v-if="!formData.mchApply.license.licensePeriodLong"
-                v-model="formData.mchApply.license.licenseEndDate"
-                readonly
+              <BDatePicker
+                v-if="!form.mchApply.license.licensePeriodLong"
+                v-model="form.mchApply.license.licenseEndDate"
                 name="licenseEndDate"
-                label="结束日期："
-                placeholder="请选择"
-                label-align="top"
-                required
-                clearable
-                :rules="rulesOne.licenseEndDate"
-                @click="datePickerObj.openPickObj('licenseEndDate')"
+                label="结束日期"
+                placeholder="请选择注册结束日期"
+                :rules="[{ required: true, message: '请选择注册结束日期' }]"
               />
             </van-cell-group>
           </template>
         </template>
         <!-- 第二模块 -->
-        <template v-if="currentObj.currentIndex === 2">
+        <template v-if="currentPage.currentIndex === 2">
           <div class="commonTitle">
             经营场所信息
           </div>
           <van-cell-group inset>
             <!-- 门店名称 -->
             <van-field
-              v-model="formData.mchApply.shop.shopName"
+              v-model="form.mchApply.shop.shopName"
               label-align="top"
               name="shopName"
               placeholder="请输入"
-              label="门店名称："
-              required
-              :rules="rulesTwo.shopName"
+              label="门店名称"
+              :rules="[{ required: true, message: '请输入门店名称' }]"
               clearable
             />
             <!-- 经营类目 -->
-            <van-field name="mccCodes" label="经营类目：" label-align="top" required>
-              <template #input>
-                <!-- formData.mchApply.other.mccCodes -->
-                <van-field
-                  v-model="mccStr"
-                  is-link
-                  readonly
-                  name="mccCodes"
-                  placeholder="请选择经营类目"
-                  :rules="rulesTwo.mccCodes"
-                  @click="cascaderObj.openMccBtn"
-                />
-              </template>
-            </van-field>
+            <b-cascader
+              v-model="form.mchApply.other.mccCodes"
+              name="mccCodes"
+              label="经营类目"
+              placeholder="请选择经营类目"
+              :rules="[{ required: true, message: '请选择经营类目' }]"
+              :options="mccCodes"
+            />
             <!-- 经营场所所在区县 -->
-            <van-field name="shopRegionCode" label="经营场所所在区县：" label-align="top" required>
-              <template #input>
-                <!-- formData.mchApply.shop.shopRegionCode -->
-                <van-field
-                  v-model="areaStr"
-                  is-link
-                  readonly
-                  name="shopRegionCode"
-                  :rules="rulesTwo.shopRegionCode"
-                  placeholder="请选择所在地区"
-                  @click="cascaderObj.openAreaBtn"
-                />
-              </template>
-            </van-field>
+            <b-cascader
+              v-model="form.mchApply.shop.shopRegionCode"
+              name="shopRegionCode"
+              label="经营场所所在区县"
+              placeholder="请选择所在区县"
+              :rules="[{ required: true, message: '请选择所在区县' }]"
+              :options="pca"
+            />
             <!-- 经营场所详细地址 -->
             <van-field
-              v-model="formData.mchApply.shop.shopAddress"
+              v-model="form.mchApply.shop.shopAddress"
               label-align="top"
               name="shopAddress"
               placeholder="请输入"
-              label="经营场所详细地址："
-              required
-              :rules="rulesTwo.shopAddress"
+              label="经营场所详细地址"
+              :rules="[{ required: true, message: '请输入经营场所详细地址' }]"
               clearable
             />
-            <van-field name="checkboxGroup" label="商户门头图片：" label-align="top" required>
+            <van-field
+              name="checkboxGroup"
+              label="商户门头图片"
+              label-align="top"
+              :rules="[{ required: true, message: '请选择商户门头图片' }]"
+            >
               <template #input>
-                <upLoadView />
+                <BUpload
+                  v-model:pic-url="form.mchApply.shop.shopDoorPicUrl"
+                  v-model:pic-id="form.mchApply.shop.shopDoorPic"
+                  :web-header="headers"
+                />
               </template>
             </van-field>
-            <van-field name="checkboxGroup" label="营业场所室内照片：" label-align="top" required>
+            <van-field
+              name="shopInsidePicUrl"
+              label="营业场所室内照片"
+              label-align="top"
+              :rules="[{ required: true, message: '请选择营业场所室内照片' }]"
+            >
               <template #input>
-                <upLoadView />
+                <BUpload
+                  v-model:pic-url="form.mchApply.shop.shopInsidePicUrl"
+                  v-model:pic-id="form.mchApply.shop.shopInsidePic"
+                  :web-header="headers"
+                />
               </template>
             </van-field>
             <van-field
               name="checkboxGroup"
-              label="营业场所室内照片2："
+              label="营业场所收银台照片"
               label-align="top"
-              required
+              :rules="[{ required: true, message: '请选择营业场所收银台照片' }]"
             >
               <template #input>
-                <upLoadView />
+                <BUpload
+                  v-model:pic-url="form.mchApply.shop.shopCashierPicUrl"
+                  v-model:pic-id="form.mchApply.shop.shopCashierPic"
+                  :web-header="headers"
+                />
               </template>
             </van-field>
           </van-cell-group>
         </template>
         <!-- 第二模块 -->
-        <template v-if="currentObj.currentIndex === 3">
+        <template v-if="currentPage.currentIndex === 3">
           <div class="commonTitle">
             结算卡信息
           </div>
           <van-cell-group inset>
-            <!-- 银行卡正面 -->
-            <van-field name="checkboxGroup" label="银行卡正面：" label-align="top" required>
+            <!-- 商户类型 -->
+            <van-field
+              v-if="form.mchApply.merchant.merchantType !== 'micro'"
+              name="merchantType"
+              label="账户类型"
+              label-align="top"
+              :rules="[{ required: true, message: '请输入结算账户类型' }]"
+            >
               <template #input>
-                <upLoadView />
+                <van-radio-group
+                  v-model="form.mchApply.bankAccount.bankAccountType"
+                  direction="horizontal"
+                >
+                  <van-radio name="company_owner">
+                    公户
+                  </van-radio>
+                  <van-radio name="person_owner">
+                    对私法人
+                  </van-radio>
+                  <van-radio name="person_not_owner">
+                    对私非法人
+                  </van-radio>
+                </van-radio-group>
+              </template>
+            </van-field>
+            <!-- 银行卡正面 -->
+            <van-field
+              name="checkboxGroup" :label="
+                form.mchApply.bankAccount.bankAccountType !== 'company_owner'
+                  ? '银行卡正面'
+                  : '开户许可证'
+              " label-align="top"
+              :rules="[
+                {
+                  required: true,
+                  message: `请上传${
+                    form.mchApply.bankAccount.bankAccountType !== 'company_owner'
+                      ? '银行卡正面'
+                      : '开户许可证'
+                  }图片`,
+                },
+              ]"
+            >
+              <template #input>
+                <div class="readOcr">
+                  <BUpload
+                    v-model:pic-url="form.mchApply.bankAccount.bankCardPicUrl"
+                    v-model:pic-id="form.mchApply.bankAccount.bankCardPic"
+                    :web-header="headers"
+                  />
+                  <van-button
+                    v-if="
+                      form.mchApply.bankAccount.bankCardPicUrl
+                        && form.mchApply.bankAccount.bankAccountType !== 'company_owner'
+                    "
+                    class="readOcrBtn"
+                    hairline
+                    plain
+                    size="small"
+                    @click="licenseInfoOcr"
+                  >
+                    OCR识别
+                  </van-button>
+                </div>
               </template>
             </van-field>
             <!-- 银行卡开户名 -->
             <van-field
-              v-model="formData.mchApply.bankAccount.bankAccountName"
+              v-model="form.mchApply.bankAccount.bankAccountName"
               label-align="top"
               name="bankAccountName"
-              placeholder="请输入"
-              label="银行卡开户名："
-              required
-              :rules="rulesThree.bankAccountName"
+              placeholder="请输入银行卡开户名"
+              label="银行卡开户名"
+              :rules="[{ required: true, message: '请输入银行卡开户名' }]"
               clearable
             />
             <!-- 银行卡号 -->
             <van-field
-              v-model="formData.mchApply.shop.bankCardNo"
+              v-model="form.mchApply.bankAccount.bankCardNo"
               label-align="top"
               name="bankCardNo"
-              placeholder="请输入"
-              label="银行卡号："
-              required
+              placeholder="请输入银行卡号"
+              label="银行卡号"
               clearable
-              :rules="rulesThree.bankCardNo"
+              :rules="[{ required: true, message: '请输入银行卡号' }]"
             />
             <!-- 开户银行联行号 -->
             <van-field
-              v-model="formData.mchApply.bankAccount.bankBranchNo"
+              v-model="form.mchApply.bankAccount.bankBranchNo"
               label-align="top"
               name="bankBranchNo"
-              placeholder="请输入"
-              label="开户银行联行号："
-              required
+              placeholder="请输入开户银行联行号"
+              label="开户银行联行号"
               clearable
-              :rules="rulesThree.bankBranchNo"
+              :rules="[{ required: true, message: '请输入开户银行联行号' }]"
             />
           </van-cell-group>
+          <template
+            v-if="['person_not_owner', 'company_not_owner'].includes(form.mchApply.bankAccount?.bankAccountType as string)"
+          >
+            <div class="commonTitle">
+              持卡人信息
+            </div>
+            <van-cell-group inset>
+              <!-- 持卡人身份证正面图片 -->
+              <van-field
+                name="certFrontPicUrl" label="持卡人身份证正面图片"
+                :rules="[{ required: true, message: '请上传持卡人身份证正面图片' }]"
+                label-align="top"
+              >
+                <template #input>
+                  <BUpload
+                    v-model:pic-url="form.mchApply.cardHolder.certFrontPicUrl"
+                    v-model:pic-id="form.mchApply.cardHolder.certFrontPic"
+                    :web-header="headers"
+                  />
+                </template>
+              </van-field>
+              <!-- 持卡人身份证反面图片 -->
+              <van-field
+                name="certBackPicUrl" label="持卡人身份证反面图片"
+                :rules="[{ required: true, message: '请上传持卡人身份证反面图片' }]"
+                label-align="top"
+              >
+                <template #input>
+                  <BUpload
+                    v-model:pic-url="form.mchApply.cardHolder.certBackPicUrl"
+                    v-model:pic-id="form.mchApply.cardHolder.certBackPic"
+                    :web-header="headers"
+                  />
+                </template>
+              </van-field>
+              <!-- 身份证号码 -->
+              <van-field
+                v-model="form.mchApply.cardHolder.certNo"
+                label-align="top"
+                name="certNo"
+                placeholder="请输入"
+                label="身份证号码"
+                clearable
+                :rules="[{ required: true, message: '请输入身份证号码' }]"
+              />
+              <!--    非法人结算授权函图片          -->
+              <van-field
+                name="certFrontPicUrl" label="非法人结算授权函图片"
+                :rules="[{ required: true, message: '请上传请上传非法人结算授权函图片' }]"
+                label-align="top"
+              >
+                <template #input>
+                  <BUpload
+                    v-model:pic-url="form.mchApply.cardHolder.letterOfAuthPicUrl"
+                    v-model:pic-id="form.mchApply.cardHolder.letterOfAuthPicUrl"
+                    :web-header="headers"
+                  />
+                </template>
+              </van-field>
+            </van-cell-group>
+          </template>
         </template>
       </van-form>
     </div>
     <div class="btnContain">
       <div class="btnBox">
-        <van-button v-if="currentObj.currentIndex > 1" type="primary" block @click="prevClick">
+        <van-button v-if="currentPage.currentIndex > 1" type="primary" block @click="prevClick">
           上一步
         </van-button>
-        <van-button v-if="currentObj.currentIndex < currentObj.date.length" type="primary" block @click="nextClick">
+        <van-button v-if="currentPage.currentIndex < currentPage.date.length" type="primary" block @click="nextClick">
           下一步
         </van-button>
-        <van-button v-if="currentObj.currentIndex === currentObj.date.length" type="primary" block @click="submitClick">
+        <van-button v-if="currentPage.currentIndex === currentPage.date.length" type="primary" block @click="submitClick">
           提交
         </van-button>
       </div>
@@ -378,41 +520,6 @@
         </van-button>
       </div>
     </div>
-
-    <!-- 公共时间弹窗 -->
-    <van-popup v-model:show="datePickerObj.showDatePicker" destroy-on-close position="bottom">
-      <van-date-picker
-        v-model="datePickerObj.datePickerValue"
-        :columns-type="datePickerObj.columType"
-        :min-date="new Date(1950, 0, 1)"
-        :max-date="new Date(2099, 0, 1)"
-        @cancel="datePickerObj.closePickObj"
-        @confirm="datePickerObj.onConfirm"
-      />
-    </van-popup>
-    <!-- 级联选择器 -->
-    <van-popup v-model:show="cascaderObj.showDialog" round position="bottom">
-      <!-- 区域 -->
-      <van-cascader
-        v-if="cascaderObj.status === 'area'"
-        v-model="cascaderObj.areaValue"
-        title="请选择经营场所所在区县"
-        :field-names="cascaderObj.fieldNames"
-        :options="cascaderObj.areaOptions"
-        @close="cascaderObj.closeDialog"
-        @finish="cascaderObj.onFinish"
-      />
-      <!-- 类目 -->
-      <van-cascader
-        v-if="cascaderObj.status === 'mcc'"
-        v-model="cascaderObj.mccValue"
-        title="请选择经营类目"
-        :field-names="cascaderObj.fieldNames"
-        :options="cascaderObj.mccOptions"
-        @close="cascaderObj.closeDialog"
-        @finish="cascaderObj.onFinish"
-      />
-    </van-popup>
   </div>
 </template>
 
@@ -420,24 +527,33 @@
 import { showNotify } from 'vant'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
-import type { MerchantApply } from './leshua.api'
-import { findById, mccTree, save } from './leshua.api'
+import type { MccConst, MerchantApply } from './Leshua.api'
+import { findById, mccTree, save } from './Leshua.api'
+import type {
+  Region,
+} from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
 import {
+  bankCardOcr,
   findAllProvinceAndCityAndArea,
+  idCardOcr,
+  licenseOcr,
   submit,
-} from '@/views/daxpay/h5/onboarded/common/onBoarded.api.ts'
-import upLoadView from '@/components/upLoadView.vue'
+} from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
+
+import BUpload from '@/components/BUpload.vue'
+import type { WebHeaders } from '#/web'
 
 const route = useRoute()
 const { id: applyId, token, client } = route.query
+// 请求头信息
 const headers = {
   'AccessToken': token,
   'x-client-code': client,
-}
+} as WebHeaders
 
 // 控制当前页面数据对象
-const currentObj = reactive({
-  currentIndex: 1, // 当前页面的值
+const currentPage = reactive({
+  currentIndex: 3, // 当前页面的值
   // 数据
   date: [
     {
@@ -454,7 +570,7 @@ const currentObj = reactive({
     },
   ],
   currentTitle: computed(() => {
-    return currentObj.date.find(item => item.index === currentObj.currentIndex).title
+    return currentPage.date.find(item => item.index === currentPage.currentIndex).title
   }),
 })
 
@@ -462,8 +578,11 @@ const currentObj = reactive({
 const formRef = ref<any>()
 const loading = ref<boolean>(false)
 
+const pca = ref<Region[]>([])
+const mccCodes = ref<MccConst[]>([])
+
 // 表单数据对象
-const formData = ref<MerchantApply>({
+const form = ref<MerchantApply>({
   mchApply: {
     merchant: {},
     legal: {},
@@ -476,216 +595,10 @@ const formData = ref<MerchantApply>({
 })
 
 /**
- * 格式化树装数据
- */
-function formatDate(data) {
-  if (!Array.isArray(data)) {
-    return []
-  }
-  return data.map((item) => {
-    const { children, ...rest } = item
-
-    if (children && children.length > 0 && item.level < 3) {
-      rest.children = formatDate(children)
-    }
-    return rest
-  })
-}
-
-// 类目接收字段名
-const mccStr = ref('')
-// 地区接收字段名
-const areaStr = ref('')
-// 级联选择框对象
-const cascaderObj = reactive({
-  showDialog: false, // 弹窗
-  status: '', // 标识
-  fieldNames: {
-    text: 'name',
-    value: 'code',
-    children: 'children',
-  }, // 自定义名
-  areaOptions: [], // 区域数据
-  mccOptions: [], // 类目数据
-  areaValue: '', // 区域选择器的值
-  mccValue: '', // 类目选择器的值
-  openMccBtn: () => {
-    // 打开类目弹窗
-    cascaderObj.status = 'mcc'
-    cascaderObj.showDialog = true
-  },
-  openAreaBtn: () => {
-    // 打开区域弹窗
-    cascaderObj.status = 'area'
-    cascaderObj.showDialog = true
-  },
-  closeDialog: () => {
-    // 关闭弹窗
-    cascaderObj.showDialog = false
-    cascaderObj.status = ''
-  },
-  onFinish: (finish) => {
-    // 选择完成事件
-    if (cascaderObj.status === 'mcc') {
-      // 赋值需要传参的数据
-      formData.value.mchApply.other.mccCodes = finish.selectedOptions.map(item => item.code)
-      // 用于表单显示
-      mccStr.value = finish.selectedOptions.map(item => item.name).join('/')
-    }
-    if (cascaderObj.status === 'area') {
-      formData.value.mchApply.shop.shopRegionCode = finish.selectedOptions.map(item => item.code) // 赋值需要传参的数据
-      areaStr.value = finish.selectedOptions.map(item => item.name).join('/')
-    }
-    cascaderObj.showDialog = false
-  },
-  // 获取类目数据
-  getMccData: () => {
-    mccTree().then(({ data }) => {
-      cascaderObj.mccOptions = formatDate(data)
-    })
-  },
-  // 获取地区树据
-  getAreaDate: () => {
-    findAllProvinceAndCityAndArea().then(({ data }) => {
-      cascaderObj.areaOptions = formatDate(data)
-    })
-  },
-})
-
-// 控制时间选择弹窗对象
-const datePickerObj = reactive({
-  showDatePicker: false, // 控制选择弹窗是否显示
-  columType: ['year', 'month', 'day'], // 类型
-  statusType: '', // 标识 储存点击的是哪个时间框
-  datePickerValue: [new Date().getFullYear(), 0, 1], // 绑定的值(默认当前年月一号)
-  openPickObj: (type) => {
-    datePickerObj.statusType = type // 存储标识
-    datePickerObj.showDatePicker = true
-  },
-  onConfirm: () => {
-    // 确定选择
-    switch (datePickerObj.statusType) {
-      case 'certStartDate': // 证件有效期开始日期
-        formData.value.mchApply.legal.certStartDate = datePickerObj.datePickerValue.join('-')
-        break
-      case 'certEndDate': // 证件有效期结束日期
-        formData.value.mchApply.legal.certEndDate = datePickerObj.datePickerValue.join('-')
-        break
-      case 'licenseStartDate': // 营业执照开始日期
-        formData.value.mchApply.license.licenseStartDate = datePickerObj.datePickerValue.join('-')
-        break
-      case 'licenseEndDate': // 营业执照结束日期
-        formData.value.mchApply.license.licenseEndDate = datePickerObj.datePickerValue.join('-')
-        break
-    }
-    datePickerObj.showDatePicker = false
-  },
-  // 关闭弹窗
-  closePickObj: () => {
-    datePickerObj.statusType = '' // 存储标识
-    datePickerObj.showDatePicker = false
-  },
-})
-
-// 校验规则第一步
-const rulesOne = reactive({
-  /* 联系人信息 */
-  // 商户简称
-  merchantShortName: [{ required: true, message: '请输入商户简称' }],
-  /* 法人信息 */
-  // 身份证姓名
-  legalName: [{ required: true, message: '请输入身份证姓名' }],
-  // 身份证号码
-  certNo: [
-    { required: true, message: '请输入身份证号码' },
-    // {
-    //   pattern: /^[1-9]\d{16}[0-9X]$/i,
-    //   message: '身份证号码格式错误',
-    // },
-  ],
-  // 开始时间
-  certStartDate: [{ required: true, message: '请选择证件开始时间' }],
-  // 结束时间
-  certEndDate: [{ required: true, message: '请选择证件结束时间' }],
-  // 手机号码
-  contactPhone: [
-    { required: true, message: '请输入手机号' },
-    // {
-    //   pattern: /^1[3-9]\d{9}$/,
-    //   message: '手机号格式错误',
-    // },
-  ],
-
-  /* 营业执照信息 */
-  // 营业执照号
-  licenseNo: [
-    { required: true, message: '请输入营业执照号' },
-    {
-      pattern: /^\d{15}$|^\d{18}$/,
-      message: '营业执照号应为15位或18位数字',
-    },
-  ],
-  // 营业执照名称
-  licenseName: [
-    { required: true, message: '请输入营业执照名称' },
-    {
-      max: 100,
-      message: '营业执照名称不能超过100个字符',
-    },
-  ],
-  // 营业执照详细地址
-  licenseAddress: [
-    { required: true, message: '请输入营业执照详细地址' },
-    {
-      max: 200,
-      message: '地址不能超过200个字符',
-    },
-  ],
-  // 注册开始日期
-  licenseStartDate: [{ required: true, message: '请选择注册开始日期' }],
-  // 注册结束日期（非长期时必填）
-  licenseEndDate: [{ required: true, message: '请选择注册结束日期' }],
-})
-// 校验规则第二步
-const rulesTwo = reactive({
-  // 门店名称
-  shopName: [
-    { required: true, message: '请输入门店名称' },
-    {
-      max: 200,
-      message: '名称不能超过32个字符',
-    },
-  ],
-  // 经营类目
-  mccCodes: [{ required: true, message: '请选择经营类目' }],
-  // 所在区县
-  shopRegionCode: [{ required: true, message: '请选择所在区县' }],
-  // 详细地址
-  shopAddress: [
-    { required: true, message: '请输入经营场所详细地址' },
-    {
-      max: 200,
-      message: '详细地址超过32个字符',
-    },
-  ],
-})
-// 校验规则第三步
-const rulesThree = reactive({
-  // 银行卡开户名
-  bankAccountName: [{ required: true, message: '请输入银行卡开户名' }],
-  // 银行卡号
-  bankCardNo: [{ required: true, message: '请输入银行卡号' }],
-  // 开户银行联行号
-  bankBranchNo: [
-    { required: true, message: '请输入开户银行联行号' },
-  ],
-})
-
-/**
  * 初始化
  */
 onMounted(async () => {
-  await initData()
+  initData()
   getInfo()
 })
 
@@ -693,8 +606,14 @@ onMounted(async () => {
  * 初始化数据
  */
 function initData() {
-  cascaderObj.getMccData() // 获取类目
-  cascaderObj.getAreaDate() // 获取区域名
+  // 获取类目数据
+  mccTree().then(({ data }) => {
+    mccCodes.value = data
+  })
+  // 获取地区树据
+  findAllProvinceAndCityAndArea().then(({ data }) => {
+    pca.value = data
+  })
 }
 
 /**
@@ -702,78 +621,56 @@ function initData() {
  */
 function getInfo() {
   findById(applyId, headers).then(({ data }) => {
-    formData.value = data
-    cascaderObj.mccValue = data.mchApply?.other?.mccCodes?.[2]
-    cascaderObj.areaValue = data.mchApply?.shop?.shopRegionCode?.[2]
+    form.value = data
   })
-}
-
-/**
- * 筛选出验证规则
- */
-function getFieldsByStep(index) {
-  switch (index) {
-    case 1:
-      return Object.keys(rulesOne)
-    case 2:
-      return Object.keys(rulesTwo)
-    case 3:
-      return Object.keys(rulesThree)
-    default:
-      return []
-  }
 }
 
 /**
  * 点击上一步
  */
 function prevClick() {
-  currentObj.currentIndex--
+  currentPage.currentIndex--
 }
 
 /**
  * 点击下一步进行校验
  */
 function nextClick() {
-  const fieldsToValidate = getFieldsByStep(currentObj.currentIndex)
-  formRef.value
-    .validate(fieldsToValidate)
+  formRef.value.validate()
     .then(() => {
       // 执行下一步操作
-      currentObj.currentIndex++
+      currentPage.currentIndex++
     })
     .catch(() => {
       showNotify({ type: 'danger', message: '还有必填项未填!请仔细检查' })
     })
 }
 
-function getLabelText(selectedValue, options) {
-  const labels = []
-  let currentLevel = options
-
-  for (let i = 0; i < selectedValue.length; i++) {
-    const val = selectedValue[i]
-    const node = currentLevel.find(item => item.id === val)
-    if (!node) {
-      break
+/**
+ * 暂存
+ */
+function saveTemp() {
+  loading.value = true
+  save(form.value, headers).then(({ code, msg }) => {
+    if (code !== 0) {
+      showNotify({ type: 'danger', message: msg })
     }
-    labels.push(node.name)
-    currentLevel = node.children || []
-  }
-
-  return labels.join(' / ')
+    else {
+      showNotify({ type: 'success', message: '暂存成功' })
+    }
+    loading.value = false
+  })
 }
 
 /**
  * 提交
  */
 function submitClick() {
-  const fieldsToValidate = getFieldsByStep(currentObj.date.length) // 只验证最后一页
   formRef.value
-    .validate(fieldsToValidate)
+    .validate()
     .then(() => {
       // 执行下一步操作
-      submit(formData.value.applyId, headers).then(({ code, data }) => {
+      submit(form.value.applyId, headers).then(({ code, data }) => {
         if (code !== 0) {
           showNotify({ type: 'danger', message: data })
         }
@@ -786,18 +683,67 @@ function submitClick() {
 }
 
 /**
- * 暂存
+ * 身份证正面识别
  */
-function saveTemp() {
-  loading.value = true
-  save(formData.value, headers).then(({ code, data }) => {
+function ocrIdCardFront() {
+  idCardOcr(form.value.mchApply.legal.certFrontPicUrl, 'ID_CARD_FRONT', headers).then((res) => {
+    if (res.code !== 0) {
+      showNotify({ type: 'danger', message: res.msg })
+      return
+    }
+    showNotify({ type: 'success', message: 'OCR识别成功' })
+    const data = res.data
+    form.value.mchApply.legal.legalName = data.name
+    form.value.mchApply.legal.certNo = data.idNumber
+  })
+}
+
+/**
+ * 身份证反面识别
+ */
+function ocrIdCardBack() {
+  idCardOcr(form.value.mchApply.legal.certBackPicUrl, 'ID_CARD_BACK', headers).then(({ code, data, msg }) => {
     if (code !== 0) {
-      showNotify({ type: 'danger', message: data })
+      showNotify({ type: 'danger', message: msg })
+      return
     }
-    else {
-      showNotify({ type: 'success', message: '暂存成功' })
+    showNotify({ type: 'success', message: 'OCR识别成功' })
+    form.value.mchApply.legal.certPeriodLong = data.periodLong
+    form.value.mchApply.legal.certStartDate = data.startDate
+    form.value.mchApply.legal.certEndDate = data.endDate
+  })
+}
+
+/**
+ * 营业执照OCR
+ */
+function licenseInfoOcr() {
+  licenseOcr(form.value.mchApply.license.licensePicUrl, headers).then(({ code, data, msg }) => {
+    if (code !== 0) {
+      showNotify({ type: 'danger', message: msg })
+      return
     }
-    loading.value = false
+    showNotify({ type: 'success', message: 'OCR识别成功' })
+    form.value.mchApply.license.licenseNo = data.number
+    form.value.mchApply.license.licenseName = data.name
+    form.value.mchApply.license.licenseAddress = data.address
+    form.value.mchApply.license.licensePeriodLong = data.periodLong
+    form.value.mchApply.license.licenseStartDate = data.startDate
+    form.value.mchApply.license.licenseEndDate = data.endDate
+  })
+}
+
+/**
+ * 银行卡OCR
+ */
+function bankOcr() {
+  bankCardOcr(form.value.mchApply.bankAccount.bankCardPicUrl, headers).then(({ code, data, msg }) => {
+    if (code !== 0) {
+      showNotify({ type: 'danger', message: msg })
+      return
+    }
+    showNotify({ type: 'success', message: 'OCR识别成功' })
+    form.value.mchApply.bankAccount.bankCardNo = data.cardNumber
   })
 }
 </script>
@@ -814,7 +760,7 @@ function saveTemp() {
     display: flex;
     align-items: center;
     background-color: #f7f7f7;
-    padding: 0px 1.25rem;
+    padding: 0 1.25rem;
     font-size: 1rem;
     font-weight: 600;
     letter-spacing: 2px;
@@ -826,7 +772,7 @@ function saveTemp() {
     width: 100%;
     height: 80%;
     overflow: scroll;
-    padding: 1.25rem 0rem;
+    padding: 1.25rem 0;
 
     // 公共头部
     .commonTitle {
@@ -834,7 +780,7 @@ function saveTemp() {
       width: 100%;
       display: flex;
       align-items: center;
-      padding: 0rem 1.25rem;
+      padding: 0 1.25rem;
       background-color: #f7f7f7;
       color: #448ef7;
       letter-spacing: 1px;
@@ -858,8 +804,8 @@ function saveTemp() {
     .btnBox {
       display: flex;
       gap: 1.25rem;
-      padding: 0px 1.25rem;
-      margin: 0.625rem 0rem;
+      padding: 0 1.25rem;
+      margin: 0.625rem 0;
     }
   }
 }
@@ -868,62 +814,14 @@ function saveTemp() {
     &.van-cell-group--inset {
       margin: 0 !important;
     }
-    .van-cell {
-      .van-cell__title {
-        &.van-field__label--top {
-          margin-bottom: 0.625rem !important;
-        }
-      }
-      .van-cell__value {
-        // 单选
-        .van-radio-group {
-          .van-radio {
-            .van-radio__icon {
-              height: 1rem;
-              width: 1rem;
-              font-size: 1.125rem;
-              .van-icon {
-                width: 1rem;
-                height: 1rem;
-                line-height: 1;
-              }
-            }
-            .van-badge__wrapper {
-              &.van-icon {
-                width: 1rem;
-                height: 1rem;
-              }
-            }
-          }
-        }
-        .van-field__body {
-          input {
-            border: 0.0625rem solid #f5f5f5;
-            height: 3.125rem;
-            padding-left: 0.625rem;
-            padding-right: 2.5rem;
-          }
-          .van-field__clear {
-            position: absolute;
-            right: 0.625rem;
-          }
-          .van-switch {
-            .van-switch__node {
-              display: flex;
-              justify-content: center;
-              .vSwitch {
-                font-size: 0.75rem;
-              }
-            }
-          }
-        }
-      }
-      &.van-cell--clickable {
-        padding: 0rem 0rem !important;
-        display: flex;
-        align-items: center;
-      }
-    }
+  }
+}
+.readOcr {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  .readOcrBtn {
+    transform: translateY(24px);
   }
 }
 </style>

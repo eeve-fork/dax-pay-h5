@@ -7,7 +7,7 @@ import type {
   OnbLicenseApply,
   OnbMerchantApply,
   OnbShopApply,
-} from '@/views/daxpay/h5/onboarded/common/base'
+} from '@/views/daxpay/h5/onboarded/common/Base'
 
 /**
  * 查询
@@ -15,31 +15,19 @@ import type {
 export function findById(id, headers) {
   return http.request<Result<MerchantApply>>({
     method: 'get',
-    url: '/leshua/mch/apply/findById',
+    url: '/leshua/onb/apply/findById',
     params: { id },
     headers,
   })
 }
 
 /**
- * 保存
+ * 保存信息
  */
 export function save(param: MerchantApply, headers) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/leshua/mch/apply/save',
-    data: param,
-    headers,
-  })
-}
-
-/**
- * 提交申请
- */
-export function submit(id, headers){
-  return http.request<Result<void>>({
-    method: 'post',
-    url: '/leshua/mch/apply/save',
+    url: '/leshua/onb/apply/save',
     data: param,
     headers,
   })
