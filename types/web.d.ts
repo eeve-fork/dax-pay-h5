@@ -36,3 +36,13 @@ export interface KeyValue {
   key: string
   value: string
 }
+
+/**
+ * 请求头信息
+ */
+export interface WebHeaders {
+  /** token */
+  'AccessToken': string
+  /** 终端编码 */
+  'x-client-code': string
+}
