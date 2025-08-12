@@ -5,7 +5,6 @@
       label-align="top"
       readonly
       :right-icon="showText ? 'clear' : ''"
-      :required="required"
       :name="name"
       :rules="rules"
       :placeholder="placeholder"
@@ -34,8 +33,8 @@
 // 级联窗口组件
 import { ref } from 'vue'
 
-const { label, placeholder, name, rules = [], required, optionsLevel = 3, options = [], title }
-  = defineProps<{ label: string, placeholder?: string, name: string, rules?: any[], required?: boolean, optionsLevel?: number, options?: any, title?: string }>()
+const { label, placeholder, name, rules = [], optionsLevel = 3, options = [], title }
+  = defineProps<{ label: string, placeholder?: string, name: string, rules?: any[], optionsLevel?: number, options?: any, title?: string }>()
 const fieldNames = ref({
   text: 'name',
   value: 'code',
@@ -55,8 +54,8 @@ const cascaderValue = ref<string>('')
 /**
  * 监听 modelValue 改变
  */
-watch(() => modelValue.value, () => initData())
-watch(() => options, () => initData())
+watch(() => modelValue.value, () => initData(), { immediate: true })
+watch(() => options, () => initData(), { immediate: true })
 /**
  * 初始化处理各项属性
  */
@@ -101,6 +100,9 @@ function onFinish({ selectedOptions }) {
   modelValue.value = selectedOptions.map(option => option.code)
 }
 
+/**
+ * 清除内容
+ */
 function onClear(e) {
   // 阻止冒泡到 @click
   e.stopPropagation()

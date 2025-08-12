@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from 'vue'
+import { defineProps, ref, watch } from 'vue'
 import { showNotify } from 'vant'
 import { getUploadParams, saveOssFileInfo, uploadFile } from '@/api/FileUpload.api.js'
 import type { WebHeaders } from '#/web'
@@ -20,7 +20,7 @@ const uploadAttachName = ref<string>()
 
 watch(() => picUrl.value, () => {
   buildFileList()
-})
+}, { immediate: true })
 
 /**
  *  上传
