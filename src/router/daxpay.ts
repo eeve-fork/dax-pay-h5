@@ -87,7 +87,7 @@ export const DaxPayH5Route: RouteRecordRaw = {
       name: 'PaySuccess',
       component: () => import('@/views/daxpay/h5/result/PaySuccess.vue'),
       meta: {
-        title: '支付成功页面',
+        title: '成功提示',
       },
     },
     {
@@ -95,15 +95,31 @@ export const DaxPayH5Route: RouteRecordRaw = {
       name: 'payFail',
       component: () => import('@/views/daxpay/h5/result/PayFail.vue'),
       meta: {
-        title: '支付失败页面',
+        title: '错误提示',
       },
     },
     {
       path: '/onboarded/leshua_pay',
       name: 'leshua',
-      component: () => import('@/views/daxpay/h5/onboarded/leshua/index.vue'),
+      component: () => import('@/views/daxpay/h5/onboarded/leshua/LeshuaApply.vue'),
       meta: {
-        title: '乐刷进件',
+        title: '乐刷进件申请',
+      },
+    },
+    {
+      path: '/onboarded/hkrt_pay',
+      name: 'hkrt',
+      component: () => import('@/views/daxpay/h5/onboarded/hkrt/HkrtApply.vue'),
+      meta: {
+        title: '海科进件申请',
+      },
+    },
+    {
+      path: '/onboarded/vbill_pay',
+      name: 'vbill',
+      component: () => import('@/views/daxpay/h5/onboarded/vbill/VbillApply.vue'),
+      meta: {
+        title: '随行付进件申请',
       },
     },
   ],

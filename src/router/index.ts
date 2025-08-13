@@ -26,6 +26,12 @@ const router = createRouter({
   strict: true,
   scrollBehavior: () => ({ left: 0, top: 0 }),
 })
+const projectName = import.meta.env.VITE_GLOB_APP_TITLE
+
+// 设置名称
+router.afterEach((to) => {
+  document.title = `${to.meta.title || '无标题'}-${projectName}`
+})
 
 export function setupRouter(app: App) {
   app.use(router)

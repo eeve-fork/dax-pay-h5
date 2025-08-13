@@ -1,5 +1,5 @@
 <template>
-  <div class="leshuaOnBoarded">
+  <div class="boarded">
     <!-- 步骤页 -->
     <van-overlay v-show="loading" :show="true">
       <div class="loading-wrapper" @click.stop>
@@ -13,7 +13,7 @@
       <span class="stepName"> {{ currentPage.currentTitle }}</span>
     </div>
     <div class="formBox">
-      <van-form ref="formRef" required colon>
+      <van-form ref="formRef" colon required="auto">
         <!-- 第一模块 -->
         <template v-if="currentPage.currentIndex === 1">
           <div class="commonTitle">
@@ -21,7 +21,7 @@
           </div>
           <van-cell-group inset>
             <!-- 商户类型 -->
-            <van-field name="merchantType" label="商户类型" label-align="top">
+            <van-field name="merchantType" label="商户类型" label-align="top" :rules="[{ required: true, message: '请选择商户类型' }]">
               <template #input>
                 <van-radio-group
                   v-model="form.mchApply.merchant.merchantType"
@@ -211,6 +211,14 @@
                 clearable
                 :rules="[{ required: true, message: '请输入营业执照名称' }]"
               />
+              <b-cascader
+                v-model="form.mchApply.license.licenseRegionCode"
+                name="shopRegionCode"
+                label="营业执照所在区县"
+                placeholder="请选择营业执照所在区县"
+                :rules="[{ required: true, message: '请选择营业执照所在区县' }]"
+                :options="pca"
+              />
               <!-- 营业执照详细地址 -->
               <van-field
                 v-model="form.mchApply.license.licenseAddress"
@@ -265,8 +273,8 @@
             />
             <!-- 经营类目 -->
             <b-cascader
-              v-model="form.mchApply.other.mccCodes"
-              name="mccCodes"
+              v-model="form.mchApply.other.businessScopeCodes"
+              name="businessScopeCodes"
               label="经营类目"
               placeholder="请选择经营类目"
               :rules="[{ required: true, message: '请选择经营类目' }]"
@@ -292,7 +300,7 @@
               clearable
             />
             <van-field
-              name="checkboxGroup"
+              name="shopDoorPicUrl"
               label="商户门头图片"
               label-align="top"
               :rules="[{ required: true, message: '请选择商户门头图片' }]"
@@ -320,7 +328,7 @@
               </template>
             </van-field>
             <van-field
-              name="checkboxGroup"
+              name="shopCashierPicUrl"
               label="营业场所收银台照片"
               label-align="top"
               :rules="[{ required: true, message: '请选择营业场所收银台照片' }]"
@@ -343,7 +351,6 @@
           <van-cell-group inset>
             <!-- 商户类型 -->
             <van-field
-              v-if="form.mchApply.merchant.merchantType !== 'micro'"
               name="merchantType"
               label="账户类型"
               label-align="top"
@@ -354,13 +361,13 @@
                   v-model="form.mchApply.bankAccount.bankAccountType"
                   direction="horizontal"
                 >
-                  <van-radio name="company_owner">
+                  <van-radio :disabled="form.mchApply.merchant.merchantType === 'micro'" name="company_owner">
                     公户
                   </van-radio>
                   <van-radio name="person_owner">
                     对私法人
                   </van-radio>
-                  <van-radio name="person_not_owner">
+                  <van-radio :disabled="form.mchApply.merchant.merchantType === 'micro'" name="person_not_owner">
                     对私非法人
                   </van-radio>
                 </van-radio-group>
@@ -368,7 +375,7 @@
             </van-field>
             <!-- 银行卡正面 -->
             <van-field
-              name="checkboxGroup" :label="
+              name="bankCardPicUrl" :label="
                 form.mchApply.bankAccount.bankAccountType !== 'company_owner'
                   ? '银行卡正面'
                   : '开户许可证'
@@ -400,21 +407,21 @@
                     hairline
                     plain
                     size="small"
-                    @click="licenseInfoOcr"
+                    @click="bankOcr"
                   >
                     OCR识别
                   </van-button>
                 </div>
               </template>
             </van-field>
-            <!-- 银行卡开户名 -->
+            <!-- 银行卡账户名 -->
             <van-field
               v-model="form.mchApply.bankAccount.bankAccountName"
               label-align="top"
               name="bankAccountName"
-              placeholder="请输入银行卡开户名"
-              label="银行卡开户名"
-              :rules="[{ required: true, message: '请输入银行卡开户名' }]"
+              placeholder="请输入银行卡账户名"
+              label="银行卡账户名"
+              :rules="[{ required: true, message: '请输入银行卡账户名' }]"
               clearable
             />
             <!-- 银行卡号 -->
@@ -427,6 +434,16 @@
               clearable
               :rules="[{ required: true, message: '请输入银行卡号' }]"
             />
+            <!-- 开户银行省市 -->
+            <b-cascader
+              v-model="form.mchApply.other.bankRegionCode"
+              name="shopRegionCode"
+              label="开户银行省市"
+              placeholder="请选择开户银行省市"
+              :rules="[{ required: true, message: '请选择开户银行省市' }]"
+              :options-level="2"
+              :options="pca"
+            />
             <!-- 开户银行联行号 -->
             <van-field
               v-model="form.mchApply.bankAccount.bankBranchNo"
@@ -436,6 +453,35 @@
               label="开户银行联行号"
               clearable
               :rules="[{ required: true, message: '请输入开户银行联行号' }]"
+            />
+            <!-- 开户银行网点名称 -->
+            <van-field
+              v-model="form.mchApply.other.bankName"
+              label-align="top"
+              name="bankBranchNo"
+              placeholder="请输入开户银行网点名称"
+              label="开户银行网点名称"
+              clearable
+              :rules="[{ required: form.mchApply.bankAccount.bankAccountType === 'company_owner', message: '请输入开户银行网点名称' }]"
+            />
+            <!-- 预留手机号 -->
+            <van-field
+              v-model="form.mchApply.bankAccount.bankPhone"
+              label-align="top"
+              name="bankBranchNo"
+              placeholder="请输入持卡人预留手机号"
+              label="预留手机号"
+              clearable
+              :rules="[
+                {
+                  required:
+                    form.mchApply.merchant.merchantType === 'micro'
+                    || ['person_owner', 'person_not_owner'].includes(
+                      form.mchApply.bankAccount.bankAccountType as string,
+                    ),
+                  message: '请输入持卡人预留手机号',
+                },
+              ]"
             />
           </van-cell-group>
           <template
@@ -527,8 +573,8 @@
 import { showNotify } from 'vant'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
-import type { MccConst, MerchantApply } from './Leshua.api'
-import { findById, mccTree, save } from './Leshua.api'
+import type { MccConst, MerchantApply } from './HkrtApply.api'
+import { findById, mccTree, save } from './HkrtApply.api'
 import type {
   Region,
 } from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
@@ -542,6 +588,7 @@ import {
 
 import BUpload from '@/components/BUpload.vue'
 import type { WebHeaders } from '#/web'
+import router from '@/router'
 
 const route = useRoute()
 const { id: applyId, token, client } = route.query
@@ -642,7 +689,7 @@ function nextClick() {
       currentPage.currentIndex++
     })
     .catch(() => {
-      showNotify({ type: 'danger', message: '还有必填项未填!请仔细检查' })
+      showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
     })
 }
 
@@ -675,10 +722,15 @@ function submitClick() {
           showNotify({ type: 'danger', message: data })
         }
         loading.value = false
+        // 跳转到成功页面
+        router.replace({
+          path: '/paySuccess',
+          query: { title: '提交申请成功' },
+        })
       })
     })
     .catch(() => {
-      showNotify({ type: 'danger', message: '还有必填项未填!请仔细检查' })
+      showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
     })
 }
 
@@ -749,7 +801,7 @@ function bankOcr() {
 </script>
 
 <style lang="less" scoped>
-.leshuaOnBoarded {
+.boarded {
   width: 100%;
   height: 100%;
   padding-bottom: env(safe-area-inset-bottom);
