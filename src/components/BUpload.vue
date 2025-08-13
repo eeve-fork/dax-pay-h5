@@ -1,5 +1,5 @@
 <template>
-  <van-uploader v-bind="$attrs" v-model="fileList" reupload :max-count="1" :preview-image="true" :after-read="afterRead" :before-delete="delImg" />
+  <van-uploader v-bind="$attrs" v-model="fileList" :max-count="1" :preview-image="true" :after-read="afterRead" :before-delete="delImg" />
 </template>
 
 <script setup lang="ts">
