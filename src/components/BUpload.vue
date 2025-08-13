@@ -45,7 +45,7 @@ async function afterRead(fileObj) {
   // 文件上传
   await uploadFile(uploadUrl.value, file, { 'Content-Type': file.type || '*/*' }).then()
   // 保存上传记录
-  const url = `/${uploadAttachName.value}`
+  const url = `${uploadAttachName.value}`
   saveOssFileInfo({
     url,
     size: file.size,
@@ -78,11 +78,12 @@ function buildFileList() {
 }
 
 /**
- * 获取文件访问地址
- * @param fileUrl
+ * 获取文件预览地址
+ * @param fileUrl 文件保存的名称
  */
 function getFileUrl(fileUrl?: string) {
-  return `${import.meta.env.VITE_GLOB_API_URL_PREFIX}/file/download${fileUrl}`
+  fileUrl = fileUrl?.startsWith('/') ? fileUrl.slice(1) : fileUrl
+  return `${import.meta.env.VITE_GLOB_API_URL_PREFIX}/file/download/${fileUrl}`
 }
 
 /**

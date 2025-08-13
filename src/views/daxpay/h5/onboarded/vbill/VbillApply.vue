@@ -689,7 +689,7 @@ const headers = {
 
 // 控制当前页面数据对象
 const currentPage = reactive({
-  currentIndex: 3, // 当前页面的值
+  currentIndex: 1, // 当前页面的值
   // 数据
   date: [
     {

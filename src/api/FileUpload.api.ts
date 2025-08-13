@@ -5,7 +5,7 @@ import type { WebHeaders } from '#/web'
 /**
  * 对象存储预签名
  */
-export function getUploadParams(param: FileUploadRequestParams, headers?: WebHeaders) {
+export function getUploadParams(param: FileUploadRequestParams, headers) {
   return http.request<Result<FileUploadParamsResult>>({
     url: '/file/getUploadParams',
     method: 'post',
@@ -17,7 +17,7 @@ export function getUploadParams(param: FileUploadRequestParams, headers?: WebHea
 /**
  * 保存前端直传文件信息
  */
-export function saveOssFileInfo(fileInfo: UpdateFileInfo, headers?: WebHeaders) {
+export function saveOssFileInfo(fileInfo: UpdateFileInfo, headers) {
   return http.request<Result<UpdateFileInfo>>({
     url: '/file/saveFileInfo',
     method: 'post',
