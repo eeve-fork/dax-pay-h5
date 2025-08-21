@@ -591,11 +591,11 @@ import type { WebHeaders } from '#/web'
 import router from '@/router'
 
 const route = useRoute()
-const { id: applyId, token, client } = route.query
+const { id: applyId, token } = route.query
 // 请求头信息
 const headers = {
   'AccessToken': token,
-  'x-client-code': client,
+  'x-client-code': 'dax-pay-gateway',
 } as WebHeaders
 
 // 控制当前页面数据对象
