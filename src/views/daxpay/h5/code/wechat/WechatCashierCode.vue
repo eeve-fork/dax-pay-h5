@@ -138,7 +138,7 @@ async function init() {
         }
         else {
           // 认证获取OpenId
-          auth({ cashierCode: cashierCode as string, cashierType: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string })
+          auth({ cashierCode: cashierCode as string, scene: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string })
             .then((res) => {
               if (res.code) {
                 router.replace({ name: 'payFail', query: { msg: res.msg } })
@@ -175,7 +175,7 @@ function pay() {
     amount: amountValue,
     cashierCode,
     openId: openId.value,
-    cashierType: CashierCodeTypeEnum.WECHAT_PAY,
+    scene: CashierCodeTypeEnum.WECHAT_PAY,
     description: description.value,
   } as CashierPayParam
   cashierPay(from)

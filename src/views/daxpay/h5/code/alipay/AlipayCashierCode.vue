@@ -125,7 +125,7 @@ function pay() {
   const from = {
     amount: amountValue,
     cashierCode: code,
-    cashierType: AggregateEnum.ALI,
+    scene: AggregateEnum.ALI,
     description: description.value,
   } as CashierPayParam
   cashierPay(from).then((res) => {
