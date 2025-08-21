@@ -195,7 +195,7 @@ function pay() {
     amount: amountValue,
     cashierCode,
     openId: openId.value,
-    cashierType: CashierSceneEnum.WECHAT_PAY,
+    scene: CashierSceneEnum.WECHAT_PAY,
     description: description.value,
   } as CashierPayParam
   cashierPay(from).then((res) => {
