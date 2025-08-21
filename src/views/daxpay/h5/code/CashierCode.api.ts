@@ -5,22 +5,22 @@ import type { AuthResult } from '@/views/daxpay/h5/auth/ChannelAuth.api'
 /**
  * 获取码牌配置
  */
-export function getCashierCodeConfig(cashierCode, scene) {
+export function getCashierCodeConfig(cashierCode, cashierScene) {
   return http.request<Result<GatewayCashierCodeConfig>>({
     url: '/unipay/gateway/cashier/getCodeConfig',
     method: 'GET',
-    params: { cashierCode, scene },
+    params: { cashierCode, cashierScene },
   })
 }
 
 /**
  * 获取码牌收银台所需授权链接, 用于获取OpenId一类的信息
  */
-export function generateAuthUrl(cashierCode, scene) {
+export function generateAuthUrl(cashierCode, cashierScene) {
   return http.request<Result<string>>({
     url: '/unipay/gateway/cashier/code/generateAuthUrl',
     method: 'POST',
-    data: { cashierCode, scene },
+    data: { cashierCode, cashierScene },
   })
 }
 
@@ -38,7 +38,7 @@ export function auth(param: CashierCodeAuthParam) {
 /**
  * 发起支付
  */
-export function cashierPay(param: CashierPayParam) {
+export function cashierPay(param: GatewayCashierCodePayParam) {
   return http.request<Result<PayResult>>({
     url: '/unipay/gateway/cashier/code/pay',
     method: 'POST',
@@ -49,11 +49,11 @@ export function cashierPay(param: CashierPayParam) {
 /**
  * 码牌收银支付参数
  */
-export interface CashierPayParam {
+export interface GatewayCashierCodePayParam {
   // 收银码牌编码
   cashierCode?: string
   // 收银台类型
-  scene?: string
+  cashierScene?: string
   // 支付金额
   amount?: number
   // 唯一标识

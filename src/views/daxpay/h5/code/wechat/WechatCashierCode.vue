@@ -83,8 +83,8 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { showNotify } from 'vant'
 import type {
-  CashierPayParam,
   GatewayCashierCodeConfig,
+  GatewayCashierCodePayParam,
   WxJsapiSignResult,
 } from '../CashierCode.api'
 
@@ -195,9 +195,9 @@ function pay() {
     amount: amountValue,
     cashierCode,
     openId: openId.value,
-    scene: CashierSceneEnum.WECHAT_PAY,
+    cashierScene: CashierSceneEnum.WECHAT_PAY,
     description: description.value,
-  } as CashierPayParam
+  } as GatewayCashierCodePayParam
   cashierPay(from).then((res) => {
     if (res.code) {
       router.replace({ name: 'payFail', query: { msg: res.msg } })

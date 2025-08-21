@@ -82,7 +82,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showNotify } from 'vant'
-import type { CashierPayParam, GatewayCashierCodeConfig } from '../CashierCode.api'
+import type { GatewayCashierCodeConfig, GatewayCashierCodePayParam } from '../CashierCode.api'
 import { cashierPay, getCashierCodeConfig } from '../CashierCode.api'
 import { AggregateEnum, CashierSceneEnum } from '@/enums/daxpay/DaxPayEnum'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
@@ -147,9 +147,9 @@ function pay() {
   const from = {
     amount: amountValue,
     cashierCode: code,
-    scene: AggregateEnum.ALI,
+    cashierScene: AggregateEnum.ALI,
     description: description.value,
-  } as CashierPayParam
+  } as GatewayCashierCodePayParam
   cashierPay(from).then((res) => {
     if (res.code) {
       router.replace({ name: 'payFail', query: { msg: res.msg } })
