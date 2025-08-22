@@ -12,11 +12,11 @@ import type {
 /**
  * 查询
  */
-export function findById(id, headers) {
+export function findById(id, sign, headers) {
   return http.request<Result<MerchantApply>>({
     method: 'get',
-    url: '/hkrt/onb/apply/findById',
-    params: { id },
+    url: '/hkrt/onb/apply/h5/findById',
+    params: { id, sign },
     headers,
   })
 }
@@ -24,11 +24,12 @@ export function findById(id, headers) {
 /**
  * 保存信息
  */
-export function save(param: MerchantApply, headers) {
+export function save(param: MerchantApply, sign, headers) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/hkrt/onb/apply/save',
+    url: '/hkrt/onb/apply/h5/save',
     data: param,
+    params: { sign },
     headers,
   })
 }

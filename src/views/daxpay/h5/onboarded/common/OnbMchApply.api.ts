@@ -13,15 +13,14 @@ export function findAllProvinceAndCityAndArea() {
 /**
  * 提交进件申请
  */
-export function submit(id, headers) {
+export function submit(id, sign, headers) {
   return http.request({
     url: '/onb/mch/apply/submit',
     method: 'post',
-    params: { id },
+    params: { id, sign },
     headers,
   })
 }
-
 
 /**
  * 身份证OCR

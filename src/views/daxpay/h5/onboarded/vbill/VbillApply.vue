@@ -680,7 +680,7 @@ import type { WebHeaders } from '#/web'
 import router from '@/router'
 
 const route = useRoute()
-const { id: applyId, token } = route.query
+const { id: applyId, sign, token } = route.query
 // 请求头信息
 const headers = {
   'AccessToken': token,
@@ -756,7 +756,11 @@ function initData() {
  * 获取数据
  */
 function getInfo() {
-  findById(applyId, headers).then(({ data }) => {
+  findById(applyId, sign, headers).then(({ code, data, msg }) => {
+    if (code !== 0) {
+      router.replace({ name: 'payFail', query: { msg, title: '获取信息失败' } })
+      return
+    }
     form.value = data
   })
 }
@@ -787,7 +791,7 @@ function nextClick() {
  */
 function saveTemp() {
   loading.value = true
-  save(form.value, headers).then(({ code, msg }) => {
+  save(form.value, sign, headers).then(({ code, msg }) => {
     if (code !== 0) {
       showNotify({ type: 'danger', message: msg })
     }
@@ -806,7 +810,7 @@ function submitClick() {
     .validate()
     .then(() => {
       // 执行下一步操作
-      submit(form.value.applyId, headers).then(({ code, data }) => {
+      submit(form.value.applyId, sign, headers).then(({ code, data }) => {
         if (code !== 0) {
           showNotify({ type: 'danger', message: data })
         }
