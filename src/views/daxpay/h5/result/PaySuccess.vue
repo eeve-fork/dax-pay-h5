@@ -1,8 +1,8 @@
 <template>
   <div class="paySuccess">
     <div class="payLogo">
-      <img v-if="isWeiPay === 'wei'" src="../../../../assets/images/weiSuccess.png" alt="">
-      <img v-else src="../../../../assets/images/success1.png" alt="">
+      <img v-if="isWeiPay === 'wei'" src="@/assets/images/weiSuccess.png" alt="">
+      <img v-else src="@/assets/images/success1.png" alt="">
       <p :class="{ textColor: isWeiPay === 'wei' }">
         支付成功
       </p>
@@ -57,7 +57,6 @@ function closeClick() {
     WeixinJSBridge.call('closeWindow')
   }
   catch {
-
   }
   try {
     AlipayJSBridge.call('closeWebview')

@@ -14,6 +14,7 @@ import { ref } from 'vue'
 import { showDialog } from 'vant'
 import type { AuthCodeParam } from '@/views/daxpay/h5/auth/ChannelAuth.api'
 import { authAndSet } from '@/views/daxpay/h5/auth/ChannelAuth.api'
+import router from '@/router'
 
 const script = document.createElement('script')
 script.setAttribute(
@@ -47,7 +48,11 @@ async function init() {
       authCode: authCode as string,
       channel: channel as string,
     })
-    authAndSet(param.value).then(() => {
+    authAndSet(param.value).then(({ code, msg }) => {
+      if (code !== 0) {
+        router.replace({ name: 'payFail', query: { msg, title: '获取信息失败' } })
+        return
+      }
       show.value = false
       showDialog({
         message: '已成功获取用户信息!',
