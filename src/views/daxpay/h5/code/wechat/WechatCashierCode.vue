@@ -232,7 +232,7 @@ function jsapiPay(data: WxJsapiSignResult) {
     if (res.err_msg === 'get_brand_wcpay_request:ok') {
       // 跳转到成功页面
       router.replace({
-        path: '/paySuccess',
+        name: 'PaySuccess',
         query: { title: '支付成功' },
       })
     }

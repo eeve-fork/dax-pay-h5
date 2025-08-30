@@ -91,6 +91,14 @@ export const DaxPayH5Route: RouteRecordRaw = {
       },
     },
     {
+      path: '/success',
+      name: 'SuccessResult',
+      component: () => import('@/views/daxpay/h5/result/SuccessResult.vue'),
+      meta: {
+        title: '操作成功',
+      },
+    },
+    {
       path: '/payFail',
       name: 'payFail',
       component: () => import('@/views/daxpay/h5/result/PayFail.vue'),

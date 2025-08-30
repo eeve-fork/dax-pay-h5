@@ -15,7 +15,7 @@ export function findAllProvinceAndCityAndArea() {
  */
 export function submit(id, sign, headers) {
   return http.request({
-    url: '/onb/mch/apply/submit',
+    url: '/onb/mch/apply/h5/submit',
     method: 'post',
     params: { id, sign },
     headers,

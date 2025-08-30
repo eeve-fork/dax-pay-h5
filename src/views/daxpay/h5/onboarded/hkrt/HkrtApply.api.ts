@@ -40,7 +40,7 @@ export function save(param: MerchantApply, sign, headers) {
 export function mccTree() {
   return http.request<Result<MccConst[]>>({
     method: 'get',
-    url: '/leshua/mcc/tree',
+    url: '/hkrt/mcc/tree',
   })
 }
 

@@ -719,8 +719,15 @@ function saveTemp() {
 function submitClick() {
   formRef.value
     .validate()
-    .then(() => {
+    .then(async () => {
+      loading.value = true
       // 执行下一步操作
+      await save(form.value, sign, headers).then(({ code, msg }) => {
+        if (code !== 0) {
+          showNotify({ type: 'danger', message: msg })
+          loading.value = false
+        }
+      })
       submit(form.value.applyId, sign, headers).then(({ code, data }) => {
         if (code !== 0) {
           showNotify({ type: 'danger', message: data })
@@ -728,7 +735,7 @@ function submitClick() {
         loading.value = false
         // 跳转到成功页面
         router.replace({
-          path: '/paySuccess',
+          name: 'SuccessResult',
           query: { title: '提交申请成功' },
         })
       })
