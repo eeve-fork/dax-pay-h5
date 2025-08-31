@@ -6,6 +6,7 @@ import { useRouteStoreWidthOut } from '@/store/modules/route'
 
 // 菜单
 import { DaxPayH5Route, DaxPayPcRoute } from '@/router/daxpay'
+import {getSystemTitle} from "@/settings/initWebsiteConfig";
 
 // 普通路由
 export const constantRouter: RouteRecordRaw[] = [
@@ -26,10 +27,10 @@ const router = createRouter({
   strict: true,
   scrollBehavior: () => ({ left: 0, top: 0 }),
 })
-const projectName = import.meta.env.VITE_GLOB_APP_TITLE
 
 // 设置名称
 router.afterEach((to) => {
+  const projectName = getSystemTitle()
   document.title = `${to.meta.title || '无标题'}-${projectName}`
 })
 

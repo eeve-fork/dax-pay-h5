@@ -1,6 +1,5 @@
 import type { Result } from '#/axios'
 import { http } from '@/utils/http/axios'
-import type { WebHeaders } from '#/web'
 
 /**
  * 对象存储预签名

@@ -1,15 +1,20 @@
 <template>
-  <div class="h-screen flex flex-col items-center justify-center p-60px">
+  <div class="bg h-screen flex flex-col items-center justify-center p-60px">
     <div class="wel-box w-full flex flex-col items-center justify-between">
-      <SvgIcon class="logo" :size="130" name="logo" />
+      <img :src="getSystemLogo()">
       <div class="text-darkBlue dark:text-garyWhite mb-4 mt-12 text-center text-2xl font-black">
-        DaxPay支付网关
+        欢迎使用{{ getSystemTitle() }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts" name="DashboardPage">
+import { getSystemLogo, getSystemTitle } from '@/settings/initWebsiteConfig'
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.bg {
+  background-color: #ebb54b80;
+}
+</style>

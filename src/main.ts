@@ -14,9 +14,12 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router, { setupRouter } from './router'
 import { setupStore } from '@/store'
+import { initWebsiteConfig } from '@/settings/initWebsiteConfig'
 
 async function bootstrap() {
   const app = createApp(App)
+  // 初始化系统配置
+  initWebsiteConfig()
   // 挂载状态管理
   setupStore(app)
   // 挂载路由
