@@ -181,7 +181,7 @@ async function init() {
 }
 
 /**
- * 微信jsapi方式支付
+ * 调起支付, 需要根据调用类型发起
  */
 function pay() {
   const amountValue = Number(amount.value)

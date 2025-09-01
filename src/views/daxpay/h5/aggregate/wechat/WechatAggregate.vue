@@ -246,28 +246,26 @@ async function wxAuth() {
  */
 function pay() {
   loading.value = true
-  if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
-    const from = {
-      orderNo: orderNo as string,
-      aggregateType: AggregateEnum.WECHAT,
-      openId: openId.value,
-    } as AggregatePayParam
-    aggregatePay(from).then(({ data, code, msg }) => {
-      loading.value = false
-      if (code) {
-        router.replace({ name: 'payFail', query: { msg }, replace: true })
-        return
-      }
-      // 根据类型拉起对应的支付。 支持跳转和jsapi
-      if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
-        const json = JSON.parse(data.payBody)
-        jsapiPay(json)
-      }
-      if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
-        location.replace(data.payBody as any)
-      }
-    })
-  }
+  const from = {
+    orderNo: orderNo as string,
+    aggregateType: AggregateEnum.WECHAT,
+    openId: openId.value,
+  } as AggregatePayParam
+  aggregatePay(from).then(({ data, code, msg }) => {
+    loading.value = false
+    if (code) {
+      router.replace({ name: 'payFail', query: { msg }, replace: true })
+      return
+    }
+    // 根据类型拉起对应的支付。 支持跳转和jsapi
+    if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
+      const json = JSON.parse(data.payBody)
+      jsapiPay(json)
+    }
+    if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
+      location.replace(data.payBody as any)
+    }
+  })
 }
 
 /**
