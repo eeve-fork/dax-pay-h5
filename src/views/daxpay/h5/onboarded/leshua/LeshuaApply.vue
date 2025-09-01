@@ -214,6 +214,7 @@
               <!-- 营业执照详细地址 -->
               <van-field
                 v-model="form.mchApply.license.licenseAddress"
+                autosize
                 label-align="top"
                 name="licenseAddress"
                 placeholder="请输入营业执照详细地址"
@@ -284,6 +285,7 @@
             <!-- 经营场所详细地址 -->
             <van-field
               v-model="form.mchApply.shop.shopAddress"
+              autosize
               label-align="top"
               name="shopAddress"
               placeholder="请输入经营场所详细地址"

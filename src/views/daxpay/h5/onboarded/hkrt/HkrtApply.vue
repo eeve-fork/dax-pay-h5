@@ -44,7 +44,7 @@
               v-model="form.mchApply.merchant.merchantShortName"
               label-align="top"
               name="merchantShortName"
-              placeholder="请输入"
+              placeholder="请输入商户简称"
               label="商户简称"
               clearable
               :rules="[{ required: true, message: '请输入商户简称' }]"
@@ -112,7 +112,7 @@
               v-model="form.mchApply.legal.legalName"
               label-align="top"
               name="legalName"
-              placeholder="请输入"
+              placeholder="请输入身份证姓名"
               label="身份证姓名"
               clearable
               :rules="[{ required: true, message: '请输入身份证姓名' }]"
@@ -122,7 +122,7 @@
               v-model="form.mchApply.legal.certNo"
               label-align="top"
               name="certNo"
-              placeholder="请输入"
+              placeholder="请输入身份证号码"
               label="身份证号码"
               clearable
               :rules="[{ required: true, message: '请输入身份证号码' }]"
@@ -150,12 +150,21 @@
               placeholder="请选择证件结束时间"
               :rules="[{ required: true, message: '请选择证件结束时间' }]"
             />
+            <van-field
+              v-model="form.mchApply.other.legalIdAddress"
+              autosize
+              label-align="top"
+              name="legalIdAddress"
+              label="证件居住地址"
+              placeholder="请输入证件居住地址"
+              :rules="[{ required: true, message: '请输入证件居住地址' }]"
+            />
             <!-- 联系人手机号 -->
             <van-field
               v-model="form.mchApply.other.contactPhone"
               label-align="top"
               name="contactPhone"
-              placeholder="请输入"
+              placeholder="请输入联系人手机号"
               label="联系人手机号"
               clearable
               :rules="[{ required: true, message: '请输入手机号' }]"
@@ -222,6 +231,7 @@
               <!-- 营业执照详细地址 -->
               <van-field
                 v-model="form.mchApply.license.licenseAddress"
+                autosize
                 label-align="top"
                 name="licenseAddress"
                 placeholder="请输入营业执照详细地址"
@@ -266,7 +276,7 @@
               v-model="form.mchApply.shop.shopName"
               label-align="top"
               name="shopName"
-              placeholder="请输入"
+              placeholder="请输入门店名称"
               label="门店名称"
               :rules="[{ required: true, message: '请输入门店名称' }]"
               clearable
@@ -292,9 +302,10 @@
             <!-- 经营场所详细地址 -->
             <van-field
               v-model="form.mchApply.shop.shopAddress"
+              autosize
               label-align="top"
               name="shopAddress"
-              placeholder="请输入"
+              placeholder="请输入经营场所详细地址"
               label="经营场所详细地址"
               :rules="[{ required: true, message: '请输入经营场所详细地址' }]"
               clearable
@@ -524,7 +535,7 @@
                 v-model="form.mchApply.cardHolder.certNo"
                 label-align="top"
                 name="certNo"
-                placeholder="请输入"
+                placeholder="请输入身份证号码"
                 label="身份证号码"
                 clearable
                 :rules="[{ required: true, message: '请输入身份证号码' }]"
@@ -758,6 +769,7 @@ function ocrIdCardFront() {
     const data = res.data
     form.value.mchApply.legal.legalName = data.name
     form.value.mchApply.legal.certNo = data.idNumber
+    form.value.mchApply.other.legalIdAddress = data.address
   })
 }
 

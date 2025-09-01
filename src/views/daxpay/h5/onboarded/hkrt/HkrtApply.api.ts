@@ -90,6 +90,8 @@ export interface OtherApply {
   legaHandAuthPic?: string
   /** 法人手持结算授权合影 */
   legaHandAuthPicUrl?: string
+  /** 法人证件居住地址 */
+  legalIdAddress?: string
 }
 
 /**

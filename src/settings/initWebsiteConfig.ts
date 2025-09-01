@@ -1,44 +1,36 @@
 import { getWebsite } from '@/api/System.api'
+import {useRoute} from "vue-router";
+
+export const WEBSITE_CONFIG = ref<WebsiteConfig>({})
 
 /**
  * 初始化网站配置, 并且挂到全局
  */
 export function initWebsiteConfig() {
-  window.DAXPAY_WEBSITE_CONFIG = {}
   getWebsite().then((res) => {
-    window.DAXPAY_WEBSITE_CONFIG = res.data
+    WEBSITE_CONFIG.value = res.data
     // @ts-expect-error 动态更新 favicon
     document.getElementById('favicon').href = getFavicon()
-    // 更新标题
-    const projectName = getSystemTitle()
-    document.title = `${projectName}`
   })
 }
 
 /**
- * 获取系统名称
- */
-export function getSystemName() {
-  // return getWebsiteConfig()?.systemName
-  return getSystemTitle()
-}
-/**
  * 获取系统标题
  */
 export function getSystemTitle() {
-  return getWebsiteConfig()?.systemName || ''
+  return WEBSITE_CONFIG.value.systemName || ''
 }
 
 /**
  * 获取系统logo
  */
 export function getSystemLogo() {
-  const wholeLogo = getWebsiteConfig()?.wholeLogo
+  const wholeLogo = WEBSITE_CONFIG.value.wholeLogo
   if (wholeLogo) {
     return `${import.meta.env.VITE_GLOB_API_URL_PREFIX}/file/download/${wholeLogo}`
   }
   else {
-    return '/logo.png'
+    return ''
   }
 }
 
@@ -46,24 +38,13 @@ export function getSystemLogo() {
  * 获取favicon
  */
 export function getFavicon() {
-  const wholeLogo = getWebsiteConfig()?.wholeLogo
+  const wholeLogo = WEBSITE_CONFIG.value.wholeLogo
   if (wholeLogo) {
     return `${import.meta.env.VITE_GLOB_API_URL_PREFIX}/file/download/${wholeLogo}?t=${Date.now()}`
   }
   else {
-    return '/favicon.ico'
+    return ''
   }
-}
-
-/**
- * 获取配置
- * @constructor
- */
-export function getWebsiteConfig() {
-  if (window.DAXPAY_WEBSITE_CONFIG) {
-    return window.DAXPAY_WEBSITE_CONFIG as WebsiteConfig
-  }
-  return {}
 }
 
 /**

@@ -6,7 +6,7 @@ import { useRouteStoreWidthOut } from '@/store/modules/route'
 
 // 菜单
 import { DaxPayH5Route, DaxPayPcRoute } from '@/router/daxpay'
-import {getSystemTitle} from "@/settings/initWebsiteConfig";
+import { getSystemTitle } from '@/settings/initWebsiteConfig'
 
 // 普通路由
 export const constantRouter: RouteRecordRaw[] = [
@@ -30,8 +30,8 @@ const router = createRouter({
 
 // 设置名称
 router.afterEach((to) => {
-  const projectName = getSystemTitle()
-  document.title = `${to.meta.title || '无标题'}-${projectName}`
+  const projectName = computed(() => getSystemTitle())
+  document.title = `${to.meta.title || '无标题'} ${projectName.value}`
 })
 
 export function setupRouter(app: App) {
