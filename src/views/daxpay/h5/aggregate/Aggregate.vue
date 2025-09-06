@@ -12,7 +12,7 @@ const { orderNo } = route.params
 
 const ua = getBrowserUA()
 if (ua === 'wechat') {
-  router.push({ path: `/aggregate/wechat/${orderNo}`, replace: true })
+  router.push({ path: `/aggregate/wechat/w/9/${orderNo}`, replace: true })
 }
 else if (ua === 'alipay') {
   router.push({ path: `/aggregate/alipay/${orderNo}`, replace: true })

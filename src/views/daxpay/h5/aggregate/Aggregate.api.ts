@@ -74,11 +74,11 @@ export function aggregatePay(param: AggregatePayParam) {
  */
 export interface AggregateOrderAndConfig {
   /** 订单信息 */
-  order: GatewayOrder
+  order?: GatewayOrder
   /** 收银台配置信息 */
-  config: GatewayPayConfig
+  config?: GatewayPayConfig
   /** 聚合支付配置信息 */
-  aggregateConfig: AggregateConfig
+  aggregateConfig?: AggregateConfig
 }
 
 /**

@@ -125,5 +125,5 @@ export interface CashierCodeAuthParam {
   // 支付场景
   cashierScene?: string
   // 授权码
-  authCode: string
+  authCode?: string
 }

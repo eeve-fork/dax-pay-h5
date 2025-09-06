@@ -19,8 +19,10 @@ export function authAndSet(param: AuthCodeParam) {
 export interface AuthCodeParam {
   // 通道
   channel?: string
-  // 标识码
+  // 标识码/openId
   authCode?: string
+  // accessToken
+  accessToken?: string
   // 查询Code
   queryCode?: string
   // 认证类型

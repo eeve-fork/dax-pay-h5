@@ -6,7 +6,7 @@
         <div class="payPrice">
           <span class="unit">￥</span>
           <div class="price">
-            {{ orderAndConfig?.order.amount }}
+            {{ orderAndConfig?.order?.amount }}
           </div>
         </div>
         <!-- 支付时间 -->
@@ -19,14 +19,14 @@
         <!-- 订单详情 -->
         <div class="infoBox">
           <div class="payMessItem titleOne">
-            {{ orderAndConfig?.order.title }}
+            {{ orderAndConfig?.order?.title }}
           </div>
           <div class="payMessItem">
             <div class="itemTitle">
               订单编号
             </div>
             <div class="itemContent">
-              {{ orderAndConfig?.order.orderNo }}
+              {{ orderAndConfig?.order?.orderNo }}
             </div>
           </div>
           <div class="payMessItem">
@@ -34,10 +34,10 @@
               商户订单号
             </div>
             <div class="itemContent">
-              {{ orderAndConfig?.order.bizOrderNo }}
+              {{ orderAndConfig?.order?.bizOrderNo }}
             </div>
           </div>
-          <div v-if="orderAndConfig?.order.description" class="payMessItem">
+          <div v-if="orderAndConfig?.order?.description" class="payMessItem">
             <div class="itemTitle">
               订单描述
             </div>
@@ -50,7 +50,7 @@
               订单结束时间
             </div>
             <div class="itemContent">
-              {{ orderAndConfig?.order.expiredTime }}
+              {{ orderAndConfig?.order?.expiredTime }}
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import type {
   AggregateOrderAndConfig,
   AggregatePayParam,
@@ -91,16 +91,15 @@ import { AggregateEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 
 const route = useRoute()
-const { orderNo } = route.params
-const { code: authCode } = route.query
+const { channelAuth: isChannel, channel, orderNo } = route.params
 const show = ref<boolean>(false)
 const isAutoLaunch = ref<boolean>(true)
-const orderAndConfig = ref<AggregateOrderAndConfig>()
+const orderAndConfig = ref<AggregateOrderAndConfig>({})
 const openId = ref<string>('')
 const loading = ref<boolean>(false)
 
 // 认证参数
-const authParam = ref<GatewayAuthCodeParam>({
+const authParam = reactive<GatewayAuthCodeParam>({
   orderNo: orderNo as string,
   aggregateType: AggregateEnum.WECHAT,
 })
@@ -160,10 +159,10 @@ onUnmounted(() => {
 /**
  * 初始化
  */
-function init() {
+async function init() {
   loading.value = true
   // 获取订单和配置信息
-  getAggregateConfig(orderNo, 'wechat_pay').then(async ({ data, msg, code }) => {
+  await getAggregateConfig(orderNo, 'wechat_pay').then(async ({ data, msg, code }) => {
     loading.value = false
     if (code !== 0) {
       // 如果异常，跳转异常页面
@@ -171,70 +170,93 @@ function init() {
         name: 'payFail',
         query: { msg },
       })
-      return
     }
-    // 判断是否需要获取OpenId
-    if (data.aggregateConfig.needOpenId) {
-      // 判断是否已经获取到了authCode, 如果没有则重定向进行获取authCode
-      if (!authCode) {
-        generateAuthUrl({
-          orderNo: orderNo as string,
-          aggregateType: AggregateEnum.WECHAT,
-        })
-          .then((res) => {
-            if (res.code !== 0) {
-              // 如果异常，跳转异常页面
-              router.replace({
-                name: 'payFail',
-                query: { msg },
-              })
-              return
-            }
-            location.replace(res.data)
-          })
-          .catch((res) => {
-            router.replace({
-              name: 'payFail',
-              query: { msg: res.message },
-            })
-          })
+    // 订单信息
+    orderAndConfig.value = data
+  })
+  // 判断是否需要获取OpenId
+  if (orderAndConfig.value?.aggregateConfig?.needOpenId) {
+    // 不等于9说明是微信重定向过来的
+    if (isChannel !== '9') {
+      if (isChannel) {
+        // 通道认证
+        await channelAuth()
         return
       }
       else {
-        authParam.value.authCode = authCode as string
-        // 获取openId
-        await wxAuth()
+        // 微信官方认证
+        await commonAuth()
+        return
       }
     }
-    show.value = true
-    orderAndConfig.value = data
-    // 判断是否自动拉起支付
-    if (orderAndConfig.value.aggregateConfig.autoLaunch) {
-      isAutoLaunch.value = true
-      pay()
-    }
-    else {
-      isAutoLaunch.value = false // 控制是否显示倒计时和时间
-      orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
-      orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
-      resume() // 开启倒计时
-      pay()
-    }
-  })
+    // 生成认证链接
+    generateAuthUrl({
+      orderNo: orderNo as string,
+      aggregateType: AggregateEnum.WECHAT,
+    })
+      .then((res) => {
+        if (res.code !== 0) {
+          // 如果异常，跳转异常页面
+          router.replace({
+            name: 'payFail',
+            query: { msg: res.msg },
+          })
+          return
+        }
+        location.replace(res.data)
+      })
+      .catch((res) => {
+        router.replace({
+          name: 'payFail',
+          query: { msg: res.message },
+        })
+      })
+    return
+  }
+  // 调用支付方法
+  payMethod()
 }
 
 /**
- * 微信认证
+ * 微信官方认证
+ */
+async function commonAuth() {
+  // 认证获取OpenId
+  const { code: authCode } = route.query
+  authParam.authCode = authCode as string
+  await wxAuth()
+}
+
+/**
+ * 通道微信认证
+ */
+async function channelAuth() {
+  // 海科通道
+  if (channel === 'hkrt_pay') {
+    const { openid } = route.query
+    authParam.authCode = openid as string
+    return
+  }
+  // 富友通道
+  if (channel === 'fuyou_pay') {
+    const { openid } = route.query
+    authParam.authCode = openid as string
+  }
+  await wxAuth()
+}
+
+/**
+ * 认证操作
  */
 async function wxAuth() {
-  // 认证获取OpenId
-  await auth(authParam.value)
+  await auth(authParam)
     .then(({ data, code, msg }) => {
       if (code) {
         router.replace({ name: 'payFail', query: { msg }, replace: true })
         return
       }
       openId.value = data.openId as string
+      payMethod()
     })
     .catch((res) => {
       router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
@@ -242,9 +264,28 @@ async function wxAuth() {
 }
 
 /**
+ * 支付方法
+ */
+function payMethod() {
+  show.value = true
+  // 判断是否自动拉起支付
+  if (orderAndConfig.value?.aggregateConfig?.autoLaunch) {
+    isAutoLaunch.value = true
+    payCallback()
+  }
+  else {
+    isAutoLaunch.value = false // 控制是否显示倒计时和时间
+    orderTime.getDownTotalTime(orderAndConfig.value?.order?.expiredTime) // 计算倒计时
+    orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
+    resume() // 开启倒计时
+    payCallback()
+  }
+}
+
+/**
  * 调起支付, 需要根据调用类型发起
  */
-function pay() {
+function payCallback() {
   loading.value = true
   const from = {
     orderNo: orderNo as string,
@@ -257,12 +298,12 @@ function pay() {
       router.replace({ name: 'payFail', query: { msg }, replace: true })
       return
     }
-    // 根据类型拉起对应的支付。 支持跳转和jsapi
-    if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.jsapi) {
+    // 根据类型拉起对应的支付 支持跳转和jsapi
+    if (orderAndConfig.value?.aggregateConfig?.callType === GatewayCallTypeEnum.jsapi) {
       const json = JSON.parse(data.payBody)
       jsapiPay(json)
     }
-    if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
+    if (orderAndConfig.value?.aggregateConfig?.callType === GatewayCallTypeEnum.link) {
       location.replace(data.payBody as any)
     }
   })

@@ -13,7 +13,7 @@ const { code } = route.params
 const ua = getBrowserUA()
 console.log(code)
 if (ua === 'wechat') {
-  router.push({ path: `/wechat/cashier/code/${code}`, replace: true })
+  router.push({ path: `/wechat/cashier/code/w/9/${code}`, replace: true })
 }
 else if (ua === 'alipay') {
   router.push({ path: `/alipay/cashier/code/${code}`, replace: true })

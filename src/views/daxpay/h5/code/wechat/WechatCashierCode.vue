@@ -83,20 +83,24 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { showNotify } from 'vant'
 import type {
+  CashierCodeAuthParam,
   GatewayCashierCodeConfig,
   GatewayCashierCodePayParam,
   WxJsapiSignResult,
 } from '../CashierCode.api'
-
-import { auth, cashierPay, generateAuthUrl, getCashierCodeConfig } from '../CashierCode.api'
+import {
+  auth,
+  cashierPay,
+  generateAuthUrl,
+  getCashierCodeConfig,
+} from '../CashierCode.api'
 
 import { AggregateEnum, CashierSceneEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
 const route = useRoute()
-const { code: cashierCode } = route.params
-const { code: authCode } = route.query
+const { channelAuth: isChannel, channel, code: cashierCode } = route.params
 
 const show = ref<boolean>(false)
 const showRemark = ref<boolean>(false)
@@ -112,13 +116,19 @@ onMounted(() => {
   init()
 })
 
+// 认证参数
+const authParam = reactive<CashierCodeAuthParam>({
+  cashierCode: cashierCode as string,
+  cashierScene: CashierSceneEnum.WECHAT_PAY,
+})
+
 /**
  * 初始化
  */
 async function init() {
   loading.value = true
   getCashierCodeConfig(cashierCode, AggregateEnum.WECHAT)
-    .then((res) => {
+    .then(async (res) => {
       if (res.code) {
         router.replace({ name: 'payFail', query: { msg: res.msg } })
         return
@@ -126,7 +136,7 @@ async function init() {
       loading.value = false
       const data = res.data
       cashierInfo.value = data as any
-      // 判断类型
+      // 判断码牌类型
       if (cashierInfo.value?.amountType === 'fixed') {
         amount.value = data.amount as string
       }
@@ -135,48 +145,86 @@ async function init() {
       }
       // 判断是否需要获取OpenId
       if (data.needOpenId) {
-        // 如果不是重定向跳转过来， 跳转到到重定向地址
-        if (!authCode) {
-          // 重定向跳转到微信授权地址
-          generateAuthUrl(cashierCode, CashierSceneEnum.WECHAT_PAY)
-            .then((res) => {
-              if (res.code) {
-                router.replace({ name: 'payFail', query: { msg: res.msg } })
-                return
-              }
-              const url = res.data
-              location.replace(url)
-            })
-            .catch((res) => {
-              router.replace({ name: 'payFail', query: { msg: res.message } })
-            })
+        // 不等于9说明是微信重定向过来的
+        if (isChannel !== '9') {
+          if (isChannel) {
+            // 通道认证
+            await channelAuth()
+            return
+          }
+          else {
+            // 微信官方认证
+            await commonAuth()
+            return
+          }
         }
-        else {
-          // 认证获取OpenId
-          auth({
-            cashierCode: cashierCode as string,
-            cashierScene: CashierSceneEnum.WECHAT_PAY,
-            authCode: authCode as string,
+
+        // 生成认证链接
+        generateAuthUrl(cashierCode, CashierSceneEnum.WECHAT_PAY)
+          .then((result) => {
+            if (res.code !== 0) {
+              // 如果异常，跳转异常页面
+              router.replace({
+                name: 'payFail',
+                query: { msg: result.msg },
+              })
+              return
+            }
+            location.replace(result.data)
           })
-            .then((res) => {
-              if (res.code) {
-                router.replace({ name: 'payFail', query: { msg: res.msg } })
-                return
-              }
-              openId.value = res.data.openId as string
-              show.value = true
+          .catch((result) => {
+            router.replace({
+              name: 'payFail',
+              query: { msg: result.message },
             })
-            .catch((res) => {
-              router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
-            })
-        }
-      }
-      else {
-        show.value = true
+          })
       }
     })
-    .catch((error) => {
-      router.replace({ name: 'payFail', query: { msg: error } })
+}
+
+/**
+ * 微信官方认证
+ */
+async function commonAuth() {
+  // 认证获取OpenId
+  const { code: authCode } = route.query
+  authParam.authCode = authCode as string
+  await wxAuth()
+}
+
+/**
+ * 通道微信认证
+ */
+async function channelAuth() {
+  // 海科通道
+  if (channel === 'hkrt_pay') {
+    const { openid } = route.query
+    authParam.authCode = openid as string
+    return
+  }
+  // 富友通道
+  if (channel === 'fuyou_pay') {
+    const { openid } = route.query
+    authParam.authCode = openid as string
+  }
+  await wxAuth()
+}
+
+/**
+ * 认证操作
+ */
+async function wxAuth() {
+  await auth(authParam)
+    .then(({ data, code, msg }) => {
+      if (code) {
+        router.replace({ name: 'payFail', query: { msg }, replace: true })
+        return
+      }
+      openId.value = data.openId as string
+      show.value = true
+    })
+    .catch((res) => {
+      router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
     })
 }
 
@@ -219,6 +267,7 @@ function pay() {
  * 拉起Jsapi支付窗口
  */
 function jsapiPay(data: WxJsapiSignResult) {
+  console.log(data)
   const form = {
     appId: data.appId, // 公众号ID，由商户传入
     timeStamp: data.timeStamp, // 时间戳，自1970年以来的秒数

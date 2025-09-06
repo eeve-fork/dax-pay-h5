@@ -19,7 +19,8 @@ export const DaxPayH5Route: RouteRecordRaw = {
       },
     },
     {
-      path: '/auth/wechat/:appId/:channel/:queryCode',
+      // 商户应用ID/支付通道/是否使用三方通道获取OpenId/OpenId查询码
+      path: '/auth/wechat/:appId/:channel/:channelAuth/:queryCode',
       name: 'WechatAuth',
       component: () => import('@/views/daxpay/h5/auth/wechat/WechatAuth.vue'),
       meta: {
@@ -51,7 +52,8 @@ export const DaxPayH5Route: RouteRecordRaw = {
       },
     },
     {
-      path: '/wechat/cashier/code/:code',
+      // 支付通道/是否使用三方通道获取OpenId/码牌编号
+      path: '/wechat/cashier/code/:channel/:channelAuth/:code',
       name: 'WechatCashierCode',
       component: () => import('@/views/daxpay/h5/code/wechat/WechatCashierCode.vue'),
       meta: {
@@ -75,7 +77,8 @@ export const DaxPayH5Route: RouteRecordRaw = {
       },
     },
     {
-      path: '/aggregate/wechat/:orderNo',
+      // 支付通道/是否使用三方通道获取OpenId/订单号
+      path: '/aggregate/wechat/:channel/:channelAuth/:orderNo',
       name: 'WechatCheckout',
       component: () => import('@/views/daxpay/h5/aggregate/wechat/WechatAggregate.vue'),
       meta: {
