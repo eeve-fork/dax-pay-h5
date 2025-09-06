@@ -61,6 +61,11 @@ function channelAuth() {
     param.authCode = openid as string
     param.accessToken = access_token as string
   }
+  // 杉德通道
+  if (channel === 'sand_pay') {
+    const { buyer_id } = route.query
+    param.authCode = buyer_id as string
+  }
   auth(param)
 }
 

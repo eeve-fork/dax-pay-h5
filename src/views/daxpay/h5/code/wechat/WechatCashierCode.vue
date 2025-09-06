@@ -207,6 +207,11 @@ async function channelAuth() {
     const { openid } = route.query
     authParam.authCode = openid as string
   }
+  // 杉德通道
+  if (channel === 'sand_pay') {
+    const { buyer_id } = route.query
+    authParam.authCode = buyer_id as string
+  }
   await wxAuth()
 }
 
