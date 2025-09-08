@@ -89,6 +89,7 @@ import {
 
 import { AggregateEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
+import {getChannelAuthResult} from "@/utils/channelAuthUtil";
 
 const route = useRoute()
 const { channelAuth: isChannel, channel, orderNo } = route.params
@@ -231,22 +232,9 @@ async function commonAuth() {
  * 通道微信认证
  */
 async function channelAuth() {
-  // 海科通道
-  if (channel === 'hkrt_pay') {
-    const { openid } = route.query
-    authParam.authCode = openid as string
-    return
-  }
-  // 富友通道
-  if (channel === 'fuyou_pay') {
-    const { openid } = route.query
-    authParam.authCode = openid as string
-  }
-  // 杉德通道
-  if (channel === 'sand_pay') {
-    const { buyer_id } = route.query
-    authParam.authCode = buyer_id as string
-  }
+  // 获取回调的参数结果
+  const { openId } = getChannelAuthResult(channel as string, route.query)
+  authParam.authCode = openId
   await wxAuth()
 }
 

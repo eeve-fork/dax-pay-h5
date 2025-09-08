@@ -1,7 +1,7 @@
 <template>
   <van-overlay v-show="show" :show="true">
     <div class="loading-wrapper" @click.stop>
-      <van-loading size="24px">
+      <van-loading v-if="wxOpenId" size="24px">
         获取中...
       </van-loading>
     </div>
@@ -13,12 +13,17 @@ import { useRoute } from 'vue-router'
 import { onMounted, reactive, ref } from 'vue'
 import { showDialog } from 'vant'
 import type { AuthCodeParam } from '@/views/daxpay/h5/auth/ChannelAuth.api'
-import { authAndSet } from '@/views/daxpay/h5/auth/ChannelAuth.api'
+import { authAndGet } from '@/views/daxpay/h5/auth/ChannelAuth.api'
 import router from '@/router'
+import { getChannelAuthResult } from '@/utils/channelAuthUtil'
+import { useCopy } from '@/hooks/useCopy'
 
 const route = useRoute()
 const { appId, channel, channelAuth: isChannel, queryCode } = route.params
 const show = ref(true)
+const wxOpenId = ref('')
+
+const { copy } = useCopy()
 
 onMounted(() => {
   init()
@@ -49,23 +54,10 @@ function channelAuth() {
     channel: channel as string,
   })
 
-  // 海科通道
-  if (channel === 'hkrt_pay') {
-    const { openid } = route.query
-    param.authCode = openid as string
-    return
-  }
-  // 富友通道
-  if (channel === 'fuyou_pay') {
-    const { openid, access_token } = route.query
-    param.authCode = openid as string
-    param.accessToken = access_token as string
-  }
-  // 杉德通道
-  if (channel === 'sand_pay') {
-    const { buyer_id } = route.query
-    param.authCode = buyer_id as string
-  }
+  // 获取回调的参数结果
+  const { openId, accessToken } = getChannelAuthResult(channel as string, route.query)
+  param.authCode = openId
+  param.accessToken = accessToken
   auth(param)
 }
 
@@ -87,17 +79,18 @@ function commonAuth() {
 /**
  * 认证
  */
-function auth(param){
-  authAndSet(param).then(({ code, msg }) => {
+function auth(param) {
+  authAndGet(param).then(({ code, data, msg }) => {
     if (code !== 0) {
       router.replace({ name: 'payFail', query: { msg, title: '获取信息失败' } })
       return
     }
     show.value = false
     showDialog({
-      message: '已成功获取用户信息!',
-      confirmButtonText: '关闭',
+      message: `已成功获取用户OpenId: ${data.openId}!`,
+      confirmButtonText: '复制并关闭',
     }).then(() => {
+      copy(data.openId)
       WeixinJSBridge.call('closeWindow')
     })
   })

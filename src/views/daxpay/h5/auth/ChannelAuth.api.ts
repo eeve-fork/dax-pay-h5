@@ -5,9 +5,9 @@ import type { Result } from '#/axios'
  * 通过AuthCode获取并设置认证结果
  * @param param
  */
-export function authAndSet(param: AuthCodeParam) {
-  return http.request<Result>({
-    url: '/unipay/assist/channel/auth/authAndSet',
+export function authAndGet(param: AuthCodeParam) {
+  return http.request<Result<AuthResult>>({
+    url: '/unipay/assist/channel/auth/auth',
     method: 'POST',
     data: param,
   })
@@ -32,7 +32,7 @@ export interface AuthCodeParam {
 }
 
 /**
- * AuthResult
+ * 认证结果
  */
 export interface AuthResult {
   // OpenId

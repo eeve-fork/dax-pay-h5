@@ -1,7 +1,7 @@
 <template>
   <van-overlay v-show="show" :show="true">
     <div class="loading-wrapper" @click.stop>
-      <van-loading size="24px">
+      <van-loading v-if="aliUserId" size="24px">
         获取中...
       </van-loading>
     </div>
@@ -13,8 +13,9 @@ import { useRoute } from 'vue-router'
 import { ref } from 'vue'
 import { showDialog } from 'vant'
 import type { AuthCodeParam } from '@/views/daxpay/h5/auth/ChannelAuth.api'
-import { authAndSet } from '@/views/daxpay/h5/auth/ChannelAuth.api'
+import { authAndGet } from '@/views/daxpay/h5/auth/ChannelAuth.api'
 import router from '@/router'
+import { useCopy } from '@/hooks/useCopy'
 
 const script = document.createElement('script')
 script.setAttribute(
@@ -31,7 +32,9 @@ const route = useRoute()
 const { appId, channel, queryCode, aliAppId } = route.params
 
 const show = ref(true)
+const aliUserId = ref('')
 
+const { copy } = useCopy()
 /**
  * 页面初始化
  */
@@ -48,16 +51,24 @@ async function init() {
       authCode: authCode as string,
       channel: channel as string,
     })
-    authAndSet(param.value).then(({ code, msg }) => {
+    authAndGet(param.value).then(({ code, data, msg }) => {
       if (code !== 0) {
         router.replace({ name: 'payFail', query: { msg, title: '获取信息失败' } })
         return
       }
       show.value = false
+      let title
+      if (data.userId) {
+        title = `已成功获取用户ID: ${data.userId}!`
+      }
+      else {
+        title = `已成功获取用户OpenId: ${data.openId}!`
+      }
       showDialog({
-        message: '已成功获取用户信息!',
-        confirmButtonText: '关闭',
+        message: title,
+        confirmButtonText: '复制并关闭',
       }).then(() => {
+        copy(data.openId)
         AlipayJSBridge.call('closeWebview')
       })
     })
