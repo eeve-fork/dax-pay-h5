@@ -1,5 +1,4 @@
 import { getWebsite } from '@/api/System.api'
-import {useRoute} from "vue-router";
 
 export const WEBSITE_CONFIG = ref<WebsiteConfig>({})
 

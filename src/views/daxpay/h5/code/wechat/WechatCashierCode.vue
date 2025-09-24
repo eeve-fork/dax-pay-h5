@@ -148,7 +148,7 @@ async function init() {
       if (data.needOpenId) {
         // 不等于9说明是微信重定向过来的
         if (isChannel !== '9') {
-          if (isChannel) {
+          if (isChannel === '1') {
             // 通道认证
             await channelAuth()
             return

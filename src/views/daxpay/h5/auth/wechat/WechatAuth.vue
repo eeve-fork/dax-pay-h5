@@ -33,7 +33,7 @@ onMounted(() => {
  * 页面初始化
  */
 async function init() {
-  if (isChannel) {
+  if (isChannel === '1') {
     // 通道封装认证方式
     channelAuth()
   }
