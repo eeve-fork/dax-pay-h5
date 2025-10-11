@@ -1,4 +1,3 @@
-
 /**
  * 商户进件申请单
  */
@@ -49,19 +48,23 @@ export interface OnbLegalApply {
   /** 身份证号 */
   certNo?: string
   /** 身份证有效期类型 */
-  certPeriodLong?: boolean
+  periodLong?: boolean
   /** 身份证开始时间 */
-  certStartDate?: string
+  startDate?: string
   /** 身份证结束时间 */
-  certEndDate?: string
+  endDate?: string
   /** 身份证正面照片 */
-  certFrontPic?: string
+  frontPic?: string
   /** 身份证正面照片路径 */
-  certFrontPicUrl?: string
+  frontPicUrl?: string
   /** 身份证反面照片 */
-  certBackPic?: string
+  backPic?: string
   /** 身份证反面照片路径 */
-  certBackPicUrl?: string
+  backPicUrl?: string
+  /** 联系人手机号 */
+  contactPhone?: string
+  /** 证件居住地址 */
+  address?: string
 }
 /**
  * 进件营业执照信息
@@ -74,15 +77,15 @@ export interface OnbLicenseApply {
   /** 营业执照名称 */
   licenseName?: string
   /** 执照地址-省市区编码 */
-  licenseRegionCode?: string[]
+  regionCode?: string[]
   /** 营业执照详细地址 */
-  licenseAddress?: string
+  address?: string
   /** 营业执照有效期类型 */
-  licensePeriodLong?: boolean
+  periodLong?: boolean
   /** 营业执照开始日期 */
-  licenseStartDate?: string
+  startDate?: string
   /** 营业执照结束日期 */
-  licenseEndDate?: string
+  endDate?: string
   /** 营业执照照片 */
   licensePic?: string
   /** 营业执照照片路径 */
@@ -95,23 +98,23 @@ export interface OnbLicenseApply {
  */
 export interface OnbShopApply {
   /** 经营场所名称 */
-  shopName?: string
+  name?: string
   /** 省市区编码 */
-  shopRegionCode?: string[]
+  regionCode?: string[]
   /** 经营场所详细地址 */
-  shopAddress?: string
+  address?: string
   /** 门头照 */
-  shopDoorPic?: string
+  doorPic?: string
   /** 门头照路径 */
-  shopDoorPicUrl?: string
+  doorPicUrl?: string
   /** 室内照 */
-  shopInsidePic?: string
+  insidePic?: string
   /** 室内照路径 */
-  shopInsidePicUrl?: string
+  insidePicUrl?: string
   /** 收银台照片 */
-  shopCashierPic?: string
+  cashierPic?: string
   /** 收银台照片路径 */
-  shopCashierPicUrl?: string
+  cashierPicUrl?: string
 }
 
 /**
@@ -121,19 +124,19 @@ export interface OnbShopApply {
  */
 export interface OnbBankAccountApply {
   /** 账户类型 */
-  bankAccountType?: string
+  accountType?: string
   /** 银行卡账户名 */
-  bankAccountName?: string
+  accountName?: string
   /** 银行卡号 */
-  bankCardNo?: string
+  cardNo?: string
   /** 银行卡开户行联行号 */
-  bankBranchNo?: string
+  branchNo?: string
   /** 银行预留手机号 */
-  bankPhone?: string
+  phone?: string
   /** 银行卡正面照片 */
-  bankCardPic?: string
+  cardFrontPic?: string
   /** 银行卡正面照片路径 */
-  bankCardPicUrl?: string
+  cardFrontPicUrl?: string
 }
 
 /**
@@ -147,19 +150,19 @@ export interface OnbCardHolderApply {
   /** 身份证号 */
   certNo?: string
   /** 身份证有效期类型 */
-  certPeriodLong?: boolean
+  periodLong?: boolean
   /** 身份证开始时间 */
-  certStartDate?: string
+  startDate?: string
   /** 身份证结束时间 */
-  certEndDate?: string
+  endDate?: string
   /** 身份证正面照片 */
-  certFrontPic?: string
+  frontPic?: string
   /** 身份证正面照片路径 */
-  certFrontPicUrl?: string
+  frontPicUrl?: string
   /** 身份证反面照片 */
-  certBackPic?: string
+  backPic?: string
   /** 身份证反面照片路径 */
-  certBackPicUrl?: string
+  backPicUrl?: string
   /** 非法人结算授权函图片 */
   letterOfAuthPic?: string
   /** 非法人结算授权函图片路径 */

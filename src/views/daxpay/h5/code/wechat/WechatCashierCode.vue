@@ -98,7 +98,7 @@ import {
 import { AggregateEnum, CashierSceneEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
-import {getChannelAuthResult} from "@/utils/channelAuthUtil";
+import { getChannelAuthResult } from '@/utils/channelAuthUtil'
 
 const route = useRoute()
 const { channelAuth: isChannel, channel, code: cashierCode } = route.params

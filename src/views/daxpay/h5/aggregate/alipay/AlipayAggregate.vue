@@ -78,7 +78,7 @@ import type {
   AggregateOrderAndConfig,
   AggregatePayParam,
 } from '@/views/daxpay/h5/aggregate/Aggregate.api'
-import { aggregatePay, getAggregateConfig } from '@/views/daxpay/h5/aggregate/Aggregate.api'
+import { aggregatePay, getQrPayConfig } from '@/views/daxpay/h5/aggregate/Aggregate.api'
 
 import { AggregateEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 
@@ -87,7 +87,7 @@ const router = useRouter()
 const { orderNo } = route.params
 const show = ref<boolean>(false)
 const isAutoLaunch = ref<boolean>(true)
-const orderAndConfig = ref<AggregateOrderAndConfig>()
+const orderAndConfig = ref<AggregateOrderAndConfig>({})
 const loading = ref<boolean>(false)
 
 // 倒计时对象
@@ -138,7 +138,7 @@ watch(
 function init() {
   loading.value = true
   // 获取订单和配置信息
-  getAggregateConfig(orderNo, 'alipay').then(async ({ data, code, msg }) => {
+  getQrPayConfig(orderNo, 'alipay').then(async ({ data, code, msg }) => {
     loading.value = false
     if (code) {
       router.replace({ name: 'payFail', query: { msg } })
@@ -147,7 +147,7 @@ function init() {
     show.value = true
     orderAndConfig.value = data
     // 判断是否自动拉起支付
-    if (orderAndConfig.value.aggregateConfig.autoLaunch) {
+    if (orderAndConfig.value?.aggregateConfig?.autoLaunch) {
       isAutoLaunch.value = true
       pay()
     }
@@ -166,10 +166,10 @@ function init() {
  */
 function pay() {
   loading.value = true
-  if (orderAndConfig.value?.aggregateConfig.callType === GatewayCallTypeEnum.link) {
+  if (orderAndConfig.value?.aggregateConfig?.callType === GatewayCallTypeEnum.link) {
     const from = {
       orderNo: orderNo as string,
-      aggregateType: AggregateEnum.ALI,
+      scene: AggregateEnum.ALI,
     } as AggregatePayParam
     aggregatePay(from).then(({ data, code, msg }) => {
       loading.value = false

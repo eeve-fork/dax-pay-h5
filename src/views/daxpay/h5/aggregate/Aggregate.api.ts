@@ -6,22 +6,22 @@ import type { GatewayOrder, GatewayPayConfig } from '@/views/daxpay/h5/cashier/C
 /**
  * 获取聚合支付相关订单和配置信息
  */
-export function getAggregateConfig(orderNo, aggregateType) {
+export function getQrPayConfig(orderNo, scene) {
   return http.request<Result<AggregateOrderAndConfig>>({
-    url: '/unipay/gateway/getAggregateConfig',
+    url: '/unipay/gateway/getQrPayConfig',
     method: 'GET',
-    params: { orderNo, aggregateType },
+    params: { orderNo, scene },
   })
 }
 
 /**
  * 获取收银台所需授权链接, 用于获取OpenId一类的信息
  */
-export function generateAuthUrl(param: GatewayAuthUrlParam) {
+export function generateAuthUrl(orderNo, scene) {
   return http.request<Result<string>>({
     url: '/unipay/gateway/generateAuthUrl',
     method: 'POST',
-    data: param,
+    data: { orderNo, scene },
   })
 }
 
@@ -33,17 +33,6 @@ export function auth(param: GatewayAuthCodeParam) {
     url: '/unipay/gateway/auth',
     method: 'POST',
     data: param,
-  })
-}
-
-/**
- * 支付成功获取状态
- */
-export function getSuccessOrderStatus(orderNo) {
-  return http.request<Result<paySuccess>>({
-    url: '/unipay/gateway/findStatusByOrderNo',
-    method: 'POST',
-    params: { orderNo },
   })
 }
 
@@ -63,7 +52,7 @@ export function getSuccessOrderMessage(orderNo) {
  */
 export function aggregatePay(param: AggregatePayParam) {
   return http.request<Result<PayResult>>({
-    url: '/unipay/gateway/aggregatePay',
+    url: '/unipay/gateway/qrPay',
     method: 'POST',
     data: param,
   })
@@ -86,7 +75,7 @@ export interface AggregateOrderAndConfig {
  */
 export interface AggregateConfig {
   /** 支付类型 */
-  aggregateType?: string
+  scene?: string
   /** 通道 */
   channel?: string
   /** 支付方式 */
@@ -108,7 +97,7 @@ export interface GatewayAuthUrlParam {
   // 订单号
   orderNo?: string
   // 聚合支付类型
-  aggregateType?: string
+  scene?: string
 }
 
 /**
@@ -118,7 +107,7 @@ export interface GatewayAuthCodeParam {
   // 订单号
   orderNo?: string
   // 聚合支付类型
-  aggregateType?: string
+  scene?: string
   // 授权码
   authCode?: string
 }
@@ -130,7 +119,7 @@ export interface AggregatePayParam {
   // 订单
   orderNo?: string
   // 聚合支付类型
-  aggregateType?: string
+  scene?: string
   // 唯一标识
   openId?: string
 }

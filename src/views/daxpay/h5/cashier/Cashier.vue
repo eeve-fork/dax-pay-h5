@@ -168,7 +168,7 @@ function payClick() {
     loading.value = true
     const form = {
       orderNo,
-      itemId: selectId.value,
+      configId: selectId.value,
     }
     payOrder(form as any)
       .then(({ data, code, msg }) => {

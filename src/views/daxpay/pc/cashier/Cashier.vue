@@ -134,6 +134,7 @@
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import vueQr from 'vue-qr/src/packages/vue-qr.vue'
+import { useIntervalFn } from '@vueuse/core'
 import { getOrderAndConfig, orderStatus, payOrder } from '@/views/daxpay/pc/cashier/Cashier.api'
 import type { CashierConfig, OrderAndConfig } from '@/views/daxpay/pc/cashier/Cashier.api'
 import { GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
@@ -227,7 +228,7 @@ const payMethObj = reactive({
   // 点击支付
   toPayTypeClick: () => {
     loading.value = true
-    payOrder({ orderNo: orderNo as string, itemId: payMethObj.itemClickObj?.id as any }).then(
+    payOrder({ orderNo: orderNo as string, configId: payMethObj.itemClickObj?.id as any }).then(
       ({ code, data, msg }) => {
         if (code !== 0) {
           router.replace({ path: `/pc/payFail`, query: { msg } })

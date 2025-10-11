@@ -84,12 +84,12 @@ import {
   aggregatePay,
   auth,
   generateAuthUrl,
-  getAggregateConfig,
+  getQrPayConfig,
 } from '@/views/daxpay/h5/aggregate/Aggregate.api'
 
 import { AggregateEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
-import {getChannelAuthResult} from "@/utils/channelAuthUtil";
+import { getChannelAuthResult } from '@/utils/channelAuthUtil'
 
 const route = useRoute()
 const { channelAuth: isChannel, channel, orderNo } = route.params
@@ -102,7 +102,7 @@ const loading = ref<boolean>(false)
 // 认证参数
 const authParam = reactive<GatewayAuthCodeParam>({
   orderNo: orderNo as string,
-  aggregateType: AggregateEnum.WECHAT,
+  scene: AggregateEnum.WECHAT,
 })
 
 // 倒计时对象
@@ -163,7 +163,7 @@ onUnmounted(() => {
 async function init() {
   loading.value = true
   // 获取订单和配置信息
-  await getAggregateConfig(orderNo, 'wechat_pay').then(async ({ data, msg, code }) => {
+  await getQrPayConfig(orderNo, 'wechat_pay').then(async ({ data, msg, code }) => {
     loading.value = false
     if (code !== 0) {
       // 如果异常，跳转异常页面
@@ -191,10 +191,7 @@ async function init() {
       }
     }
     // 生成认证链接
-    generateAuthUrl({
-      orderNo: orderNo as string,
-      aggregateType: AggregateEnum.WECHAT,
-    })
+    generateAuthUrl(orderNo as string, AggregateEnum.WECHAT)
       .then((res) => {
         if (res.code !== 0) {
           // 如果异常，跳转异常页面
@@ -282,7 +279,7 @@ function payCallback() {
   loading.value = true
   const from = {
     orderNo: orderNo as string,
-    aggregateType: AggregateEnum.WECHAT,
+    scene: AggregateEnum.WECHAT,
     openId: openId.value,
   } as AggregatePayParam
   aggregatePay(from).then(({ data, code, msg }) => {

@@ -4,7 +4,6 @@ import axios from 'axios'
 import { showDialog, showFailToast } from 'vant'
 import { VAxios } from './Axios'
 import type { AxiosTransform } from './axiosTransform'
-import { checkStatus } from './checkStatus'
 import { formatRequestDate, joinTimestamp } from './helper'
 import type { CreateAxiosOptions, RequestOptions } from './types'
 import { ContentTypeEnum, RequestEnum, ResultEnum } from '@/enums/httpEnum'
@@ -178,7 +177,7 @@ const transform: AxiosTransform = {
     // 请求是否被取消
     const isCancel = axios.isCancel(error)
     if (!isCancel) {
-      checkStatus(error.response && error.response.status, msg)
+      showFailToast(msg)
     }
     else {
       console.warn(error, '请求被取消！')

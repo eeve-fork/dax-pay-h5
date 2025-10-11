@@ -6,9 +6,9 @@ import type { Result } from '#/axios'
  */
 export function getOrderAndConfig(orderNo) {
   return http.request<Result<OrderAndConfig>>({
-    url: '/unipay/gateway/getOrderAndConfig',
+    url: '/unipay/gateway/checkout/getOrderAndConfig',
     method: 'GET',
-    params: { orderNo, cashierType: 'pc' },
+    params: { orderNo, type: 'pc' },
   })
 }
 /**
@@ -16,7 +16,7 @@ export function getOrderAndConfig(orderNo) {
  */
 export function payOrder(data: payParam) {
   return http.request<Result<payConfig>>({
-    url: '/unipay/gateway/cashier/pay',
+    url: '/unipay/gateway/checkout/pay',
     method: 'POST',
     data,
   })

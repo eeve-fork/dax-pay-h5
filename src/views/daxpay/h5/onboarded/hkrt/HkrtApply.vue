@@ -56,7 +56,7 @@
           <van-cell-group inset>
             <!-- 身份证正面 -->
             <van-field
-              name="certFrontPicUrl"
+              name="frontPicUrl"
               label="身份证正面"
               label-align="top"
               :rules="[{ required: true, message: '请上传身份证正面图片' }]"
@@ -64,12 +64,12 @@
               <template #input>
                 <div class="readOcr">
                   <BUpload
-                    v-model:pic-url="form.mchApply.legal.certFrontPicUrl"
-                    v-model:pic-id="form.mchApply.legal.certFrontPic"
+                    v-model:pic-url="form.mchApply.legal.frontPicUrl"
+                    v-model:pic-id="form.mchApply.legal.frontPic"
                     :web-header="headers"
                   />
                   <van-button
-                    v-if="form.mchApply.legal.certFrontPicUrl"
+                    v-if="form.mchApply.legal.frontPicUrl"
                     class="readOcrBtn"
                     hairline
                     plain
@@ -83,7 +83,7 @@
             </van-field>
             <!-- 身份证反面 -->
             <van-field
-              name="certBackPic"
+              name="backPic"
               label="身份证反面"
               label-align="top"
               :rules="[{ required: true, message: '请上传身份证反面图片' }]"
@@ -91,11 +91,11 @@
               <template #input>
                 <div class="readOcr">
                   <BUpload
-                    v-model:pic-url="form.mchApply.legal.certBackPicUrl"
-                    v-model:pic-id="form.mchApply.legal.certBackPic"
+                    v-model:pic-url="form.mchApply.legal.backPicUrl"
+                    v-model:pic-id="form.mchApply.legal.backPic"
                     :web-header="headers"
                   /><van-button
-                    v-if="form.mchApply.legal.certBackPicUrl"
+                    v-if="form.mchApply.legal.backPicUrl"
                     class="readOcrBtn"
                     hairline
                     plain
@@ -130,38 +130,38 @@
             <!-- 身份证有效期 -->
             <van-field label="长期有效" label-align="top">
               <template #input>
-                <van-switch v-model="form.mchApply.legal.certPeriodLong" />
+                <van-switch v-model="form.mchApply.legal.periodLong" />
               </template>
             </van-field>
             <!-- 证件有效期开始日期 -->
             <BDatePicker
-              v-model="form.mchApply.legal.certStartDate"
-              name="certStartDate"
+              v-model="form.mchApply.legal.startDate"
+              name="startDate"
               label="证件开始日期"
               placeholder="请选择证件有效期开始日期"
               :rules="[{ required: true, message: '请选择证件开始时间' }]"
             />
             <!-- 证件有效期结束日期 -->
             <BDatePicker
-              v-if="!form.mchApply.legal.certPeriodLong"
-              v-model="form.mchApply.legal.certEndDate"
-              name="certEndDate"
+              v-if="!form.mchApply.legal.periodLong"
+              v-model="form.mchApply.legal.endDate"
+              name="endDate"
               label="证件有效期结束日期"
               placeholder="请选择证件结束时间"
               :rules="[{ required: true, message: '请选择证件结束时间' }]"
             />
             <van-field
-              v-model="form.mchApply.other.legalIdAddress"
+              v-model="form.mchApply.legal.address"
               autosize
               label-align="top"
-              name="legalIdAddress"
+              name="address"
               label="证件居住地址"
               placeholder="请输入证件居住地址"
               :rules="[{ required: true, message: '请输入证件居住地址' }]"
             />
             <!-- 联系人手机号 -->
             <van-field
-              v-model="form.mchApply.other.contactPhone"
+              v-model="form.mchApply.legal.contactPhone"
               label-align="top"
               name="contactPhone"
               placeholder="请输入联系人手机号"
@@ -228,39 +228,38 @@
                 :rules="[{ required: true, message: '请选择营业执照所在区县' }]"
                 :options="pca"
               />
-              <!-- 营业执照详细地址 -->
+              <!-- 营业执照注册地址 -->
               <van-field
-                v-model="form.mchApply.license.licenseAddress"
+                v-model="form.mchApply.license.address"
                 autosize
                 label-align="top"
-                name="licenseAddress"
-                placeholder="请输入营业执照详细地址"
-                label="营业执照详细地址"
-                clearable
-                :rules="[{ required: true, message: '请输入营业执照详细地址' }]"
+                name="address"
+                label="营业执照注册地址"
+                placeholder="请输入营业执照注册地址"
+                :rules="[{ required: true, message: '请输入营业执照注册地址' }]"
               />
-              <!-- 注册有效期 -->
+              <!-- 营业执照有效期 -->
               <van-field label="长期有效" label-align="top">
                 <template #input>
-                  <van-switch v-model="form.mchApply.license.licensePeriodLong" />
+                  <van-switch v-model="form.mchApply.license.periodLong" />
                 </template>
               </van-field>
-              <!-- 开始日期 -->
+              <!-- 营业执照有效期开始日期 -->
               <BDatePicker
-                v-model="form.mchApply.license.licenseStartDate"
-                name="licenseStartDate"
-                label="开始日期"
-                placeholder="请选择注册开始日期"
-                :rules="[{ required: true, message: '请选择注册开始日期' }]"
+                v-model="form.mchApply.license.startDate"
+                name="startDate"
+                label="营业执照开始日期"
+                placeholder="请选择营业执照有效期开始日期"
+                :rules="[{ required: true, message: '请选择营业执照开始时间' }]"
               />
-              <!-- 结束日期 -->
+              <!-- 营业执照有效期结束日期 -->
               <BDatePicker
-                v-if="!form.mchApply.license.licensePeriodLong"
-                v-model="form.mchApply.license.licenseEndDate"
-                name="licenseEndDate"
-                label="结束日期"
-                placeholder="请选择注册结束日期"
-                :rules="[{ required: true, message: '请选择注册结束日期' }]"
+                v-if="!form.mchApply.license.periodLong"
+                v-model="form.mchApply.license.endDate"
+                name="endDate"
+                label="营业执照有效期结束日期"
+                placeholder="请选择营业执照结束时间"
+                :rules="[{ required: true, message: '请选择营业执照结束时间' }]"
               />
             </van-cell-group>
           </template>
@@ -273,13 +272,13 @@
           <van-cell-group inset>
             <!-- 门店名称 -->
             <van-field
-              v-model="form.mchApply.shop.shopName"
+              v-model="form.mchApply.shop.name"
               label-align="top"
-              name="shopName"
+              name="name"
               placeholder="请输入门店名称"
               label="门店名称"
-              :rules="[{ required: true, message: '请输入门店名称' }]"
               clearable
+              :rules="[{ required: true, message: '请输入门店名称' }]"
             />
             <!-- 经营类目 -->
             <b-cascader
@@ -301,53 +300,56 @@
             />
             <!-- 经营场所详细地址 -->
             <van-field
-              v-model="form.mchApply.shop.shopAddress"
+              v-model="form.mchApply.shop.address"
               autosize
               label-align="top"
-              name="shopAddress"
+              name="address"
               placeholder="请输入经营场所详细地址"
               label="经营场所详细地址"
-              :rules="[{ required: true, message: '请输入经营场所详细地址' }]"
               clearable
+              :rules="[{ required: true, message: '请输入经营场所详细地址' }]"
             />
+            <!-- 门头照 -->
             <van-field
-              name="shopDoorPicUrl"
-              label="商户门头图片"
+              name="doorPic"
+              label="门头照"
               label-align="top"
-              :rules="[{ required: true, message: '请选择商户门头图片' }]"
+              :rules="[{ required: true, message: '请上传门头照' }]"
             >
               <template #input>
                 <BUpload
-                  v-model:pic-url="form.mchApply.shop.shopDoorPicUrl"
-                  v-model:pic-id="form.mchApply.shop.shopDoorPic"
+                  v-model:pic-url="form.mchApply.shop.doorPicUrl"
+                  v-model:pic-id="form.mchApply.shop.doorPic"
                   :web-header="headers"
                 />
               </template>
             </van-field>
+            <!-- 店内照 -->
             <van-field
-              name="shopInsidePicUrl"
-              label="营业场所室内照片"
+              name="insidePic"
+              label="店内照"
               label-align="top"
-              :rules="[{ required: true, message: '请选择营业场所室内照片' }]"
+              :rules="[{ required: true, message: '请上传店内照' }]"
             >
               <template #input>
                 <BUpload
-                  v-model:pic-url="form.mchApply.shop.shopInsidePicUrl"
-                  v-model:pic-id="form.mchApply.shop.shopInsidePic"
+                  v-model:pic-url="form.mchApply.shop.insidePicUrl"
+                  v-model:pic-id="form.mchApply.shop.insidePic"
                   :web-header="headers"
                 />
               </template>
             </van-field>
+            <!-- 收银台照 -->
             <van-field
-              name="shopCashierPicUrl"
-              label="营业场所收银台照片"
+              name="cashierPic"
+              label="收银台照"
               label-align="top"
-              :rules="[{ required: true, message: '请选择营业场所收银台照片' }]"
+              :rules="[{ required: true, message: '请上传收银台照' }]"
             >
               <template #input>
                 <BUpload
-                  v-model:pic-url="form.mchApply.shop.shopCashierPicUrl"
-                  v-model:pic-id="form.mchApply.shop.shopCashierPic"
+                  v-model:pic-url="form.mchApply.shop.cashierPicUrl"
+                  v-model:pic-id="form.mchApply.shop.cashierPic"
                   :web-header="headers"
                 />
               </template>
@@ -425,26 +427,78 @@
                 </div>
               </template>
             </van-field>
-            <!-- 银行卡账户名 -->
+            <!-- 账户类型 -->
             <van-field
-              v-model="form.mchApply.bankAccount.bankAccountName"
+              v-model="form.mchApply.bankAccount.accountType"
+              is-link
+              readonly
+              name="accountType"
+              label="账户类型"
+              placeholder="请选择账户类型"
+              @click="showAccountTypePicker = true"
+            />
+            <van-popup v-model:show="showAccountTypePicker" position="bottom">
+              <van-picker
+                :columns="accountTypeColumns"
+                @confirm="onAccountTypeConfirm"
+                @cancel="showAccountTypePicker = false"
+              />
+            </van-popup>
+            <!-- 开户名 -->
+            <van-field
+              v-model="form.mchApply.bankAccount.accountName"
               label-align="top"
-              name="bankAccountName"
-              placeholder="请输入银行卡账户名"
-              label="银行卡账户名"
-              :rules="[{ required: true, message: '请输入银行卡账户名' }]"
+              name="accountName"
+              placeholder="请输入开户名"
+              label="开户名"
               clearable
+              :rules="[{ required: true, message: '请输入开户名' }]"
             />
             <!-- 银行卡号 -->
             <van-field
-              v-model="form.mchApply.bankAccount.bankCardNo"
+              v-model="form.mchApply.bankAccount.cardNo"
               label-align="top"
-              name="bankCardNo"
+              name="cardNo"
               placeholder="请输入银行卡号"
               label="银行卡号"
               clearable
               :rules="[{ required: true, message: '请输入银行卡号' }]"
             />
+            <!-- 开户支行号 -->
+            <van-field
+              v-model="form.mchApply.bankAccount.branchNo"
+              label-align="top"
+              name="branchNo"
+              placeholder="请输入开户支行号"
+              label="开户支行号"
+              clearable
+              :rules="[{ required: true, message: '请输入开户支行号' }]"
+            />
+            <!-- 银行预留手机号 -->
+            <van-field
+              v-model="form.mchApply.bankAccount.phone"
+              label-align="top"
+              name="phone"
+              placeholder="请输入银行预留手机号"
+              label="银行预留手机号"
+              clearable
+              :rules="[{ required: true, message: '请输入银行预留手机号' }]"
+            />
+            <!-- 银行卡正面照 -->
+            <van-field
+              name="cardFrontPic"
+              label="银行卡正面照"
+              label-align="top"
+              :rules="[{ required: true, message: '请上传银行卡正面照' }]"
+            >
+              <template #input>
+                <BUpload
+                  v-model:pic-url="form.mchApply.bankAccount.cardFrontPicUrl"
+                  v-model:pic-id="form.mchApply.bankAccount.cardFrontPic"
+                  :web-header="headers"
+                />
+              </template>
+            </van-field>
             <!-- 开户银行省市 -->
             <b-cascader
               v-model="form.mchApply.other.bankRegionCode"
@@ -502,58 +556,89 @@
               持卡人信息
             </div>
             <van-cell-group inset>
-              <!-- 持卡人身份证正面图片 -->
+              <!-- 持卡人身份证正面 -->
               <van-field
-                name="certFrontPicUrl" label="持卡人身份证正面图片"
+                name="frontPic"
+                label="持卡人身份证正面"
+                label-align="top"
                 :rules="[{ required: true, message: '请上传持卡人身份证正面图片' }]"
-                label-align="top"
               >
                 <template #input>
                   <BUpload
-                    v-model:pic-url="form.mchApply.cardHolder.certFrontPicUrl"
-                    v-model:pic-id="form.mchApply.cardHolder.certFrontPic"
+                    v-model:pic-url="form.mchApply.cardHolder.frontPicUrl"
+                    v-model:pic-id="form.mchApply.cardHolder.frontPic"
                     :web-header="headers"
                   />
                 </template>
               </van-field>
-              <!-- 持卡人身份证反面图片 -->
+              <!-- 持卡人身份证反面 -->
               <van-field
-                name="certBackPicUrl" label="持卡人身份证反面图片"
-                :rules="[{ required: true, message: '请上传持卡人身份证反面图片' }]"
+                name="backPic"
+                label="持卡人身份证反面"
                 label-align="top"
+                :rules="[{ required: true, message: '请上传持卡人身份证反面图片' }]"
               >
                 <template #input>
                   <BUpload
-                    v-model:pic-url="form.mchApply.cardHolder.certBackPicUrl"
-                    v-model:pic-id="form.mchApply.cardHolder.certBackPic"
+                    v-model:pic-url="form.mchApply.cardHolder.backPicUrl"
+                    v-model:pic-id="form.mchApply.cardHolder.backPic"
                     :web-header="headers"
                   />
                 </template>
               </van-field>
+              <!-- 持卡人身份证有效期 -->
+              <van-field label="长期有效" label-align="top">
+                <template #input>
+                  <van-switch v-model="form.mchApply.cardHolder.periodLong" />
+                </template>
+              </van-field>
+              <!-- 持卡人证件有效期开始日期 -->
+              <BDatePicker
+                v-model="form.mchApply.cardHolder.startDate"
+                name="startDate"
+                label="持卡人证件开始日期"
+                placeholder="请选择持卡人证件有效期开始日期"
+                :rules="[{ required: true, message: '请选择持卡人证件开始时间' }]"
+              />
+              <!-- 持卡人证件有效期结束日期 -->
+              <BDatePicker
+                v-if="!form.mchApply.cardHolder.periodLong"
+                v-model="form.mchApply.cardHolder.endDate"
+                name="endDate"
+                label="持卡人证件有效期结束日期"
+                placeholder="请选择持卡人证件结束时间"
+                :rules="[{ required: true, message: '请选择持卡人证件结束时间' }]"
+              />
               <!-- 身份证号码 -->
               <van-field
-                v-model="form.mchApply.cardHolder.certNo"
+                v-model="form.mchApply.cardHolder.idCardNo"
                 label-align="top"
-                name="certNo"
+                name="idCardNo"
                 placeholder="请输入身份证号码"
                 label="身份证号码"
                 clearable
                 :rules="[{ required: true, message: '请输入身份证号码' }]"
               />
-              <!--    非法人结算授权函图片          -->
+              <!-- 持卡人姓名 -->
               <van-field
-                name="certFrontPicUrl" label="非法人结算授权函图片"
-                :rules="[{ required: true, message: '请上传请上传非法人结算授权函图片' }]"
+                v-model="form.mchApply.cardHolder.name"
                 label-align="top"
-              >
-                <template #input>
-                  <BUpload
-                    v-model:pic-url="form.mchApply.cardHolder.letterOfAuthPicUrl"
-                    v-model:pic-id="form.mchApply.cardHolder.letterOfAuthPicUrl"
-                    :web-header="headers"
-                  />
-                </template>
-              </van-field>
+                name="name"
+                placeholder="请输入持卡人姓名"
+                label="持卡人姓名"
+                clearable
+                :rules="[{ required: true, message: '请输入持卡人姓名' }]"
+              />
+              <!-- 持卡人手机号 -->
+              <van-field
+                v-model="form.mchApply.cardHolder.phone"
+                label-align="top"
+                name="phone"
+                placeholder="请输入持卡人手机号"
+                label="持卡人手机号"
+                clearable
+                :rules="[{ required: true, message: '请输入持卡人手机号' }]"
+              />
             </van-cell-group>
           </template>
         </template>
@@ -820,6 +905,17 @@ function bankOcr() {
     showNotify({ type: 'success', message: 'OCR识别成功' })
     form.value.mchApply.bankAccount.bankCardNo = data.cardNumber
   })
+}
+
+const showAccountTypePicker = ref(false)
+const accountTypeColumns = [
+  { text: '对公账户', value: '1' },
+  { text: '对私账户', value: '2' }
+]
+
+function onAccountTypeConfirm({ selectedOptions }) {
+  form.mchApply.bankAccount.accountType = selectedOptions[0]?.value
+  showAccountTypePicker.value = false
 }
 </script>
 
