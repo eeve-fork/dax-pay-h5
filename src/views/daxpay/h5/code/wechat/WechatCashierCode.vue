@@ -119,8 +119,8 @@ onMounted(() => {
 
 // 认证参数
 const authParam = reactive<CashierCodeAuthParam>({
-  cashierCode: cashierCode as string,
-  cashierScene: CashierSceneEnum.WECHAT_PAY,
+  code: cashierCode as string,
+  scene: CashierSceneEnum.WECHAT_PAY,
 })
 
 /**
@@ -179,6 +179,9 @@ async function init() {
               query: { msg: result.message },
             })
           })
+      }
+      else {
+        show.value = true
       }
     })
 }

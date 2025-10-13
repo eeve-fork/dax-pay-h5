@@ -146,8 +146,8 @@ function pay() {
   loading.value = true
   const from = {
     amount: amountValue,
-    cashierCode: code,
-    cashierScene: AggregateEnum.ALI,
+    code,
+    scene: AggregateEnum.ALI,
     description: description.value,
   } as GatewayCashierCodePayParam
   cashierPay(from).then((res) => {
