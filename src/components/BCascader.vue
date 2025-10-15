@@ -4,11 +4,12 @@
       v-model="showText"
       label-align="top"
       readonly
-      :right-icon="showText ? 'clear' : ''"
+      :right-icon="showText && !disabled ? 'clear' : ''"
       :name="name"
       :rules="rules"
       :placeholder="placeholder"
       :label="label"
+      :disabled="disabled"
       @click="open"
       @click-right-icon="onClear"
     />
@@ -33,8 +34,8 @@
 // 级联窗口组件
 import { ref } from 'vue'
 
-const { label, placeholder, name, rules = [], optionsLevel = 3, options = [], title }
-  = defineProps<{ label: string, placeholder?: string, name: string, rules?: any[], optionsLevel?: number, options?: any, title?: string }>()
+const { label, placeholder, name, rules = [], optionsLevel = 3, options = [], disabled = false, title }
+  = defineProps<{ label: string, placeholder?: string, name: string, rules?: any[], optionsLevel?: number, disabled?: boolean,options?: any, title?: string }>()
 const fieldNames = ref({
   text: 'name',
   value: 'code',

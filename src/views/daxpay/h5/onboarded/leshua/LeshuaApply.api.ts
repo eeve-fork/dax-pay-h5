@@ -1,12 +1,12 @@
 import { http } from '@/utils/http/axios'
 import type { Result } from '#/axios'
 import type {
-  OnbBankAccountApply,
-  OnbCardHolderApply,
-  OnbLegalApply,
-  OnbLicenseApply,
-  OnbMerchantApply,
-  OnbShopApply,
+  OnbBankAccountProfile,
+  OnbCardHolderProfile,
+  OnbLegalProfile,
+  OnbLicenseProfile,
+  OnbMerchantProfile,
+  OnbShopProfile,
 } from '@/views/daxpay/h5/onboarded/common/Base'
 
 /**
@@ -59,17 +59,17 @@ export interface MerchantApply {
  */
 export interface MchApply {
   /** 商户信息 */
-  merchant: OnbMerchantApply
+  merchant: OnbMerchantProfile
   /** 法人信息 */
-  legal: OnbLegalApply
+  legal: OnbLegalProfile
   /** 商户资质图片信息 */
-  license: OnbLicenseApply
+  license: OnbLicenseProfile
   /** 经营场所名称 */
-  shop: OnbShopApply
+  shop: OnbShopProfile
   /** 结算卡信息 */
-  bankAccount: OnbBankAccountApply
+  bankAccount: OnbBankAccountProfile
   /** 持卡人信息 */
-  cardHolder: OnbCardHolderApply
+  cardHolder: OnbCardHolderProfile
   /** 其他申请信息 */
   other: OtherApply
 }

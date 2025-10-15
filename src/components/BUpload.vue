@@ -1,5 +1,16 @@
 <template>
-  <van-uploader v-bind="$attrs" v-model="fileList" :max-count="1" :preview-image="true" :after-read="afterRead" :before-delete="delImg" />
+  <van-uploader
+    v-bind="$attrs"
+    v-model="fileList"
+    :disabled="showable"
+    :max-count="1"
+    :preview-image="true"
+    :deletable="!showable"
+    :after-read="afterRead"
+    :before-delete="delImg"
+    :max-size="maxSize * 1024"
+    @oversize="onOversize"
+  />
 </template>
 
 <script setup lang="ts">
@@ -8,7 +19,12 @@ import { showNotify } from 'vant'
 import { getUploadParams, saveOssFileInfo, uploadFile } from '@/api/FileUpload.api.js'
 import type { WebHeaders } from '#/web'
 
-const { webHeader } = defineProps<{ webHeader?: WebHeaders }>()
+// size大小为kb
+const { showable = false, maxSize = 1024, webHeader } = defineProps<{
+  showable?: boolean
+  maxSize?: number
+  webHeader?: WebHeaders
+}>()
 const picUrl = defineModel<string | undefined>('picUrl')
 const picId = defineModel<string | undefined>('picId')
 
@@ -92,5 +108,28 @@ function getFileUrl(fileUrl?: string) {
 function delImg() {
   picUrl.value = undefined
   picId.value = undefined
+}
+
+/**
+ * 文件超出限制
+ */
+function onOversize({ file }) {
+  showNotify({ type: 'danger', message: `${file.name} 文件大小为${formatFileSize(file.size)}, 超出了最大${formatFileSize(maxSize * 1024)}的限制!` })
+}
+
+/**
+ * 格式化文件大小
+ * @param bytes 字节大小
+ * @returns 格式化后的文件大小字符串
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) {
+    return '0 B'
+  }
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`
 }
 </script>

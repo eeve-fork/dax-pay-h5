@@ -1,35 +1,11 @@
 /**
- * 商户进件申请单
- */
-export interface IsvMchApply extends MchEntity {
-  // 进件通道
-  channel?: string
-  // 进件类型
-  applyType?: string
-  // 服务商
-  isvNo?: string
-  // 进件的商户类型
-  applyMchType?: string
-  // 商户号
-  mchNo?: string
-  // 单据名称
-  name?: string
-  // 表单数据
-  formData?: string
-  // 外部状态
-  outStatus?: string
-  // 状态
-  status?: string
-  // 错误提示
-  errorMsg?: string
-}
-
-/**
- * 进件商户申请信息
+ * 进件商户信息
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbMerchantApply {
+export interface OnbMerchantProfile {
+  /** 进件申请Id */
+  applyId?: number
   /** 商户类型 */
   merchantType?: string
   /** 商户全称 */
@@ -42,7 +18,9 @@ export interface OnbMerchantApply {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbLegalApply {
+export interface OnbLegalProfile {
+  /** 进件申请Id */
+  applyId?: number
   /** 法人姓名 */
   legalName?: string
   /** 身份证号 */
@@ -71,7 +49,9 @@ export interface OnbLegalApply {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbLicenseApply {
+export interface OnbLicenseProfile {
+  /** 进件申请Id */
+  applyId?: number
   /** 营业执照号 */
   licenseNo?: string
   /** 营业执照名称 */
@@ -80,7 +60,7 @@ export interface OnbLicenseApply {
   regionCode?: string[]
   /** 营业执照详细地址 */
   address?: string
-  /** 营业执照有效期类型 */
+  /** 营业执照长期有效 */
   periodLong?: boolean
   /** 营业执照开始日期 */
   startDate?: string
@@ -92,14 +72,20 @@ export interface OnbLicenseApply {
   licensePicUrl?: string
 }
 /**
- * 经营场所信息
+ * 门店信息
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbShopApply {
+export interface OnbShopProfile {
+  /** 进件申请Id */
+  applyId?: number
+  /** 门店类型 */
+  type?: string
+  /** 结算类型 */
+  settleType?: string
   /** 经营场所名称 */
   name?: string
-  /** 省市区编码 */
+  /** 门店地址-省市区编码 */
   regionCode?: string[]
   /** 经营场所详细地址 */
   address?: string
@@ -122,21 +108,29 @@ export interface OnbShopApply {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbBankAccountApply {
+export interface OnbBankAccountProfile {
+  /** 进件申请Id */
+  applyId?: number
   /** 账户类型 */
   accountType?: string
   /** 银行卡账户名 */
   accountName?: string
   /** 银行卡号 */
   cardNo?: string
+  /** 银行卡开户行名称 */
+  bankName?: string
   /** 银行卡开户行联行号 */
   branchNo?: string
   /** 银行预留手机号 */
-  phone?: string
+  bankPhone?: string
   /** 银行卡正面照片 */
   cardFrontPic?: string
   /** 银行卡正面照片路径 */
   cardFrontPicUrl?: string
+  /** 银行卡反面照片 */
+  cardBackPic?: string
+  /** 银行卡反面照片路径 */
+  cardBackPicUrl?: string
 }
 
 /**
@@ -144,7 +138,9 @@ export interface OnbBankAccountApply {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbCardHolderApply {
+export interface OnbCardHolderProfile {
+  /** 进件申请Id */
+  applyId?: number
   /** 持卡人姓名 */
   holderName?: string
   /** 身份证号 */

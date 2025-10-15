@@ -5,11 +5,12 @@
       v-model="showText"
       label-align="top"
       readonly
-      :right-icon="showText ? 'clear' : ''"
+      :right-icon="showText && !disabled ? 'clear' : ''"
       :name="name"
       :rules="rules"
       :placeholder="placeholder"
       :label="label"
+      :disabled="disabled"
       @click="open"
       @click-right-icon="onClear"
     />
@@ -30,8 +31,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const { label, placeholder, name, rules = [] }
-  = defineProps<{ label: string, placeholder?: string, name: string, rules?: any[]}>()
+const { label, placeholder, name, disabled = false, rules = [] }
+  = defineProps<{ label: string, placeholder?: string, name: string, disabled?: boolean, rules?: any[] }>()
 
 const modelValue = defineModel<string>()
 // 显示在 field 上的文本

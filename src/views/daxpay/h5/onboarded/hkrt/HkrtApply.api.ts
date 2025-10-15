@@ -1,12 +1,12 @@
 import { http } from '@/utils/http/axios'
 import type { Result } from '#/axios'
 import type {
-  OnbBankAccountApply,
-  OnbCardHolderApply,
-  OnbLegalApply,
-  OnbLicenseApply,
-  OnbMerchantApply,
-  OnbShopApply,
+  OnbBankAccountProfile,
+  OnbCardHolderProfile,
+  OnbLegalProfile,
+  OnbLicenseProfile,
+  OnbMerchantProfile,
+  OnbShopProfile,
 } from '@/views/daxpay/h5/onboarded/common/Base'
 
 /**
@@ -27,7 +27,7 @@ export function findH5ById(id, sign, headers) {
 export function saveH5(param: MerchantApply, sign, headers) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/hkrt/onb/apply/save',
+    url: '/hkrt/onb/apply/h5/save',
     data: param,
     params: { sign },
     headers,
@@ -52,7 +52,7 @@ export function findById(id, headers) {
 export function save(param: MerchantApply, headers) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/hkrt/onb/apply/h5/save',
+    url: '/hkrt/onb/apply/save',
     data: param,
     headers,
   })
@@ -74,26 +74,18 @@ export function mccTree() {
 export interface MerchantApply {
   /** 申请单ID */
   applyId?: string
-  /** 商户申请参数 */
-  mchApply: MchApply
-}
-
-/**
- * 商户申请信息
- */
-export interface MchApply {
   /** 商户信息 */
-  merchant: OnbMerchantApply
+  merchant: OnbMerchantProfile
   /** 法人信息 */
-  legal: OnbLegalApply
+  legal: OnbLegalProfile
   /** 商户资质图片信息 */
-  license: OnbLicenseApply
+  license: OnbLicenseProfile
   /** 经营场所名称 */
-  shop: OnbShopApply
+  shop: OnbShopProfile
   /** 结算卡信息 */
-  bankAccount: OnbBankAccountApply
+  bankAccount: OnbBankAccountProfile
   /** 持卡人信息 */
-  cardHolder: OnbCardHolderApply
+  cardHolder: OnbCardHolderProfile
   /** 其他申请信息 */
   other: OtherApply
 }
@@ -104,8 +96,8 @@ export interface MchApply {
 export interface OtherApply {
   /** 联系人手机号 */
   contactPhone?: string
-  /** 营业范围代码 */
-  businessScopeCodes?: string[]
+  /** 经营类目代码 */
+  mccCodes?: string[]
   /** 开户银行省市 */
   bankRegionCode?: string[]
   /** 开户银行网点名称 */

@@ -21,7 +21,7 @@ const routeStore = useRouteStore()
 const { getAppTheme, getIsPageAnimate, getPageAnimateType } = useDesignSetting()
 // 读取是否为夜间模式
 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-const darkMode = mediaQuery.matches ? 'dark' : 'light'
+const darkMode = mediaQuery.matches ? 'light' : 'light'
 // 需要缓存的路由组件
 const keepAliveComponents = computed(() => routeStore.keepAliveComponents)
 
