@@ -668,18 +668,17 @@
 <script setup lang="ts">
 import { showNotify } from 'vant'
 import { useRoute } from 'vue-router'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import type { MccConst, MerchantApply } from './HkrtApply.api'
-import { findById, mccTree, save } from './HkrtApply.api'
-import type {
-  Region,
-} from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
+import { findById, findH5ById, mccTree, save, saveH5 } from './HkrtApply.api'
+import type { Region } from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
 import {
   bankCardOcr,
   findAllProvinceAndCityAndArea,
   idCardOcr,
   licenseOcr,
   submit,
+  submitH5,
 } from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
 
 import BUpload from '@/components/BUpload.vue'
@@ -687,11 +686,16 @@ import type { WebHeaders } from '#/web'
 import router from '@/router'
 
 const route = useRoute()
-const { id: applyId, sign, token } = route.query
+// sign 作为H5独立访问时, 用来给数据验证访问做的安全措施
+// clientCode 终端编码, 默认网关端. 嵌入时会传输对应的终端编码
+// showable 是否为展示模式, 嵌入式才会生效, 此时只能看数据
+const { id: applyId, sign, token, clientCode, showable } = route.query
+
 // 请求头信息
 const headers = {
   'AccessToken': token,
-  'x-client-code': 'dax-pay-gateway',
+  // 判断是网关端/商户端/代理端
+  'x-client-code': clientCode || 'dax-pay-gateway',
 } as WebHeaders
 
 // 控制当前页面数据对象
@@ -763,7 +767,9 @@ function initData() {
  * 获取数据
  */
 function getInfo() {
-  findById(applyId, sign, headers).then(({ code, data, msg }) => {
+  // 终端有值说明是嵌入方式
+  const promise = clientCode ? findById(applyId, headers) : findH5ById(applyId, sign, headers)
+  promise.then(({ code, data, msg }) => {
     if (code !== 0) {
       router.replace({ name: 'payFail', query: { msg, title: '获取信息失败' } })
       return
@@ -783,6 +789,8 @@ function prevClick() {
  * 点击下一步进行校验
  */
 function nextClick() {
+  uni.navigateBack()
+  return
   formRef.value.validate()
     .then(() => {
       // 执行下一步操作
@@ -798,7 +806,9 @@ function nextClick() {
  */
 function saveTemp() {
   loading.value = true
-  save(form.value, sign, headers).then(({ code, msg }) => {
+  // 终端有值说明是嵌入方式
+  const promise = clientCode ? save(form.value, headers) : saveH5(form.value, sign, headers)
+  promise.then(({ code, msg }) => {
     if (code !== 0) {
       showNotify({ type: 'danger', message: msg })
     }
@@ -817,24 +827,29 @@ function submitClick() {
     .validate()
     .then(async () => {
       loading.value = true
-      // 执行下一步操作
-      await save(form.value, sign, headers).then(({ code, msg }) => {
-        if (code !== 0) {
-          showNotify({ type: 'danger', message: msg })
-          loading.value = false
-        }
-      })
-      submit(form.value.applyId, sign, headers).then(({ code, data }) => {
-        if (code !== 0) {
-          showNotify({ type: 'danger', message: data })
-        }
+      // 暂存
+      const saveRes = clientCode ? await saveH5(form.value, sign, headers) : await save(form.value, headers)
+      if (saveRes.code !== 0) {
+        showNotify({ type: 'danger', message: saveRes.msg })
         loading.value = false
+      }
+      // 提交申请
+      const submitRes = clientCode ? await submitH5(form.value.applyId, sign, headers) : await submit(form.value.applyId, headers)
+      if (submitRes.code !== 0) {
+        showNotify({ type: 'danger', message: submitRes.data })
+      }
+      loading.value = false
+      // 嵌入方式直接返回
+      if (clientCode) {
+        uni.navigateBack()
+      }
+      else {
         // 跳转到成功页面
         router.replace({
           name: 'SuccessResult',
           query: { title: '提交申请成功' },
         })
-      })
+      }
     })
     .catch(() => {
       showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
@@ -910,13 +925,21 @@ function bankOcr() {
 const showAccountTypePicker = ref(false)
 const accountTypeColumns = [
   { text: '对公账户', value: '1' },
-  { text: '对私账户', value: '2' }
+  { text: '对私账户', value: '2' },
 ]
 
 function onAccountTypeConfirm({ selectedOptions }) {
-  form.mchApply.bankAccount.accountType = selectedOptions[0]?.value
+  form.value.mchApply.bankAccount.accountType = selectedOptions[0]?.value
   showAccountTypePicker.value = false
 }
+onMounted(() => {
+  // 嵌入方式才需要判断, 判断是什么环境中
+  if (client) {
+    uni.getEnv((res) => {
+      envType.value = res.miniprogram ? 'miniApp' : 'h5'
+    })
+  }
+})
 </script>
 
 <style lang="less" scoped>
@@ -942,7 +965,7 @@ function onAccountTypeConfirm({ selectedOptions }) {
   .formBox {
     width: 100%;
     height: 80%;
-    overflow: scroll;
+    overflow-y: scroll;
     padding: 1.25rem 0;
 
     // 公共头部

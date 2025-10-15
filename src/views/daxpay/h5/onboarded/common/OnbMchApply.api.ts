@@ -11,13 +11,24 @@ export function findAllProvinceAndCityAndArea() {
 }
 
 /**
- * 提交进件申请
+ * 提交进件申请(独立H5模式)
  */
-export function submit(id, sign, headers) {
+export function submitH5(id, sign, headers) {
   return http.request({
     url: '/onb/mch/apply/h5/submit',
     method: 'post',
     params: { id, sign },
+    headers,
+  })
+}
+/**
+ * 提交进件申请(嵌入模式)
+ */
+export function submit(id, headers) {
+  return http.request({
+    url: '/onb/mch/apply/submit',
+    method: 'post',
+    params: { id },
     headers,
   })
 }

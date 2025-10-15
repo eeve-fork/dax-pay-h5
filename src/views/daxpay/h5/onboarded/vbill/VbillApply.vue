@@ -674,7 +674,7 @@ import {
   findAllProvinceAndCityAndArea,
   idCardOcr,
   licenseOcr,
-  submit,
+  submitH5,
 } from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
 
 import BUpload from '@/components/BUpload.vue'
@@ -820,7 +820,7 @@ function submitClick() {
         }
       })
       // 执行下一步操作
-      submit(form.value.applyId, sign, headers).then(({ code, data }) => {
+      submitH5(form.value.applyId, sign, headers).then(({ code, data }) => {
         if (code !== 0) {
           showNotify({ type: 'danger', message: data })
         }

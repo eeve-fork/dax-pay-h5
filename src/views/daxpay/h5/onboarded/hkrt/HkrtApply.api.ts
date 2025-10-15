@@ -10,9 +10,9 @@ import type {
 } from '@/views/daxpay/h5/onboarded/common/Base'
 
 /**
- * 查询
+ * 查询(独立H5模式)
  */
-export function findById(id, sign, headers) {
+export function findH5ById(id, sign, headers) {
   return http.request<Result<MerchantApply>>({
     method: 'get',
     url: '/hkrt/onb/apply/h5/findById',
@@ -22,14 +22,38 @@ export function findById(id, sign, headers) {
 }
 
 /**
- * 保存信息
+ * 保存信息(独立H5模式)
  */
-export function save(param: MerchantApply, sign, headers) {
+export function saveH5(param: MerchantApply, sign, headers) {
+  return http.request<Result<void>>({
+    method: 'post',
+    url: '/hkrt/onb/apply/save',
+    data: param,
+    params: { sign },
+    headers,
+  })
+}
+
+/**
+ * 查询(嵌入模式)
+ */
+export function findById(id, headers) {
+  return http.request<Result<MerchantApply>>({
+    method: 'get',
+    url: '/hkrt/onb/apply/findById',
+    params: { id },
+    headers,
+  })
+}
+
+/**
+ * 保存信息(嵌入模式)
+ */
+export function save(param: MerchantApply, headers) {
   return http.request<Result<void>>({
     method: 'post',
     url: '/hkrt/onb/apply/h5/save',
     data: param,
-    params: { sign },
     headers,
   })
 }
