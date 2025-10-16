@@ -133,6 +133,14 @@ export const DaxPayH5Route: RouteRecordRaw = {
         title: '随行付进件申请',
       },
     },
+    {
+      path: '/onboarded/sand_pay',
+      name: 'sand',
+      component: () => import('@/views/daxpay/h5/onboarded/sand/SandApply.vue'),
+      meta: {
+        title: '杉德进件申请',
+      },
+    },
   ],
 }
 /**
