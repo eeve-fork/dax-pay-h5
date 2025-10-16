@@ -258,7 +258,7 @@
               <!-- 营业执照有效期 -->
               <van-field label="长期有效" label-align="top" :disabled="showable">
                 <template #input>
-                  <van-switch v-model="form.license.periodLong" :disabled="showable"/>
+                  <van-switch v-model="form.license.periodLong" :disabled="showable" />
                 </template>
               </van-field>
               <!-- 营业执照有效期开始日期 -->
@@ -627,12 +627,12 @@
         <van-button v-if="currentPage.currentIndex < currentPage.date.length" type="primary" block @click="nextClick">
           下一步
         </van-button>
-        <van-button v-if="currentPage.currentIndex === currentPage.date.length" :disabled="show" type="primary" block @click="submitClick">
+        <van-button v-if="currentPage.currentIndex === currentPage.date.length" :disabled="showable" type="primary" block @click="submitClick">
           提交
         </van-button>
       </div>
       <div class="btnBox" style="margin-bottom: 20px">
-        <van-button type="primary" plain block :disabled="show" @click="saveTemp">
+        <van-button type="primary" plain block :disabled="showable" @click="saveTemp">
           暂存
         </van-button>
       </div>
@@ -805,11 +805,13 @@ function submitClick() {
       if (saveRes.code !== 0) {
         showNotify({ type: 'danger', message: saveRes.msg })
         loading.value = false
+        return
       }
       // 提交申请
       const submitRes = clientCode ? await submit(form.value.applyId, headers) : await submitH5(form.value.applyId, sign, headers)
       if (submitRes.code !== 0) {
-        showNotify({ type: 'danger', message: submitRes.data })
+        showNotify({ type: 'danger', message: submitRes.msg })
+        return
       }
       loading.value = false
       // 嵌入方式直接返回
@@ -893,18 +895,6 @@ function bankOcr() {
     showNotify({ type: 'success', message: 'OCR识别成功' })
     form.value.bankAccount.cardNo = data.cardNumber
   })
-}
-
-const showAccountTypePicker = ref(false)
-const accountTypeColumns = [
-  { text: '公户', value: 'company_owner' },
-  { text: '对私法人', value: 'person_owner' },
-  { text: '对私非法人', value: 'person_not_owner' },
-]
-
-function onAccountTypeConfirm({ selectedOptions }) {
-  form.value.bankAccount.accountType = selectedOptions[0]?.value
-  showAccountTypePicker.value = false
 }
 </script>
 
