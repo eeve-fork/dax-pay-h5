@@ -10,9 +10,9 @@ import type {
 } from '@/views/daxpay/h5/onboarded/common/Base'
 
 /**
- * 查询
+ * 查询(独立H5模式)
  */
-export function findById(id, sign, headers) {
+export function findH5ById(id, sign, headers) {
   return http.request<Result<MerchantApply>>({
     method: 'get',
     url: '/vbill/onb/apply/h5/findById',
@@ -22,14 +22,38 @@ export function findById(id, sign, headers) {
 }
 
 /**
- * 保存信息
+ * 保存信息(独立H5模式)
  */
-export function save(param: MerchantApply, sign, headers) {
+export function saveH5(param: MerchantApply, sign, headers) {
   return http.request<Result<void>>({
     method: 'post',
     url: '/vbill/onb/apply/h5/save',
     data: param,
     params: { sign },
+    headers,
+  })
+}
+
+/**
+ * 查询(嵌入模式)
+ */
+export function findById(id, headers) {
+  return http.request<Result<MerchantApply>>({
+    method: 'get',
+    url: '/vbill/onb/apply/findById',
+    params: { id },
+    headers,
+  })
+}
+
+/**
+ * 保存信息(嵌入模式)
+ */
+export function save(param: MerchantApply, headers) {
+  return http.request<Result<void>>({
+    method: 'post',
+    url: '/vbill/onb/apply/save',
+    data: param,
     headers,
   })
 }
@@ -50,14 +74,6 @@ export function mccTree() {
 export interface MerchantApply {
   /** 申请单ID */
   applyId?: string
-  /** 商户申请参数 */
-  mchApply: MchApply
-}
-
-/**
- * 商户申请信息
- */
-export interface MchApply {
   /** 商户信息 */
   merchant: OnbMerchantProfile
   /** 法人信息 */
@@ -72,6 +88,8 @@ export interface MchApply {
   cardHolder: OnbCardHolderProfile
   /** 其他申请信息 */
   other: OtherApply
+  /** 费率配置信息 */
+  rate?: RateProfile
 }
 
 /**
@@ -86,26 +104,54 @@ export interface OtherApply {
   onlineName?: string
   /** 客服电话 */
   servicePhone?: string
-  /** 联系人手机号 */
-  contactPhone?: string
   /** 开户许可证照片 */
   openLicensePic?: string
   /** 开户许可证照片地址 */
   openLicensePicUrl?: string
-  /** 对公结算说明函照片 */
-  letterOfAuthPic?: string
-  /** 对公结算说明函照片地址 */
-  letterOfAuthPicUrl?: string
-  /** 银行卡反面照片 */
-  bankCardBackPic?: string
-  /** 银行卡反面照片地址 */
-  bankCardBackPicUrl?: string
   /** 营业范围代码 */
-  businessScopeCodes?: string[]
+  mccCodes?: string[]
   /** ICP许可证或公众号主体信息截图 */
   icpLicencePic?: string
   /** ICP许可证或公众号主体信息截图地址 */
   icpLicencePicUrl?: string
+}
+
+/**
+ * 随行付商户费率配置参数
+ */
+export interface RateProfile {
+  /** 商户申请单ID */
+  applyId?: number
+  /** 微信贷记卡费率 */
+  wechatCreditRate?: number
+  /** 微信借记卡费率 */
+  wechatDebitRate?: number
+  /** 微信借记卡封顶手续费 */
+  wechatDebitMaxFee?: number
+  /** 支付宝贷记卡费率 */
+  alipayCreditRate?: number
+  /** 支付宝借记卡费率 */
+  alipayDebitRate?: number
+  /** 支付宝借记卡封顶手续费 */
+  alipayDebitMaxFee?: number
+  /** 银联单笔小于1000贷记卡费率 */
+  unionCreditMinRate?: number
+  /** 银联单笔小于1000借记卡费率 */
+  unionDebitMinRate?: number
+  /** 银联单笔大于1000贷记卡费率 */
+  unionCreditMaxRate?: number
+  /** 银联单笔大于1000借记卡费率 */
+  unionDebitMaxRate?: number
+  /** 贷记卡费率 */
+  creditRate?: number
+  /** 借记卡费率 */
+  cardDebitRate?: number
+  /** 借记卡手续费封顶值 */
+  cardDebitCap?: number
+  /** 手机闪付贷记卡费率 */
+  quickCreditRate?: number
+  /** 手机闪付借记卡费率 */
+  quickDebitRate?: number
 }
 
 /**
