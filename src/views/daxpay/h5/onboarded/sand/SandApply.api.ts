@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios'
-import type { Result } from '#/axios'
+import type {MchEntity, Result} from '#/axios'
 import type {
   OnbLegalProfile,
   OnbLicenseProfile,
@@ -107,7 +107,7 @@ export interface MerchantApply {
 /**
  * 杉德其他申请数据
  */
-export interface SandOtherApply {
+export interface SandOtherApply extends MchEntity {
   /** 邮箱 */
   email?: string
   /** 商户经营类目编码 */

@@ -1,9 +1,11 @@
+import type { MchEntity } from '#/axios'
+
 /**
  * 进件商户信息
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbMerchantProfile {
+export interface OnbMerchantProfile extends MchEntity {
   /** 进件申请Id */
   applyId?: number
   /** 商户类型 */
@@ -18,7 +20,7 @@ export interface OnbMerchantProfile {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbLegalProfile {
+export interface OnbLegalProfile extends MchEntity {
   /** 进件申请Id */
   applyId?: number
   /** 法人姓名 */
@@ -49,7 +51,7 @@ export interface OnbLegalProfile {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbLicenseProfile {
+export interface OnbLicenseProfile extends MchEntity {
   /** 进件申请Id */
   applyId?: number
   /** 营业执照号 */
@@ -76,7 +78,7 @@ export interface OnbLicenseProfile {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbShopProfile {
+export interface OnbShopProfile extends MchEntity {
   /** 进件申请Id */
   applyId?: number
   /** 门店类型 */
@@ -108,7 +110,7 @@ export interface OnbShopProfile {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbBankAccountProfile {
+export interface OnbBankAccountProfile extends MchEntity {
   /** 进件申请Id */
   applyId?: number
   /** 账户类型 */
@@ -138,7 +140,7 @@ export interface OnbBankAccountProfile {
  * @author xxm
  * @since 2025/6/9
  */
-export interface OnbCardHolderProfile {
+export interface OnbCardHolderProfile extends MchEntity {
   /** 进件申请Id */
   applyId?: number
   /** 持卡人姓名 */

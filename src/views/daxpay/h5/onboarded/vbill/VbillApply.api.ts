@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios'
-import type { Result } from '#/axios'
+import type {MchEntity, Result} from '#/axios'
 import type {
   OnbBankAccountProfile,
   OnbCardHolderProfile,
@@ -95,7 +95,7 @@ export interface MerchantApply {
 /**
  * 其他申请数据
  */
-export interface OtherApply {
+export interface OtherApply extends MchEntity {
   /** 经营类型 */
   operationalType?: string
   /** 线上产品类型 */

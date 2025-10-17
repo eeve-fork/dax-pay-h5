@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios'
-import type { Result } from '#/axios'
+import type {MchEntity, Result} from '#/axios'
 import type {
   OnbBankAccountProfile,
   OnbCardHolderProfile,
@@ -71,7 +71,7 @@ export function mccTree() {
 /**
  * 乐刷商户申请参数
  */
-export interface MerchantApply {
+export interface MerchantApply extends MchEntity {
   /** 申请单ID */
   applyId?: string
   /** 商户信息 */

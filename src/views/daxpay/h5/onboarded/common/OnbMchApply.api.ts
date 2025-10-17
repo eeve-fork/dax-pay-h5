@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios'
-import type { Result } from '#/axios'
+import type { MchEntity, Result } from '#/axios'
 /**
  * 地区树
  */
@@ -65,6 +65,28 @@ export function bankCardOcr(uri, headers) {
     url: '/ocr/bankCard',
     method: 'post',
     params: { uri },
+    headers,
+  })
+}
+
+/**
+ * 获取商户主体信息(嵌入)
+ */
+export function getMainBody(mchNo: string, headers) {
+  return http.request<Result<MchMainBody>>({
+    url: '/merchant/profile/getMainBody',
+    params: { mchNo },
+    headers,
+  })
+}
+
+/**
+ * 获取商户店铺信息(嵌入)
+ */
+export function getShopInfo(mchNo: string, headers) {
+  return http.request<Result<MchShopProfile>>({
+    url: '/merchant/profile/shop/findByMchNo',
+    params: { mchNo },
     headers,
   })
 }
@@ -149,4 +171,92 @@ export interface BankCardOCRResult {
   cardType?: string
   /** 有效期 */
   validToDate?: string
+}
+
+/**
+ * 商户主体信息参数
+ */
+export interface MchMainBody {
+  // 基础信息
+  base: MchBaseProfile
+  // 法人信息
+  legal: MchLegalProfile
+  // 营业执照信息
+  license: MchLicenseProfile
+}
+
+/**
+ * 商户基础信息
+ */
+export interface MchBaseProfile extends MchEntity {
+  // 商户类型
+  merchantType?: string
+  // 商户名称
+  merchantName?: string
+  // 商户简称
+  merchantShortName?: string
+}
+
+/**
+ * 商户法人信息
+ */
+export interface MchLegalProfile extends MchEntity {
+  // 法人姓名
+  legalName?: string
+  // 法人证件号
+  certNo?: string
+  // 联系手机号
+  contactPhone?: string
+  // 长期有效
+  periodLong?: boolean
+  // 法人证件开始日期
+  startDate?: string
+  // 法人证件结束日期
+  endDate?: string
+  // 身份证地址
+  address?: string
+  // 法人身份证正面照片
+  frontPic?: string
+  // 法人身份证反面照片
+  backPic?: string
+}
+
+/**
+ * 商户营业执照信息
+ */
+export interface MchLicenseProfile extends MchEntity {
+  // 营业执照号
+  licenseNo?: string
+  // 营业执照名称
+  licenseName?: string
+  // 执照地址-省市区编码
+  regionCode?: string[]
+  // 营业执照详细地址
+  address?: string
+  // 营业执照长期有效
+  periodLong?: boolean
+  // 营业执照开始日期
+  startDate?: string
+  // 营业执照结束日期
+  endDate?: string
+  // 营业执照照片
+  licensePic?: string
+}
+
+/**
+ * 商户店铺信息
+ */
+export interface MchShopProfile extends MchEntity {
+  // 经营场所名称
+  name?: string
+  // 省市区编码
+  regionCode?: string[]
+  // 经营场所详细地址
+  address?: string
+  // 门头照
+  doorPic?: string
+  // 室内照
+  insidePic?: string
+  // 收银台照片
+  cashierPic?: string
 }

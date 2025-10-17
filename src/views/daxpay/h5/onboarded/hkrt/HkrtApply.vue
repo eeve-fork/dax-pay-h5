@@ -621,13 +621,16 @@
     </div>
     <div class="btnContain">
       <div class="btnBox">
+        <van-button v-if="!showable && currentPage.currentIndex === 1 && clientCode" type="" block @click="readMch">
+          读取商户信息
+        </van-button>
         <van-button v-if="currentPage.currentIndex > 1" type="primary" block @click="prevClick">
           上一步
         </van-button>
         <van-button v-if="currentPage.currentIndex < currentPage.date.length" type="primary" block @click="nextClick">
           下一步
         </van-button>
-        <van-button v-if="currentPage.currentIndex === currentPage.date.length" :disabled="showable" type="primary" block @click="submitClick">
+        <van-button v-if="!showable && currentPage.currentIndex === currentPage.date.length" :disabled="showable" type="primary" block @click="submitClick">
           提交
         </van-button>
       </div>
@@ -641,7 +644,7 @@
 </template>
 
 <script setup lang="ts">
-import { showNotify } from 'vant'
+import {showConfirmDialog, showDialog, showNotify} from 'vant'
 import { useRoute } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import type { MccConst, MerchantApply } from './HkrtApply.api'
@@ -659,6 +662,7 @@ import {
 import BUpload from '@/components/BUpload.vue'
 import type { WebHeaders } from '#/web'
 import router from '@/router'
+import { initMerchantProfile } from '@/views/daxpay/h5/onboarded/common/OnbMchApplyUtil'
 
 const route = useRoute()
 // sign 作为H5独立访问时, 用来给数据验证访问做的安全措施
@@ -796,39 +800,48 @@ function saveTemp() {
  * 提交
  */
 function submitClick() {
-  formRef.value
-    .validate()
-    .then(async () => {
-      loading.value = true
-      // 暂存
-      const saveRes = clientCode ? await save(form.value, headers) : await saveH5(form.value, sign, headers)
-      if (saveRes.code !== 0) {
-        showNotify({ type: 'danger', message: saveRes.msg })
-        loading.value = false
-        return
-      }
-      // 提交申请
-      const submitRes = clientCode ? await submit(form.value.applyId, headers) : await submitH5(form.value.applyId, sign, headers)
-      if (submitRes.code !== 0) {
-        showNotify({ type: 'danger', message: submitRes.msg })
-        return
-      }
-      loading.value = false
-      // 嵌入方式直接返回
-      if (clientCode) {
-        uni.navigateBack()
-      }
-      else {
-        // 跳转到成功页面
-        router.replace({
-          name: 'SuccessResult',
-          query: { title: '提交申请成功' },
+  showConfirmDialog({
+    title: '提示',
+    message: '确定要提交进件申请！',
+  }).then(() => {
+    formRef.value
+      .validate()
+      .then(async () => {
+        loading.value = true
+        // 执行下一步操作
+        const savePromise = clientCode ? save(form.value, headers) : saveH5(form.value, sign, headers)
+        await savePromise.then(({ code, msg }) => {
+          if (code !== 0) {
+            showNotify({ type: 'danger', message: msg })
+            loading.value = false
+          }
         })
-      }
-    })
-    .catch(() => {
-      showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
-    })
+        // 提交
+        const submitPromise = clientCode ? submit(form.value.applyId, headers) : submitH5(form.value.applyId, sign, headers)
+        await submitPromise.then(({ code, msg }) => {
+          if (code !== 0) {
+            showNotify({ type: 'danger', message: msg })
+            return
+          }
+          // 嵌入方式直接返回
+          if (clientCode) {
+            showDialog({ title: '提交成功', message: '返回申请列表后请刷新查看最新信息！' }).then(() => {
+              uni.navigateBack()
+            })
+          }
+          else {
+            // 跳转到成功页面
+            router.replace({
+              name: 'SuccessResult',
+              query: { title: '提交申请成功' },
+            })
+          }
+        })
+      })
+      .catch(() => {
+        showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
+      })
+  })
 }
 
 /**
@@ -895,6 +908,30 @@ function bankOcr() {
     showNotify({ type: 'success', message: 'OCR识别成功' })
     form.value.bankAccount.cardNo = data.cardNumber
   })
+}
+
+/**
+ * 读取商户资料
+ */
+function readMch() {
+  showConfirmDialog({
+    title: '提示',
+    message: '确定要读取商户资料吗？读取后会覆盖已经填写的信息内容！',
+  }).then(() => {
+    readMchData()
+  })
+}
+
+/**
+ * 读取商户资料
+ */
+async function readMchData() {
+  // 获取当前商户号
+  const mchNo = form.value.merchant.mchNo as string
+  loading.value = true
+  await initMerchantProfile(form.value, mchNo, headers)
+  loading.value = false
+  showNotify({ type: 'success', message: '商户资料读取成功' })
 }
 </script>
 
