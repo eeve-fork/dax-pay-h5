@@ -20,7 +20,7 @@ import { getUploadParams, saveOssFileInfo, uploadFile } from '@/api/FileUpload.a
 import type { WebHeaders } from '#/web'
 
 // size大小为kb
-const { showable = false, maxSize = 1024, webHeader } = defineProps<{
+const { showable = false, maxSize = 1024 } = defineProps<{
   showable?: boolean
   maxSize?: number
   webHeader?: WebHeaders
@@ -48,7 +48,7 @@ async function afterRead(fileObj) {
     fileName: file.name,
     mediaType: file.type || '*/*',
     fileSize: file.size,
-  }, webHeader)
+  })
     .then(({ data }) => {
       // 预签名形式
       uploadUrl.value = data.url
@@ -68,7 +68,7 @@ async function afterRead(fileObj) {
     originalFilename: file.name,
     filename: uploadAttachName.value,
     contentType: file.type,
-  }, webHeader)
+  })
     .then(() => {
       picUrl.value = url
       showNotify({ type: 'success', message: '文件上传成功' })

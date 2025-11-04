@@ -3,9 +3,9 @@ import { getMainBody, getShopInfo } from '@/views/daxpay/h5/onboarded/common/Onb
 /**
  * 初始化商户信息
  */
-export async function initMerchantProfile(form, mchNo, headers) {
+export async function initMerchantProfile(form, mchNo) {
   // 并行调用三个接口获取数据
-  const [mainBodyRes, shopInfoRes] = await Promise.all([getMainBody(mchNo, headers), getShopInfo(mchNo, headers)])
+  const [mainBodyRes, shopInfoRes] = await Promise.all([getMainBody(mchNo), getShopInfo(mchNo)])
 
   // 映射主体信息到表单
   if (mainBodyRes.data) {

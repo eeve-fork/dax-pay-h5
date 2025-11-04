@@ -109,6 +109,16 @@ export const DaxPayH5Route: RouteRecordRaw = {
         title: '错误提示',
       },
     },
+  ],
+}
+
+/**
+ * 进件相关
+ */
+export const DaxPayOnboardedRoute: RouteRecordRaw = {
+  path: '/onboarded',
+  name: 'onboarded',
+  children: [
     {
       path: '/onboarded/leshua_pay',
       name: 'leshua',
@@ -139,6 +149,40 @@ export const DaxPayH5Route: RouteRecordRaw = {
       component: () => import('@/views/daxpay/h5/onboarded/sand/SandApply.vue'),
       meta: {
         title: '杉德进件申请',
+      },
+    },
+  ],
+}
+
+/**
+ * 小程序内嵌页面
+ */
+export const DaxPayMiniRoute: RouteRecordRaw = {
+  path: '/mini',
+  name: 'mini',
+  children: [
+    {
+      path: '/mini/mch/profile/main',
+      name: 'MchMainBody',
+      component: () => import('@/views/daxpay/miniapp/merchant/profile/MchMainBody.vue'),
+      meta: {
+        title: '主体信息',
+      },
+    },
+    {
+      path: '/mini/mch/profile/shop',
+      name: 'MchShopInfo',
+      component: () => import('@/views/daxpay/miniapp/merchant/profile/MchShopInfo.vue'),
+      meta: {
+        title: '经营信息',
+      },
+    },
+    {
+      path: '/mini/mch/profile/settle',
+      name: 'MchSettleInfo',
+      component: () => import('@/views/daxpay/miniapp/merchant/profile/MchSettleInfo.vue'),
+      meta: {
+        title: '结算信息',
       },
     },
   ],

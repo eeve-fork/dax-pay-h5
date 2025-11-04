@@ -156,7 +156,7 @@
                   <BUpload
                     v-model:pic-url="form.legal.frontPicUrl"
                     v-model:pic-id="form.legal.frontPic"
-                    :web-header="headers"
+
                     :showable="showable"
                   />
                   <van-button
@@ -185,7 +185,7 @@
                   <BUpload
                     v-model:pic-url="form.legal.backPicUrl"
                     v-model:pic-id="form.legal.backPic"
-                    :web-header="headers"
+
                     :showable="showable"
                   />
                   <van-button
@@ -214,7 +214,7 @@
                 <BUpload
                   v-model:pic-url="form.other.handIdCardFrontPicUrl"
                   v-model:pic-id="form.other.handIdCardFrontPic"
-                  :web-header="headers"
+
                   :showable="showable"
                 />
               </template>
@@ -293,7 +293,7 @@
                     <BUpload
                       v-model:pic-url="form.license.licensePicUrl"
                       v-model:pic-id="form.license.licensePic"
-                      :web-header="headers"
+
                       :showable="showable"
                     />
                     <van-button
@@ -321,7 +321,7 @@
                   <BUpload
                     v-model:pic-url="form.other.busNetPicUrl"
                     v-model:pic-id="form.other.busNetPic"
-                    :web-header="headers"
+
                     :showable="showable"
                   />
                 </template>
@@ -464,7 +464,7 @@
                 <BUpload
                   v-model:pic-url="form.other.appScreenshotImgUrl"
                   v-model:pic-id="form.other.appScreenshotImg"
-                  :web-header="headers"
+
                   :showable="showable"
                 />
               </template>
@@ -480,7 +480,7 @@
                 <BUpload
                   v-model:pic-url="form.other.paymentsImgUrl"
                   v-model:pic-id="form.other.paymentsImg"
-                  :web-header="headers"
+
                   :showable="showable"
                 />
               </template>
@@ -518,22 +518,18 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import {Dialog, showConfirmDialog, showDialog, showNotify} from 'vant'
+import { showConfirmDialog, showDialog, showNotify } from 'vant'
 import type { MccConst, MerchantApply } from './SandApply.api'
 import { findById, findH5ById, mccTree, mchMccTree, save, saveH5, wxMccTree } from './SandApply.api'
-import type {
-  Region,
-} from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
 import {
-  findAllProvinceAndCityAndArea,
-  idCardOcr,
-  licenseOcr,
   submit,
   submitH5,
 } from '@/views/daxpay/h5/onboarded/common/OnbMchApply.api'
-import type { WebHeaders } from '#/web'
 import router from '@/router'
 import { initMerchantProfile } from '@/views/daxpay/h5/onboarded/common/OnbMchApplyUtil'
+import { useTokenStore } from '@/store/modules/token'
+import {idCardOcr, licenseOcr, Region} from '@/api/System.api'
+import { findAllProvinceAndCityAndArea } from '@/api/System.api'
 
 const route = useRoute()
 const { id: applyId, sign, token, clientCode, show } = route.query
@@ -541,11 +537,10 @@ const { id: applyId, sign, token, clientCode, show } = route.query
 const showable = ref<boolean>(show === 'true')
 
 // 请求头信息
-const headers = {
-  'AccessToken': token,
-  // 判断是网关端/商户端/代理端
-  'x-client-code': clientCode || 'dax-pay-gateway',
-} as WebHeaders
+const { setToken, setClientCode } = useTokenStore()
+// 请求头信息
+setToken(token as string)
+setClientCode(clientCode as string)
 
 // 当前页面状态
 const currentPage = reactive({
@@ -608,7 +603,7 @@ function initData() {
  */
 function getInfo() {
   // 终端有值说明是嵌入方式
-  const promise = clientCode ? findById(applyId, headers) : findH5ById(applyId, sign, headers)
+  const promise = clientCode ? findById(applyId) : findH5ById(applyId, sign)
   promise.then(({ code, data, msg }) => {
     if (code !== 0) {
       router.replace({ name: 'payFail', query: { msg, title: '获取信息失败' } })
@@ -656,7 +651,7 @@ function nextClick() {
 function saveTemp() {
   loading.value = true
   // 终端有值说明是嵌入方式
-  const promise = clientCode ? save(form.value, headers) : saveH5(form.value, sign, headers)
+  const promise = clientCode ? save(form.value) : saveH5(form.value, sign)
   promise.then(({ code, msg }) => {
     if (code !== 0) {
       showNotify({ type: 'danger', message: msg })
@@ -681,7 +676,7 @@ function submitClick() {
       .then(async () => {
         loading.value = true
         // 执行下一步操作
-        const savePromise = clientCode ? save(form.value, headers) : saveH5(form.value, sign, headers)
+        const savePromise = clientCode ? save(form.value) : saveH5(form.value, sign)
         await savePromise.then(({ code, msg }) => {
           if (code !== 0) {
             showNotify({ type: 'danger', message: msg })
@@ -689,7 +684,7 @@ function submitClick() {
           }
         })
         // 提交
-        const submitPromise = clientCode ? submit(form.value.applyId, headers) : submitH5(form.value.applyId, sign, headers)
+        const submitPromise = clientCode ? submit(form.value.applyId) : submitH5(form.value.applyId, sign)
         await submitPromise.then(({ code, msg }) => {
           if (code !== 0) {
             showNotify({ type: 'danger', message: msg })
@@ -720,7 +715,7 @@ function submitClick() {
  * 身份证正面识别
  */
 function ocrIdCardFront() {
-  idCardOcr(form.value.legal.frontPicUrl, 'ID_CARD_FRONT', headers).then((res) => {
+  idCardOcr(form.value.legal.frontPicUrl, 'ID_CARD_FRONT').then((res) => {
     if (res.code !== 0) {
       showNotify({ type: 'danger', message: res.msg })
       return
@@ -736,7 +731,7 @@ function ocrIdCardFront() {
  * 身份证反面识别
  */
 function ocrIdCardBack() {
-  idCardOcr(form.value.legal.backPicUrl, 'ID_CARD_BACK', headers).then(({ code, data, msg }) => {
+  idCardOcr(form.value.legal.backPicUrl, 'ID_CARD_BACK').then(({ code, data, msg }) => {
     if (code !== 0) {
       showNotify({ type: 'danger', message: msg })
       return
@@ -752,7 +747,7 @@ function ocrIdCardBack() {
  * 营业执照OCR
  */
 function licenseInfoOcr() {
-  licenseOcr(form.value.license.licensePicUrl, headers).then(({ code, data, msg }) => {
+  licenseOcr(form.value.license.licensePicUrl).then(({ code, data, msg }) => {
     if (code !== 0) {
       showNotify({ type: 'danger', message: msg })
       return
@@ -786,7 +781,7 @@ async function readMchData() {
   // 获取当前商户号
   const mchNo = form.value.merchant.mchNo as string
   loading.value = true
-  await initMerchantProfile(form.value, mchNo, headers)
+  await initMerchantProfile(form.value, mchNo)
   loading.value = false
   showNotify({ type: 'success', message: '商户资料读取成功' })
 }

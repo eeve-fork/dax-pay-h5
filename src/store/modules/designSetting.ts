@@ -3,7 +3,7 @@ import { store } from '@/store'
 import designSetting from '@/settings/designSetting'
 import type { DesignSettingState } from '@/settings/designSetting'
 
-const {  appTheme, appThemeList, isPageAnimate, pageAnimateType } = designSetting
+const { appTheme, appThemeList, isPageAnimate, pageAnimateType } = designSetting
 
 export const useDesignSettingStore = defineStore({
   id: 'app-design-setting',

@@ -4,24 +4,22 @@ import { http } from '@/utils/http/axios'
 /**
  * 对象存储预签名
  */
-export function getUploadParams(param: FileUploadRequestParams, headers) {
+export function getUploadParams(param: FileUploadRequestParams) {
   return http.request<Result<FileUploadParamsResult>>({
     url: '/file/getUploadParams',
     method: 'post',
     data: param,
-    headers,
   })
 }
 
 /**
  * 保存前端直传文件信息
  */
-export function saveOssFileInfo(fileInfo: UpdateFileInfo, headers) {
+export function saveOssFileInfo(fileInfo: UpdateFileInfo) {
   return http.request<Result<UpdateFileInfo>>({
     url: '/file/saveFileInfo',
     method: 'post',
     data: fileInfo,
-    headers,
   })
 }
 

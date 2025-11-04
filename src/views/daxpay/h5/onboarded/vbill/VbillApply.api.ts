@@ -12,49 +12,45 @@ import type {
 /**
  * 查询(独立H5模式)
  */
-export function findH5ById(id, sign, headers) {
+export function findH5ById(id, sign) {
   return http.request<Result<MerchantApply>>({
     method: 'get',
     url: '/vbill/onb/apply/h5/findById',
     params: { id, sign },
-    headers,
   })
 }
 
 /**
  * 保存信息(独立H5模式)
  */
-export function saveH5(param: MerchantApply, sign, headers) {
+export function saveH5(param: MerchantApply, sign) {
   return http.request<Result<void>>({
     method: 'post',
     url: '/vbill/onb/apply/h5/save',
     data: param,
     params: { sign },
-    headers,
   })
 }
 
 /**
  * 查询(嵌入模式)
  */
-export function findById(id, headers) {
+export function findById(id) {
   return http.request<Result<MerchantApply>>({
     method: 'get',
     url: '/vbill/onb/apply/findById',
     params: { id },
-    headers,
   })
 }
 
 /**
  * 保存信息(嵌入模式)
  */
-export function save(param: MerchantApply, headers) {
+export function save(param: MerchantApply) {
   return http.request<Result<void>>({
     method: 'post',
     url: '/vbill/onb/apply/save',
     data: param,
-    headers,
   })
 }
 

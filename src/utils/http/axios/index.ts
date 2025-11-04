@@ -13,6 +13,7 @@ import { isString } from '@/utils/is/'
 import { deepMerge, isUrl } from '@/utils'
 import { setObjToUrlParams } from '@/utils/urlUtils'
 import type { Result } from '#/axios'
+import { useTokenStore } from '@/store/modules/token'
 
 const globSetting = useGlobSetting()
 const urlPrefix = globSetting.urlPrefix
@@ -102,6 +103,21 @@ const transform: AxiosTransform = {
     if (!isUrlStr && apiUrl && isString(apiUrl)) { /* empty */ }
     const params = config.params || {}
     const data = config.data || false
+    // token
+    const { getToken, getClientCode } = useTokenStore()
+    if ((config as Recordable).headers) {
+      config.headers = {
+        ...config.headers,
+        'AccessToken': getToken(),
+        'x-client-code': getClientCode(),
+      }
+    }
+    else {
+      ;(config as Recordable).headers = {
+        'AccessToken': getToken(),
+        'x-client-code': getClientCode(),
+      }
+    }
     if (config.method?.toUpperCase() === RequestEnum.GET) {
       if (!isString(params)) {
         // 给 get 请求加上时间戳参数，避免从缓存中拿数据。
