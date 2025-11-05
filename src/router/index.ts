@@ -5,7 +5,7 @@ import { ErrorPageRoute, routeModuleList } from '@/router/base'
 import { useRouteStoreWidthOut } from '@/store/modules/route'
 
 // 菜单
-import { DaxPayH5Route, DaxPayMiniRoute, DaxPayOnboardedRoute, DaxPayPcRoute } from '@/router/daxpay'
+import { DaxPayAgentMiniRoute, DaxPayH5Route, DaxPayMchMiniRoute, DaxPayOnboardedRoute, DaxPayPcRoute } from '@/router/daxpay'
 import { getSystemTitle } from '@/settings/initWebsiteConfig'
 
 // 普通路由
@@ -13,7 +13,8 @@ export const constantRouter: RouteRecordRaw[] = [
   DaxPayH5Route,
   DaxPayPcRoute,
   DaxPayOnboardedRoute,
-  DaxPayMiniRoute,
+  DaxPayMchMiniRoute,
+  DaxPayAgentMiniRoute,
   ErrorPageRoute,
 ]
 

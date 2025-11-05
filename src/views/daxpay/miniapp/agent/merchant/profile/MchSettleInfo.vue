@@ -138,12 +138,15 @@ import { bankCardOcr, idCardOcr } from '@/api/System.api'
 import { useTokenStore } from '@/store/modules/token'
 
 const route = useRoute()
-const { token } = route.query
+const { token, mchNo } = route.query
 
 // 请求头信息
 const { setToken, setClientCode } = useTokenStore()
 setToken(token as string)
-setClientCode('dax-pay-merchant')
+setClientCode('dax-pay-agent')
+
+// 商户号
+const mchNoValue = ref(mchNo as string)
 
 // 表单引用
 const formRef = ref()
@@ -170,8 +173,8 @@ async function initData() {
   loading.value = true
   try {
     const [settleInfoRes, mainBodyRes] = await Promise.all([
-      getSettleInfo(),
-      getMainBody(),
+      getSettleInfo(mchNoValue.value),
+      getMainBody(mchNoValue.value),
     ])
     if (settleInfoRes.data) {
       form.value = settleInfoRes.data
@@ -220,6 +223,7 @@ async function handleSubmit() {
       ...form.value,
       bankCard: form.value.bankCard || {},
       cardHolder: form.value.cardHolder || {},
+      mchNo: mchNoValue.value,
     }
     const { code, msg } = await updateSettleInfo(params)
     if (code) {

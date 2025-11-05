@@ -114,12 +114,15 @@ import { findAllProvinceAndCityAndArea } from '@/api/System.api'
 import { useTokenStore } from '@/store/modules/token'
 
 const route = useRoute()
-const { token } = route.query
+const { token, mchNo } = route.query
 
 // 请求头信息
 const { setToken, setClientCode } = useTokenStore()
 setToken(token as string)
-setClientCode('dax-pay-merchant')
+setClientCode('dax-pay-agent')
+
+// 商户号
+const mchNoValue = ref(mchNo as string)
 
 // 表单引用
 const formRef = ref()
@@ -142,7 +145,7 @@ async function initData() {
   loading.value = true
   try {
     const [shopInfoRes, pcaRes] = await Promise.all([
-      getShopInfo(),
+      getShopInfo(mchNoValue.value),
       findAllProvinceAndCityAndArea(),
     ])
     if (shopInfoRes.data) {
@@ -187,7 +190,9 @@ async function handleSubmit() {
   try {
     await formRef.value?.validate()
     loading.value = true
-    const { code, msg } = await updateShopInfo(form.value)
+    // 添加mchNo到表单数据
+    const formData = { ...form.value, mchNo: mchNoValue.value }
+    const { code, msg } = await updateShopInfo(formData)
     if (code) {
       showNotify({ type: 'danger', message: msg })
       return

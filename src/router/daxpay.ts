@@ -155,11 +155,11 @@ export const DaxPayOnboardedRoute: RouteRecordRaw = {
 }
 
 /**
- * 小程序内嵌页面
+ * 商户端小程序内嵌页面
  */
-export const DaxPayMiniRoute: RouteRecordRaw = {
-  path: '/mini',
-  name: 'mini',
+export const DaxPayMchMiniRoute: RouteRecordRaw = {
+  path: '/mini/mch',
+  name: 'merchantMini',
   children: [
     {
       path: '/mini/mch/profile/main',
@@ -187,6 +187,40 @@ export const DaxPayMiniRoute: RouteRecordRaw = {
     },
   ],
 }
+/**
+ * 代理端小程序内嵌页面
+ */
+export const DaxPayAgentMiniRoute: RouteRecordRaw = {
+  path: '/mini/agent',
+  name: 'agentMini',
+  children: [
+    {
+      path: '/mini/agent/mch/profile/main',
+      name: 'AgentMchMainBody',
+      component: () => import('@/views/daxpay/miniapp/agent/merchant/profile/MchMainBody.vue'),
+      meta: {
+        title: '主体信息',
+      },
+    },
+    {
+      path: '/mini/agent/mch/profile/shop',
+      name: 'AgentMchShopInfo',
+      component: () => import('@/views/daxpay/miniapp/agent/merchant/profile/MchShopInfo.vue'),
+      meta: {
+        title: '经营信息',
+      },
+    },
+    {
+      path: '/mini/agent/mch/profile/settle',
+      name: 'AgentMchSettleInfo',
+      component: () => import('@/views/daxpay/miniapp/agent/merchant/profile/MchSettleInfo.vue'),
+      meta: {
+        title: '结算信息',
+      },
+    },
+  ],
+}
+
 /**
  * pc页面
  */

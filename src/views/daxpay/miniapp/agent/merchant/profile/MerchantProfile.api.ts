@@ -4,10 +4,11 @@ import type { MchEntity, Result } from '#/axios'
 /**
  * 查询主体信息
  */
-export function getMainBody() {
+export function getMainBody(mchNo: string) {
   return http.request<Result<MchMainBody>>({
     method: 'get',
-    url: '/mini/mch/profile/getMainBody',
+    url: '/mini/agent/mch/profile/getMainBody',
+    params: { mchNo },
   })
 }
 
@@ -17,7 +18,7 @@ export function getMainBody() {
 export function updateMainBody(params: MchMainBody) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/mini/mch/profile/updateMainBody',
+    url: '/mini/agent/mch/profile/updateMainBody',
     data: params,
   })
 }
@@ -25,10 +26,11 @@ export function updateMainBody(params: MchMainBody) {
 /**
  * 查询经营场所信息
  */
-export function getShopInfo() {
+export function getShopInfo(mchNo: string) {
   return http.request<Result<MchShopProfile>>({
     method: 'get',
-    url: '/mini/mch/profile/shop/getShopProfile',
+    url: '/mini/agent/mch/profile/shop/getShopProfile',
+    params: { mchNo },
   })
 }
 
@@ -38,7 +40,7 @@ export function getShopInfo() {
 export function updateShopInfo(params: MchShopProfile) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/mini/mch/profile/shop/update',
+    url: '/mini/agent/mch/profile/shop/update',
     data: params,
   })
 }
@@ -46,10 +48,11 @@ export function updateShopInfo(params: MchShopProfile) {
 /**
  * 查询结算信息
  */
-export function getSettleInfo() {
+export function getSettleInfo(mchNo: string) {
   return http.request<Result<MchSettle>>({
     method: 'get',
-    url: '/mini/mch/profile/getSettleInfo',
+    url: '/mini/agent/mch/profile/getSettleInfo',
+    params: { mchNo },
   })
 }
 
@@ -59,7 +62,7 @@ export function getSettleInfo() {
 export function updateSettleInfo(params: MchSettle) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/mini/mch/profile/updateSettleInfo',
+    url: '/mini/agent/mch/profile/updateSettleInfo',
     data: params,
   })
 }
@@ -67,20 +70,66 @@ export function updateSettleInfo(params: MchSettle) {
 /**
  * 提交主体认证
  */
-export function applyProfileAuth() {
+export function applyProfileAuth(mchNo: string) {
   return http.request<Result<void>>({
     method: 'post',
-    url: '/mini/mch/profile/applyProfileAuth',
+    url: '/mini/agent/mch/profile/applyProfileAuth',
+    params: { mchNo },
   })
 }
 
 /**
  * 根据商户号查询商户状态信息
  */
-export function getMerchantStatus() {
+export function getMerchantStatus(mchNo: string) {
   return http.request<Result<MerchantStatus>>({
     method: 'get',
-    url: '/mini/mch/findMchStatus',
+    url: '/mini/agent/mch/profile/findMchStatus',
+    params: { mchNo },
+  })
+}
+
+/**
+ * 查询结算卡信息
+ */
+export function getBankCardProfile(mchNo: string) {
+  return http.request<Result<MchBankCardProfile>>({
+    method: 'get',
+    url: '/mini/agent/mch/profile/bankcard/getBankCardProfile',
+    params: { mchNo },
+  })
+}
+
+/**
+ * 查询持卡人信息
+ */
+export function getCardHolderProfile(mchNo: string) {
+  return http.request<Result<MchCardHolderProfile>>({
+    method: 'get',
+    url: '/mini/agent/mch/profile/cardholder/getCardHolderProfile',
+    params: { mchNo },
+  })
+}
+
+/**
+ * 查询法人信息
+ */
+export function getLegalProfile(mchNo: string) {
+  return http.request<Result<MchLegalProfile>>({
+    method: 'get',
+    url: '/mini/agent/mch/profile/legal/getLegalProfile',
+    params: { mchNo },
+  })
+}
+
+/**
+ * 查询营业执照信息
+ */
+export function getLicenseProfile(mchNo: string) {
+  return http.request<Result<MchLicenseProfile>>({
+    method: 'get',
+    url: '/mini/agent/mch/profile/license/getLicenseProfile',
+    params: { mchNo },
   })
 }
 

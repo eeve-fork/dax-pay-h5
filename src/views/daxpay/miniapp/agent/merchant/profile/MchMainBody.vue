@@ -380,12 +380,15 @@ import { findAllProvinceAndCityAndArea, idCardOcr, licenseOcr } from '@/api/Syst
 import { useTokenStore } from '@/store/modules/token'
 
 const route = useRoute()
-const { token } = route.query
+const { token, mchNo } = route.query
 
 // 请求头信息
 const { setToken, setClientCode } = useTokenStore()
 setToken(token as string)
-setClientCode('dax-pay-merchant')
+setClientCode('dax-pay-agent')
+
+// 商户号
+const mchNoValue = ref(mchNo as string)
 
 // 表单引用
 const formRef = ref()
@@ -434,9 +437,9 @@ async function initData() {
   try {
     // 并行获取主体信息、省市区数据和商户状态
     const [mainBodyRes, pcaRes, mchStatusRes] = await Promise.all([
-      getMainBody(),
+      getMainBody(mchNoValue.value),
       findAllProvinceAndCityAndArea(),
-      getMerchantStatus(),
+      getMerchantStatus(mchNoValue.value),
     ])
 
     // 设置表单数据
@@ -542,7 +545,9 @@ async function handleSubmit() {
   await formRef.value.validate()
   loading.value = true
   try {
-    const { code, msg } = await updateMainBody(form.value)
+    // 添加mchNo到表单数据
+    const formData = { ...form.value, mchNo: mchNoValue.value }
+    const { code, msg } = await updateMainBody(formData)
     if (code) {
       showNotify({ type: 'danger', message: msg })
       return
@@ -607,9 +612,10 @@ async function handleSubmitAuth() {
       loading.value = true
       try {
         // 先保存数据
-        await updateMainBody(form.value)
+        const formData = { ...form.value, mchNo: mchNoValue.value }
+        await updateMainBody(formData)
         // 再提交认证
-        await applyProfileAuth()
+        await applyProfileAuth(mchNoValue.value)
         showNotify({ type: 'success', message: '认证申请提交成功' })
         // 重新加载数据以获取最新状态
         await initData()
