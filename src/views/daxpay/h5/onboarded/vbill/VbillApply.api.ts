@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios'
-import type {MchEntity, Result} from '#/axios'
+import type { MchEntity, Result } from '#/axios'
 import type {
   OnbBankAccountProfile,
   OnbCardHolderProfile,
@@ -7,6 +7,7 @@ import type {
   OnbLicenseProfile,
   OnbMerchantProfile,
   OnbShopProfile,
+  TradeRateConfigItem,
 } from '@/views/daxpay/h5/onboarded/common/Base'
 
 /**
@@ -65,6 +66,26 @@ export function mccTree() {
 }
 
 /**
+ * 获取代理商权限配置
+ */
+export function getAgentPermConfig() {
+  return http.request<Result<any>>({
+    method: 'get',
+    url: '/vbill/rate/agent/getPermConfig',
+  })
+}
+
+/**
+ * 获取代理商费率配置
+ */
+export function getConfig() {
+  return http.request<Result<VbillRateConfig>>({
+    method: 'get',
+    url: '/vbill/rate/agent/getConfig',
+  })
+}
+
+/**
  * 随行付商户申请参数
  */
 export interface MerchantApply {
@@ -85,7 +106,7 @@ export interface MerchantApply {
   /** 其他申请信息 */
   other: OtherApply
   /** 费率配置信息 */
-  rate?: RateProfile
+  rate: RateProfile
 }
 
 /**
@@ -148,6 +169,82 @@ export interface RateProfile {
   quickCreditRate?: number
   /** 手机闪付借记卡费率 */
   quickDebitRate?: number
+}
+
+/**
+ * 随行付费率配置
+ */
+export interface VbillRateConfig extends MchEntity {
+  /** 微信贷记卡费率 */
+  wechatCreditRate: TradeRateConfigItem
+  /** 微信借记卡费率 */
+  wechatDebitRate: TradeRateConfigItem
+  /** 微信借记卡封顶手续费 */
+  wechatDebitMaxFee: TradeRateConfigItem
+  /** 支付宝贷记卡费率 */
+  alipayCreditRate: TradeRateConfigItem
+  /** 支付宝借记卡费率 */
+  alipayDebitRate: TradeRateConfigItem
+  /** 支付宝借记卡封顶手续费 */
+  alipayDebitMaxFee: TradeRateConfigItem
+  /** 银联单笔小于1000贷记卡费率 */
+  unionCreditMinRate: TradeRateConfigItem
+  /** 银联单笔小于1000借记卡费率 */
+  unionDebitMinRate: TradeRateConfigItem
+  /** 银联单笔大于1000贷记卡费率 */
+  unionCreditMaxRate: TradeRateConfigItem
+  /** 银联单笔大于1000借记卡费率 */
+  unionDebitMaxRate: TradeRateConfigItem
+  /** 贷记卡费率 */
+  creditRate: TradeRateConfigItem
+  /** 借记卡费率 */
+  cardDebitRate: TradeRateConfigItem
+  /** 借记卡手续费封顶值 */
+  cardDebitCap: TradeRateConfigItem
+  /** 手机闪付贷记卡费率 */
+  quickCreditRate: TradeRateConfigItem
+  /** 手机闪付借记卡费率 */
+  quickDebitRate: TradeRateConfigItem
+  /** 服务商号 */
+  isvNo?: string
+}
+
+/**
+ * 随行付商户费率配置
+ */
+export interface VbillMchRateConfig extends MchEntity {
+  /** 微信贷记卡费率 */
+  wechatCreditRate?: number
+  /** 微信借记卡费率 */
+  wechatDebitRate?: number
+  /** 微信借记卡封顶手续费 */
+  wechatDebitMaxFee?: number
+  /** 支付宝贷记卡费率 */
+  alipayCreditRate?: number
+  /** 支付宝借记卡费率 */
+  alipayDebitRate?: number
+  /** 支付宝借记卡封顶手续费 */
+  alipayDebitMaxFee?: number
+  /** 银联单笔小于1000贷记卡费率 */
+  unionCreditMinRate?: number
+  /** 银联单笔小于1000借记卡费率 */
+  unionDebitMinRate?: number
+  /** 银联单笔大于1000贷记卡费率 */
+  unionCreditMaxRate?: number
+  /** 银联单笔大于1000借记卡费率 */
+  unionDebitMaxRate?: number
+  /** 贷记卡费率 */
+  creditRate?: number
+  /** 借记卡费率 */
+  cardDebitRate?: number
+  /** 借记卡手续费封顶值 */
+  cardDebitCap?: number
+  /** 手机闪付贷记卡费率 */
+  quickCreditRate?: number
+  /** 手机闪付借记卡费率 */
+  quickDebitRate?: number
+  /** 进件商户号 */
+  onbMchNo?: string
 }
 
 /**

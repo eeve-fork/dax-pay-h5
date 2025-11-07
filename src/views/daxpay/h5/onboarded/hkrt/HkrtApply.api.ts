@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios'
-import type {MchEntity, Result} from '#/axios'
+import type { MchEntity, Result } from '#/axios'
 import type {
   OnbBankAccountProfile,
   OnbCardHolderProfile,
@@ -7,6 +7,7 @@ import type {
   OnbLicenseProfile,
   OnbMerchantProfile,
   OnbShopProfile,
+  TradeRateConfigItem,
 } from '@/views/daxpay/h5/onboarded/common/Base'
 
 /**
@@ -84,6 +85,10 @@ export interface MerchantApply {
   cardHolder: OnbCardHolderProfile
   /** 其他申请信息 */
   other: OtherApply
+  /** 结算产品信息 */
+  settle: SettleProfile
+  /** 费率 */
+  rate: HkrtMchRateConfig
 }
 
 /**
@@ -118,4 +123,120 @@ export interface MccConst {
   parentCode: string
   /** 子类目 */
   children?: MccConst[]
+}
+
+/**
+ * 海科融通入驻结算信息
+ */
+export interface SettleProfile {
+  // 申请ID
+  applyId?: string
+  // 结算周期
+  settlementCycle?: string
+  // 提现费率
+  withdrawalRate?: number
+  // 最小提现费用
+  withdrawalFeeMin?: number
+  // 对公提现费率
+  publicWithdrawalRate?: number
+  // 对公最小提现费用
+  publicWithdrawalFeeMin?: number
+}
+
+/**
+ * 海科商户费率配置
+ */
+export interface HkrtMchRateConfig {
+  // 微信费率
+  wechatRate?: number
+  // 支付宝费率
+  alipayRate?: number
+  // 银行卡借记卡费率
+  bankDebitRate?: number
+  // 银行卡贷记卡费率
+  bankCreditRate?: number
+  // 银联二维码借记卡费率
+  unionDebitRate?: number
+  // 银联二维码贷记卡费率
+  unionCreditRate?: number
+  // 银联二维码1000以下费率
+  unionMixRate?: number
+  // 银行卡借记卡封顶手续费
+  bankDebitMax?: number
+  // 银联二维码借记卡封顶手续费
+  unionDebitMax?: number
+}
+
+/**
+ * 代理商权限配置
+ */
+export interface AgentPermConfig {
+  /** 是否可用代理商API接口 */
+  agentApi?: boolean
+  /** 是否可以查询商户订单信息(界面) */
+  queryOrder?: boolean
+  /** 是否可以代商户退款(界面) */
+  refund?: boolean
+  /** 是否可以创建商户订单(界面) */
+  createOrder?: boolean
+  /** 是否可以创建进件商户 */
+  createOnbMch?: boolean
+  /** 是否可以代商户进行交易(API) */
+  tradeApi?: boolean
+  /** 是否可以设置商户结算周期 */
+  settleCycle?: boolean
+  /** 是否可以操作商户应用 */
+  setupMchApp?: boolean
+  /** 是否可以查看商户应用信息 */
+  mchAppInfo?: boolean
+  /** 设置商户分账规则 */
+  setupMchProfit?: boolean
+  /** 可用通道 */
+  availableChannel?: string[]
+  /** 可用接口 */
+  availableApi?: string[]
+}
+
+/**
+ * 海科费率配置
+ */
+export interface HkrtRateConfig {
+  // 微信费率
+  wechatRate: TradeRateConfigItem
+  // 支付宝费率
+  alipayRate: TradeRateConfigItem
+  // 银行卡借记卡费率
+  bankDebitRate: TradeRateConfigItem
+  // 银行卡贷记卡费率
+  bankCreditRate: TradeRateConfigItem
+  // 银联二维码借记卡费率
+  unionDebitRate: TradeRateConfigItem
+  // 银联二维码贷记卡费率
+  unionCreditRate: TradeRateConfigItem
+  // 银联二维码1000以下费率
+  unionMixRate: TradeRateConfigItem
+  // 银行卡借记卡封顶手续费
+  bankDebitMax: TradeRateConfigItem
+  // 银联二维码借记卡封顶手续费
+  unionDebitMax: TradeRateConfigItem
+}
+
+/**
+ * 查询代理商权限
+ */
+export function getAgentPermConfig() {
+  return http.request<Result<AgentPermConfig>>({
+    method: 'get',
+    url: '/agent/perm/config/get',
+  })
+}
+
+/**
+ * 代理端获取代理费率
+ */
+export function getConfig() {
+  return http.request<Result<HkrtRateConfig>>({
+    method: 'get',
+    url: '/hkrt/rate/agent/getConfig',
+  })
 }

@@ -684,11 +684,260 @@
             </van-cell-group>
           </template>
         </template>
+
+        <!-- 费率配置模块 -->
+        <template v-if="currentPage.currentIndex === 4 && clientCode === 'dax-pay-agent'">
+          <div class="commonTitle">
+            费率配置
+          </div>
+          <van-cell-group inset>
+            <!-- 微信贷记卡费率 -->
+            <van-field
+              v-model="form.rate.wechatCreditRate"
+              label-align="top"
+              name="wechatCreditRate"
+              placeholder="请输入微信贷记卡费率"
+              label="微信贷记卡费率(%)"
+              type="number"
+              :min="agentRate.wechatCreditRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入微信贷记卡费率' }]"
+            />
+            <!-- 微信借记卡费率 -->
+            <van-field
+              v-model="form.rate.wechatDebitRate"
+              label-align="top"
+              name="wechatDebitRate"
+              placeholder="请输入微信借记卡费率"
+              label="微信借记卡费率(%)"
+              type="number"
+              :min="agentRate.wechatDebitRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入微信借记卡费率' }]"
+            />
+            <!-- 微信借记卡封顶手续费 -->
+            <van-field
+              v-model="form.rate.wechatDebitMaxFee"
+              label-align="top"
+              name="wechatDebitMaxFee"
+              placeholder="请输入微信借记卡封顶手续费"
+              label="微信借记卡封顶手续费(元)"
+              type="number"
+              :min="0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入微信借记卡封顶手续费' }]"
+            />
+            <!-- 支付宝贷记卡费率 -->
+            <van-field
+              v-model="form.rate.alipayCreditRate"
+              label-align="top"
+              name="alipayCreditRate"
+              placeholder="请输入支付宝贷记卡费率"
+              label="支付宝贷记卡费率(%)"
+              type="number"
+              :min="agentRate.alipayCreditRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入支付宝贷记卡费率' }]"
+            />
+            <!-- 支付宝借记卡费率 -->
+            <van-field
+              v-model="form.rate.alipayDebitRate"
+              label-align="top"
+              name="alipayDebitRate"
+              placeholder="请输入支付宝借记卡费率"
+              label="支付宝借记卡费率(%)"
+              type="number"
+              :min="agentRate.alipayDebitRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入支付宝借记卡费率' }]"
+            />
+            <!-- 支付宝借记卡封顶手续费 -->
+            <van-field
+              v-model="form.rate.alipayDebitMaxFee"
+              label-align="top"
+              name="alipayDebitMaxFee"
+              placeholder="请输入支付宝借记卡封顶手续费"
+              label="支付宝借记卡封顶手续费(元)"
+              type="number"
+              :min="0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入支付宝借记卡封顶手续费' }]"
+            />
+            <!-- 银联单笔小于1000贷记卡费率 -->
+            <van-field
+              v-model="form.rate.unionCreditMinRate"
+              label-align="top"
+              name="unionCreditMinRate"
+              placeholder="请输入银联单笔小于1000贷记卡费率"
+              label="银联单笔小于1000贷记卡费率(%)"
+              type="number"
+              :min="agentRate.unionCreditMinRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入银联单笔小于1000贷记卡费率' }]"
+            />
+            <!-- 银联单笔小于1000借记卡费率 -->
+            <van-field
+              v-model="form.rate.unionDebitMinRate"
+              label-align="top"
+              name="unionDebitMinRate"
+              placeholder="请输入银联单笔小于1000借记卡费率"
+              label="银联单笔小于1000借记卡费率(%)"
+              type="number"
+              :min="agentRate.unionDebitMinRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入银联单笔小于1000借记卡费率' }]"
+            />
+            <!-- 银联单笔大于1000贷记卡费率 -->
+            <van-field
+              v-model="form.rate.unionCreditMaxRate"
+              label-align="top"
+              name="unionCreditMaxRate"
+              placeholder="请输入银联单笔大于1000贷记卡费率"
+              label="银联单笔大于1000贷记卡费率(%)"
+              type="number"
+              :min="agentRate.unionCreditMaxRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入银联单笔大于1000贷记卡费率' }]"
+            />
+            <!-- 银联单笔大于1000借记卡费率 -->
+            <van-field
+              v-model="form.rate.unionDebitMaxRate"
+              label-align="top"
+              name="unionDebitMaxRate"
+              placeholder="请输入银联单笔大于1000借记卡费率"
+              label="银联单笔大于1000借记卡费率(%)"
+              type="number"
+              :min="agentRate.unionDebitMaxRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入银联单笔大于1000借记卡费率' }]"
+            />
+            <!-- 贷记卡费率 -->
+            <van-field
+              v-model="form.rate.creditRate"
+              label-align="top"
+              name="creditRate"
+              placeholder="请输入贷记卡费率"
+              label="贷记卡费率(%)"
+              type="number"
+              :min="agentRate.creditRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入贷记卡费率' }]"
+            />
+            <!-- 借记卡费率 -->
+            <van-field
+              v-model="form.rate.cardDebitRate"
+              label-align="top"
+              name="cardDebitRate"
+              placeholder="请输入借记卡费率"
+              label="借记卡费率(%)"
+              type="number"
+              :min="agentRate.cardDebitRate?.mchRate || 0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入借记卡费率' }]"
+            />
+            <!-- 借记卡手续费封顶值 -->
+            <van-field
+              v-model="form.rate.cardDebitCap"
+              label-align="top"
+              name="cardDebitCap"
+              placeholder="请输入借记卡手续费封顶值"
+              label="借记卡手续费封顶值(元)"
+              type="number"
+              :min="0"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入借记卡手续费封顶值' }]"
+            />
+            <!-- 手机闪付贷记卡费率 -->
+            <van-field
+              v-model="form.rate.quickCreditRate"
+              label-align="top"
+              name="quickCreditRate"
+              placeholder="请输入手机闪付贷记卡费率"
+              label="手机闪付贷记卡费率(%)"
+              type="number"
+              :min="agentRate.quickCreditRate.mchRate"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入手机闪付贷记卡费率' }]"
+            />
+            <!-- 手机闪付借记卡费率 -->
+            <van-field
+              v-model="form.rate.quickDebitRate"
+              label-align="top"
+              name="quickDebitRate"
+              placeholder="请输入手机闪付借记卡费率"
+              label="手机闪付借记卡费率(%)"
+              type="number"
+              :min="agentRate.quickDebitRate.mchRate"
+              :max="100"
+              :step="0.01"
+              :precision="2"
+              clearable
+              :disabled="showable"
+              :rules="[{ required: true, message: '请输入手机闪付借记卡费率' }]"
+            />
+          </van-cell-group>
+        </template>
       </van-form>
     </div>
     <div class="btnContain">
       <div class="btnBox">
-        <van-button v-if="!showable && currentPage.currentIndex === 1 && clientCode" type="" block @click="readMch">
+        <van-button v-if="!showable && currentPage.currentIndex === 1 && clientCode" block @click="readMch">
           读取商户信息
         </van-button>
         <van-button v-if="currentPage.currentIndex > 1" type="primary" block @click="prevClick">
@@ -714,8 +963,8 @@
 import { showConfirmDialog, showDialog, showNotify } from 'vant'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
-import type { MccConst, MerchantApply } from './VbillApply.api'
-import { findById, findH5ById, mccTree, save, saveH5 } from './VbillApply.api'
+import type { MccConst, MerchantApply, VbillRateConfig } from './VbillApply.api'
+import { findById, findH5ById, getConfig, mccTree, save, saveH5 } from './VbillApply.api'
 import {
   submit,
   submitH5,
@@ -725,8 +974,8 @@ import BUpload from '@/components/BUpload.vue'
 import router from '@/router'
 import { initMerchantProfile } from '@/views/daxpay/h5/onboarded/common/OnbMchApplyUtil'
 import { useTokenStore } from '@/store/modules/token'
-import {bankCardOcr, idCardOcr, licenseOcr, Region} from '@/api/System.api'
-import { findAllProvinceAndCityAndArea } from '@/api/System.api'
+import type { Region } from '@/api/System.api'
+import { bankCardOcr, findAllProvinceAndCityAndArea, idCardOcr, licenseOcr } from '@/api/System.api'
 
 const route = useRoute()
 const { id: applyId, sign, token, clientCode, show } = route.query
@@ -755,6 +1004,13 @@ const currentPage = reactive({
       index: 3,
       title: '结算账户',
     },
+    // 当clientCode为dax-pay-agent时显示费率配置
+    ...(clientCode === 'dax-pay-agent'
+      ? [{
+          index: 4,
+          title: '费率配置',
+        }]
+      : []),
   ],
   currentTitle: computed(() => {
     return currentPage.date.find(item => item.index === currentPage.currentIndex).title
@@ -768,6 +1024,25 @@ const loading = ref<boolean>(false)
 const pca = ref<Region[]>([])
 const mccCodes = ref<MccConst[]>([])
 
+// 代理商费率配置
+const agentRate = ref<VbillRateConfig>({
+  wechatCreditRate: {},
+  wechatDebitRate: {},
+  wechatDebitMaxFee: {},
+  alipayCreditRate: {},
+  alipayDebitRate: {},
+  alipayDebitMaxFee: {},
+  unionCreditMinRate: {},
+  unionDebitMinRate: {},
+  unionCreditMaxRate: {},
+  unionDebitMaxRate: {},
+  creditRate: {},
+  cardDebitRate: {},
+  cardDebitCap: {},
+  quickCreditRate: {},
+  quickDebitRate: {},
+})
+
 // 表单数据对象
 const form = ref<MerchantApply>({
   merchant: {},
@@ -777,6 +1052,7 @@ const form = ref<MerchantApply>({
   bankAccount: {},
   cardHolder: {},
   other: {},
+  rate: {},
 })
 
 /**
@@ -799,6 +1075,36 @@ function initData() {
   findAllProvinceAndCityAndArea().then(({ data }) => {
     pca.value = data
   })
+
+  // 获取权限配置和费率配置
+  Promise.all([
+    getConfig(),
+  ]).then(([rateRes]) => {
+    agentRate.value = rateRes.data
+
+    // 初始化费率配置
+    if (clientCode === 'dax-pay-agent' && agentRate.value) {
+      form.value.rate = {
+        wechatCreditRate: agentRate.value.wechatCreditRate?.mchRate || 0,
+        wechatDebitRate: agentRate.value.wechatDebitRate?.mchRate || 0,
+        wechatDebitMaxFee: agentRate.value.wechatDebitMaxFee?.mchRate || 0,
+        alipayCreditRate: agentRate.value.alipayCreditRate?.mchRate || 0,
+        alipayDebitRate: agentRate.value.alipayDebitRate?.mchRate || 0,
+        alipayDebitMaxFee: agentRate.value.alipayDebitMaxFee?.mchRate || 0,
+        unionCreditMinRate: agentRate.value.unionCreditMinRate?.mchRate || 0,
+        unionDebitMinRate: agentRate.value.unionDebitMinRate?.mchRate || 0,
+        unionCreditMaxRate: agentRate.value.unionCreditMaxRate?.mchRate || 0,
+        unionDebitMaxRate: agentRate.value.unionDebitMaxRate?.mchRate || 0,
+        creditRate: agentRate.value.creditRate?.mchRate || 0,
+        cardDebitRate: agentRate.value.cardDebitRate?.mchRate || 0,
+        cardDebitCap: agentRate.value.cardDebitCap?.mchRate || 0,
+        quickCreditRate: agentRate.value.quickCreditRate?.mchRate || 0,
+        quickDebitRate: agentRate.value.quickDebitRate?.mchRate || 0,
+      }
+    }
+  }).catch(() => {
+    showNotify({ type: 'danger', message: '获取配置信息失败' })
+  })
 }
 
 /**
@@ -811,6 +1117,22 @@ function getInfo() {
       router.replace({ name: 'payFail', query: { msg, title: '获取信息失败' } })
       return
     }
+
+    // 处理费率配置
+    if (data.rate && clientCode === 'dax-pay-agent') {
+      // 确保费率配置对象存在
+      if (!form.value.rate) {
+        form.value.rate = {}
+      }
+
+      // 将返回的费率数据赋值给表单
+      Object.keys(data.rate).forEach((key) => {
+        if (data.rate[key] !== null && data.rate[key] !== undefined) {
+          form.value.rate[key] = data.rate[key]
+        }
+      })
+    }
+
     form.value = data
   })
 }
@@ -819,7 +1141,13 @@ function getInfo() {
  * 点击上一步
  */
 function prevClick() {
-  currentPage.currentIndex--
+  // 特殊处理费率配置页面
+  if (currentPage.currentIndex === 5 && clientCode === 'dax-pay-agent') {
+    currentPage.currentIndex = 4
+  }
+  else {
+    currentPage.currentIndex--
+  }
 }
 
 /**
@@ -831,14 +1159,26 @@ function nextClick() {
     currentPage.currentIndex++
     return
   }
-  
+
+  // 特殊处理费率配置页面
+  if (currentPage.currentIndex === 4 && clientCode === 'dax-pay-agent') {
+    // 验证费率配置是否完整
+    if (!form.value.rate || Object.keys(form.value.rate).length === 0) {
+      showNotify({
+        type: 'warning',
+        message: '请完成费率配置',
+      })
+      return
+    }
+  }
+
   formRef.value.validate()
     .then(() => {
       // 执行下一步操作
       currentPage.currentIndex++
     })
     .catch(() => {
-      showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
+      showNotify({ type: 'danger', message: '表单校验未通过，请仔细检查！' })
     })
 }
 
@@ -863,13 +1203,15 @@ function saveTemp() {
  * 提交
  */
 function submitClick() {
-  showConfirmDialog({
-    title: '提示',
-    message: '确定要提交进件申请！',
-  }).then(() => {
-    formRef.value
-      .validate()
-      .then(async () => {
+  // 先进行数据校验
+  formRef.value
+    .validate()
+    .then(() => {
+      // 校验通过后弹窗确认
+      showConfirmDialog({
+        title: '提示',
+        message: '确定要提交进件申请！',
+      }).then(async () => {
         loading.value = true
         // 执行下一步操作
         const savePromise = clientCode ? save(form.value) : saveH5(form.value, sign)
@@ -901,10 +1243,10 @@ function submitClick() {
           }
         })
       })
-      .catch(() => {
-        showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
-      })
-  })
+    })
+    .catch(() => {
+      showNotify({ type: 'danger', message: '表单校验未通过，请仔细检查！' })
+    })
 }
 
 /**

@@ -166,3 +166,15 @@ export interface OnbCardHolderProfile extends MchEntity {
   /** 非法人结算授权函图片路径 */
   letterOfAuthPicUrl?: string
 }
+
+/**
+ * 费率配置项
+ */
+export interface TradeRateConfigItem {
+  /** 服务商成本费率 */
+  isvRate?: number
+  /** 代理商默认费率 */
+  agentRate?: number
+  /** 商户默认费率 */
+  mchRate?: number
+}

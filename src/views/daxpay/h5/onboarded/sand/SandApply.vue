@@ -493,7 +493,7 @@
     <!-- 底部按钮 -->
     <div class="btnContain">
       <div class="btnBox">
-        <van-button v-if="!showable && currentPage.currentIndex === 1 && clientCode" type="" block @click="readMch">
+        <van-button v-if="!showable && currentPage.currentIndex === 1 && clientCode" block @click="readMch">
           读取商户信息
         </van-button>
         <van-button v-if="currentPage.currentIndex > 1" type="primary" block @click="prevClick">
@@ -528,8 +528,8 @@ import {
 import router from '@/router'
 import { initMerchantProfile } from '@/views/daxpay/h5/onboarded/common/OnbMchApplyUtil'
 import { useTokenStore } from '@/store/modules/token'
-import {idCardOcr, licenseOcr, Region} from '@/api/System.api'
-import { findAllProvinceAndCityAndArea } from '@/api/System.api'
+import type { Region } from '@/api/System.api'
+import { findAllProvinceAndCityAndArea, idCardOcr, licenseOcr } from '@/api/System.api'
 
 const route = useRoute()
 const { id: applyId, sign, token, clientCode, show } = route.query
@@ -640,7 +640,7 @@ function nextClick() {
     updateCurrentTitle()
     return
   }
-  
+
   formRef.value.validate()
     .then(() => {
       // 执行下一步操作
@@ -648,7 +648,7 @@ function nextClick() {
       updateCurrentTitle()
     })
     .catch(() => {
-      showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
+      showNotify({ type: 'danger', message: '表单校验未通过，请仔细检查！' })
     })
 }
 
@@ -674,13 +674,15 @@ function saveTemp() {
  * 提交
  */
 function submitClick() {
-  showConfirmDialog({
-    title: '提示',
-    message: '确定要提交进件申请！',
-  }).then(() => {
-    formRef.value
-      .validate()
-      .then(async () => {
+  // 先进行数据校验
+  formRef.value
+    .validate()
+    .then(() => {
+      // 校验通过后弹窗确认
+      showConfirmDialog({
+        title: '提示',
+        message: '确定要提交进件申请！',
+      }).then(async () => {
         loading.value = true
         // 执行下一步操作
         const savePromise = clientCode ? save(form.value) : saveH5(form.value, sign)
@@ -712,10 +714,10 @@ function submitClick() {
           }
         })
       })
-      .catch(() => {
-        showNotify({ type: 'danger', message: '还有必填项未填写，请仔细检查！' })
-      })
-  })
+    })
+    .catch(() => {
+      showNotify({ type: 'danger', message: '表单校验未通过，请仔细检查！' })
+    })
 }
 
 /**
