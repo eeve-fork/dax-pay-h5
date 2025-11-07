@@ -634,6 +634,13 @@ function prevClick() {
  * 点击下一步进行校验
  */
 function nextClick() {
+  // 如果是查看模式，直接跳转到下一步，不进行表单验证
+  if (showable.value) {
+    currentPage.currentIndex++
+    updateCurrentTitle()
+    return
+  }
+  
   formRef.value.validate()
     .then(() => {
       // 执行下一步操作

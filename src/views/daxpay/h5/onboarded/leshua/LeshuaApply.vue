@@ -654,8 +654,8 @@ import BUpload from '@/components/BUpload.vue'
 import router from '@/router'
 import { initMerchantProfile } from '@/views/daxpay/h5/onboarded/common/OnbMchApplyUtil'
 import { useTokenStore } from '@/store/modules/token'
-import {bankCardOcr, idCardOcr, licenseOcr, Region} from '@/api/System.api'
-import { findAllProvinceAndCityAndArea } from '@/api/System.api'
+import type { Region } from '@/api/System.api'
+import { bankCardOcr, findAllProvinceAndCityAndArea, idCardOcr, licenseOcr } from '@/api/System.api'
 
 const route = useRoute()
 const { id: applyId, sign, token, clientCode, show } = route.query
@@ -756,6 +756,12 @@ function prevClick() {
  * 点击下一步进行校验
  */
 function nextClick() {
+  // 如果是查看模式，直接跳转到下一步，不进行表单验证
+  if (showable.value) {
+    currentPage.currentIndex++
+    return
+  }
+  
   formRef.value.validate()
     .then(() => {
       // 执行下一步操作
