@@ -226,6 +226,22 @@ export const DaxPayAgentMiniRoute: RouteRecordRaw = {
         title: '提现申请',
       },
     },
+    {
+      path: '/mini/agent/wallet/cashouts/detail',
+      name: 'AgentCashoutsDetail',
+      component: () => import('@/views/daxpay/miniapp/agent/wallet/cashouts/CashoutsDetail.vue'),
+      meta: {
+        title: '提现详情',
+      },
+    },
+    {
+      path: '/mini/agent/wallet/cashouts/edit',
+      name: 'AgentCashoutsEdit',
+      component: () => import('@/views/daxpay/miniapp/agent/wallet/cashouts/CashoutsEdit.vue'),
+      meta: {
+        title: '编辑提现申请',
+      },
+    },
   ],
 }
 

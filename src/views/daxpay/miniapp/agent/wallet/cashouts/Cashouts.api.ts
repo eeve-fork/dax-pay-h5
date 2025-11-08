@@ -1,5 +1,5 @@
 import { http } from '@/utils/http/axios'
-import type { MchEntity, Result } from '#/axios'
+import type { MchEntity, Result, PageResult } from '#/axios'
 
 /**
  * 查询钱包
@@ -15,7 +15,7 @@ export function getWallet() {
  * 创建提现申请
  */
 export function createApply(params: AgentCashouts) {
-  return http.request<Result<number>>({
+  return http.request<Result<void>>({
     method: 'post',
     url: '/agent/cashouts/create',
     data: params,
@@ -36,7 +36,7 @@ export function getConfig() {
  * 提现手续费金额计算
  */
 export function calcCashoutsFee(cashoutsAmount: number) {
-  return http.request<Result<AgentCashoutsConfig>>({
+  return http.request<Result<AgentCashouts>>({
     method: 'get',
     url: '/agent/cashouts/calcCashoutsFee',
     params: { cashoutsAmount },
@@ -47,7 +47,7 @@ export function calcCashoutsFee(cashoutsAmount: number) {
  * 提现申请分页
  */
 export function pageCashouts(params: any) {
-  return http.request<Result<any>>({
+  return http.request<Result<PageResult<AgentCashouts>>>({
     method: 'get',
     url: '/agent/cashouts/page',
     params,
@@ -57,7 +57,7 @@ export function pageCashouts(params: any) {
 /**
  * 提现申请详情
  */
-export function getCashouts(id: number) {
+export function getCashouts(id: string) {
   return http.request<Result<AgentCashouts>>({
     method: 'get',
     url: '/agent/cashouts/findById',
@@ -109,6 +109,8 @@ export interface AgentWallet extends MchEntity {
 export interface AgentCashouts extends MchEntity {
   /** 申请名称 */
   name?: string
+  /** 提现申请号 */
+  cashoutsNo?: string
   /** 提现方式 */
   type?: string
   /** 提现金额 */
@@ -137,6 +139,18 @@ export interface AgentCashouts extends MchEntity {
   status?: string
   /** 外部状态 */
   outStatus?: string
+  /** 申请时间 */
+  applyTime?: string
+  /** 审核备注 */
+  auditRemark?: string
+  /** 审核时间 */
+  auditTime?: string
+  /** 打款时间 */
+  payoutsTime?: string
+  /** 打款凭证 */
+  payVoucherUrl?: string
+  /** 打款备注 */
+  payoutsRemark?: string
 }
 
 /**

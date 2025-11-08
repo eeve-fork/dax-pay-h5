@@ -1,5 +1,5 @@
 <template>
-  <div class="cashouts-apply">
+  <div class="cashouts-edit">
     <van-overlay v-show="loading" :show="true">
       <div class="loading-wrapper" @click.stop>
         <van-loading size="24px">
@@ -217,7 +217,7 @@
       <!-- 底部按钮 -->
       <div class="bottom-btn">
         <van-button type="primary" block :loading="loading" @click="handleSubmit">
-          提交申请
+          保存修改
         </van-button>
       </div>
     </div>
@@ -228,7 +228,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { showConfirmDialog, showNotify } from 'vant'
 import { useRoute } from 'vue-router'
-import { calcCashoutsFee, createApply, getConfig, getWallet } from './Cashouts.api'
+import { calcCashoutsFee, getCashouts, getConfig, getWallet, updateCashouts } from './Cashouts.api'
 import type { AgentCashouts, AgentCashoutsConfig, AgentWallet } from './Cashouts.api'
 import { useTokenStore } from '@/store/modules/token'
 
@@ -298,10 +298,12 @@ async function initData() {
     const { data: configData } = await getConfig()
     cashoutsConfig.value = configData
 
-    // 初始化金额字段
-    form.value.amount = 0
-    form.value.feeAmount = 0
-    form.value.arriveAmount = 0
+    // 获取提现详情数据
+    const id = route.query.id as string
+    if (id) {
+      const { data: cashoutsData } = await getCashouts(id)
+      form.value = cashoutsData
+    }
   }
   catch (error) {
     console.error('数据加载失败:', error)
@@ -344,17 +346,16 @@ async function handleSubmit() {
     // 确认弹窗
     await showConfirmDialog({
       title: '提示',
-      message: '是否创建提现申请！',
+      message: '是否保存提现申请修改！',
     })
 
     loading.value = true
     // 保存提现申请
-    const { code, msg } = await createApply(form.value)
-    if (code !== 0) {
-      showNotify({ type: 'danger', message: msg })
-      return
-    }
-    uni.navigateBack()
+    await updateCashouts(form.value)
+    showNotify({ type: 'success', message: '保存成功' })
+    setTimeout(() => {
+      uni.navigateBack()
+    }, 1000)
   }
   finally {
     loading.value = false
@@ -368,7 +369,7 @@ onMounted(() => {
 </script>
 
 <style lang="less" scoped>
-.cashouts-apply {
+.cashouts-edit {
   width: 100%;
   height: 100%;
   padding-bottom: env(safe-area-inset-bottom);
