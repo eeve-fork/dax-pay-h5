@@ -218,6 +218,14 @@ export const DaxPayAgentMiniRoute: RouteRecordRaw = {
         title: '结算信息',
       },
     },
+    {
+      path: '/mini/agent/wallet/cashouts',
+      name: 'AgentCashoutsApply',
+      component: () => import('@/views/daxpay/miniapp/agent/wallet/cashouts/CashoutsApply.vue'),
+      meta: {
+        title: '提现申请',
+      },
+    },
   ],
 }
 

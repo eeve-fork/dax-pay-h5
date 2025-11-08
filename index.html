@@ -15,7 +15,7 @@
         ;(() => {
           const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
           const darkMode = mediaQuery.matches ? 'light' : 'light'
-          const { appTheme = '#5d9dfe' } =
+          const { appTheme = '#f8d03b' } =
             JSON.parse(window.localStorage.getItem('DESIGN-SETTING')) || {}
 
           let htmlRoot = document.getElementById('htmlRoot')

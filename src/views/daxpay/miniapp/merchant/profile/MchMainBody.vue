@@ -647,11 +647,11 @@ onMounted(() => {
 }
 
 .form-content {
+  /* 主体内容滚动 */
   flex: 1;
-  overflow-y: scroll;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 20px 0;
-  padding-bottom: 80px; /* 为底部按钮留出空间 */
+  padding-bottom: 12px;
 }
 
 .loading-wrapper {
@@ -666,44 +666,26 @@ onMounted(() => {
 /* 卡片样式 */
 .status-card,
 .info-card {
-  margin-bottom: 16px;
-  background: #fff;
-  border-radius: 0;
+  margin: 12px 8px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: none;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .card-header {
-  height: 50px;
-  width: 100%;
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  background-color: #f7f7f7;
-  color: #448ef7;
-  letter-spacing: 1px;
-  position: relative;
-  font-weight: 600;
-  border-bottom: none;
-
-  &::before {
-    position: absolute;
-    top: 50%;
-    left: 5px;
-    transform: translateY(-50%);
-    content: '';
-    width: 5px;
-    height: 20px;
-    background-color: #448ef7;
-  }
+  height: 34px;
+  padding: 0 14px;
+  background-color: #fff4c5;
 }
 
 .card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   font-size: 14px;
-  color: #448ef7;
+  font-weight: 500;
+  color: #5c4b37;
+  line-height: 1.2;
 }
 
 /* 认证状态样式优化 */
@@ -752,10 +734,6 @@ onMounted(() => {
 }
 
 .bottom-btn {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: white;
   padding: 15px 20px;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);

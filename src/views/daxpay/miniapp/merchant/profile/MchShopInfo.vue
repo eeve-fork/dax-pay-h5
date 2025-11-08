@@ -237,14 +237,14 @@ onMounted(() => {
 .card-header {
   display: flex;
   align-items: center;
-  height: 40px;
+  height: 34px;
   padding: 0 14px;
-  background-color: #ecf5ff;
+  background-color: #fff4c5;
 }
 
 .card-title {
-  font-size: 16px;
-  color: #409eff;
+  font-size: 14px;
+  color: #5c4b37;
 }
 
 .bottom-btn {

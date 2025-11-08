@@ -777,7 +777,7 @@
         </van-button>
       </div>
       <div class="btnBox" style="margin-bottom: 20px">
-        <van-button type="primary" plain block :disabled="showable" @click="saveTemp">
+        <van-button type="primary" color="#ff8a00" plain block :disabled="showable" @click="saveTemp">
           暂存
         </van-button>
       </div>
@@ -904,16 +904,16 @@ function initData() {
     pca.value = data
   })
 
-  // 获取权限配置和费率配置
-  Promise.all([
-    getAgentPermConfig(),
-    getConfig(),
-  ]).then(([permRes, rateRes]) => {
-    agentPerm.value = permRes.data
-    agentRate.value = rateRes.data
-  }).catch(() => {
-    showNotify({ type: 'danger', message: '获取权限或费率配置失败' })
-  })
+  // 只有在dax-pay-agent客户端才获取权限配置和费率配置
+  if (clientCode === 'dax-pay-agent') {
+    Promise.all([
+      getAgentPermConfig(),
+      getConfig(),
+    ]).then(([permRes, rateRes]) => {
+      agentPerm.value = permRes.data
+      agentRate.value = rateRes.data
+    })
+  }
 }
 
 /**
@@ -1154,7 +1154,7 @@ async function readMchData() {
     font-weight: 600;
     letter-spacing: 2px;
     .current {
-      color: #448ef7;
+      color: #ff8a00;
     }
   }
   .formBox {
@@ -1171,7 +1171,7 @@ async function readMchData() {
       align-items: center;
       padding: 0 1.25rem;
       background-color: #f7f7f7;
-      color: #448ef7;
+      color: #5C4B37;
       letter-spacing: 1px;
       position: relative;
       font-weight: 600;
@@ -1183,7 +1183,7 @@ async function readMchData() {
         content: '';
         width: 0.3125rem;
         height: 1.25rem;
-        background-color: #448ef7;
+        background-color: #ff8a00;
       }
     }
   }

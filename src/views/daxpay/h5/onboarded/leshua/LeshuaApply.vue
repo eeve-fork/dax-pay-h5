@@ -631,7 +631,7 @@
         </van-button>
       </div>
       <div class="btnBox" style="margin-bottom: 20px">
-        <van-button type="primary" :disabled="showable" plain block @click="saveTemp">
+        <van-button type="primary" color="#ff8a00" :disabled="showable" plain block @click="saveTemp">
           暂存
         </van-button>
       </div>
@@ -970,7 +970,7 @@ async function readMchData() {
     font-weight: 600;
     letter-spacing: 2px;
     .current {
-      color: #448ef7;
+      color: #ff8a00;
     }
   }
   .formBox {
@@ -987,7 +987,7 @@ async function readMchData() {
       align-items: center;
       padding: 0 1.25rem;
       background-color: #f7f7f7;
-      color: #448ef7;
+      color: #5C4B37;
       letter-spacing: 1px;
       position: relative;
       font-weight: 600;
@@ -999,7 +999,7 @@ async function readMchData() {
         content: '';
         width: 0.3125rem;
         height: 1.25rem;
-        background-color: #448ef7;
+        background-color: #ff8a00;
       }
     }
   }

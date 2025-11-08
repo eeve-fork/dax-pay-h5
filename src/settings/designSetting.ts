@@ -35,7 +35,7 @@ export const appThemeList: string[] = [
 
 const setting: DesignSettingState = {
   // 系统主题色
-  appTheme: '#5d9dfe',
+  appTheme: '#f2d15a',
   // 系统内置主题色列表
   appThemeList,
   // 是否开启路由动画

@@ -314,14 +314,16 @@ onMounted(() => {
 .card-header {
   display: flex;
   align-items: center;
-  height: 40px;
+  height: 34px;
   padding: 0 14px;
-  background-color: #ecf5ff;
+  background-color: #fff4c5;
 }
 
 .card-title {
-  font-size: 16px;
-  color: #409eff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5c4b37;
+  line-height: 1.2;
 }
 
 /* 让内嵌面板去掉默认边距，卡片白底由容器负责 */
