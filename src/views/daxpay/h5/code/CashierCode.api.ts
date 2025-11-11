@@ -5,22 +5,22 @@ import type { AuthResult } from '@/views/daxpay/h5/auth/ChannelAuth.api'
 /**
  * 获取码牌配置
  */
-export function getCashierCodeConfig(cashierCode, scene) {
-  return http.request<Result<GatewayCashierConfig>>({
-    url: '/unipay/gateway/cashier/getCodeConfig',
+export function getCashierCodeConfig(code, scene) {
+  return http.request<Result<GatewayCashierCodeConfig>>({
+    url: '/unipay/gateway/cashier/code/getCodeConfig',
     method: 'GET',
-    params: { cashierCode, scene },
+    params: { code, scene },
   })
 }
 
 /**
  * 获取码牌收银台所需授权链接, 用于获取OpenId一类的信息
  */
-export function generateAuthUrl(cashierCode, cashierScene) {
+export function generateAuthUrl(code, scene) {
   return http.request<Result<string>>({
     url: '/unipay/gateway/cashier/code/generateAuthUrl',
     method: 'POST',
-    data: { cashierCode, cashierScene },
+    data: { code, scene },
   })
 }
 
@@ -38,7 +38,7 @@ export function auth(param: CashierCodeAuthParam) {
 /**
  * 发起支付
  */
-export function cashierPay(param: CashierPayParam) {
+export function cashierPay(param: GatewayCashierCodePayParam) {
   return http.request<Result<PayResult>>({
     url: '/unipay/gateway/cashier/code/pay',
     method: 'POST',
@@ -49,11 +49,11 @@ export function cashierPay(param: CashierPayParam) {
 /**
  * 码牌收银支付参数
  */
-export interface CashierPayParam {
+export interface GatewayCashierCodePayParam {
   // 收银码牌编码
-  cashierCode?: string
+  code?: string
   // 收银台类型
-  cashierScene?: string
+  scene?: string
   // 支付金额
   amount?: number
   // 唯一标识
@@ -95,14 +95,22 @@ export interface WxJsapiSignResult {
 }
 
 /**
- * 收银台配置信息
+ * 码牌配置信息
  */
-export interface GatewayCashierConfig {
-  // 商家名称
+export interface GatewayCashierCodeConfig {
+  // 码牌名称
   name?: string
+  // 是否启用
+  enable?: boolean
+  // 金额类型
+  amountType?: string
+  // 金额
+  amount?: string
+  // 支付通道
+  channel?: string
   // 支付调起方式
   callType?: string
-  // 判断是否需要
+  // 判断是否需要获取openId
   needOpenId?: boolean
   // 备注
   remark?: string
@@ -112,10 +120,10 @@ export interface GatewayCashierConfig {
  * 码牌用户标识认证类
  */
 export interface CashierCodeAuthParam {
-  // 码牌编码
-  cashierCode?: string
+  // 收银码牌编码
+  code?: string
   // 支付场景
-  cashierScene?: string
+  scene?: string
   // 授权码
-  authCode: string
+  authCode?: string
 }

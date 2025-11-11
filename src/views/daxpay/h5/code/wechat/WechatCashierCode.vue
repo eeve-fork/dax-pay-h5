@@ -1,5 +1,5 @@
 <template>
-  <div v-if="show">
+  <div v-if="show" class="wchatMpPay">
     <div class="container">
       <div class="payName">
         <span>付款给</span>
@@ -20,7 +20,12 @@
           添加备注
         </div>
         <div v-else style="max-width: 75vw">
-          <van-text-ellipsis :content="`备注: ${description}`" />
+          <p style="text-align: center;">
+            备注：
+          </p>
+          <p class="remarkDecript">
+            {{ description }}
+          </p>
           <div />
         </div>
       </div>
@@ -56,6 +61,7 @@
       />
     </van-dialog>
     <van-number-keyboard
+      v-if="cashierInfo.amountType === 'random'"
       :show="!loading"
       theme="custom"
       extra-key="."
@@ -64,6 +70,11 @@
       @input="input"
       @delete="del"
     />
+    <div v-if="cashierInfo.amountType === 'fixed'" class="redirectPayBtn" @click="pay">
+      <van-button type="success">
+        付款
+      </van-button>
+    </div>
   </div>
 </template>
 
@@ -72,11 +83,11 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { showNotify } from 'vant'
 import type {
-  CashierPayParam,
-  GatewayCashierConfig,
+  CashierCodeAuthParam,
+  GatewayCashierCodeConfig,
+  GatewayCashierCodePayParam,
   WxJsapiSignResult,
 } from '../CashierCode.api'
-
 import {
   auth,
   cashierPay,
@@ -84,18 +95,18 @@ import {
   getCashierCodeConfig,
 } from '../CashierCode.api'
 
-import { AggregateEnum, CashierCodeTypeEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum, CashierSceneEnum, GatewayCallTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import router from '@/router'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
+import { getChannelAuthResult } from '@/utils/channelAuthUtil'
 
 const route = useRoute()
-const { code: cashierCode } = route.params
-const { code: authCode } = route.query
+const { channelAuth: isChannel, channel, code: cashierCode } = route.params
 
 const show = ref<boolean>(false)
 const showRemark = ref<boolean>(false)
 const loading = ref<boolean>(false)
-const cashierInfo = ref<GatewayCashierConfig>({})
+const cashierInfo = ref<GatewayCashierCodeConfig>({})
 const amount = ref<string>('0')
 const description = ref<string>()
 const openId = ref<string>()
@@ -106,13 +117,19 @@ onMounted(() => {
   init()
 })
 
+// 认证参数
+const authParam = reactive<CashierCodeAuthParam>({
+  code: cashierCode as string,
+  scene: CashierSceneEnum.WECHAT_PAY,
+})
+
 /**
  * 初始化
  */
 async function init() {
   loading.value = true
   getCashierCodeConfig(cashierCode, AggregateEnum.WECHAT)
-    .then((res) => {
+    .then(async (res) => {
       if (res.code) {
         router.replace({ name: 'payFail', query: { msg: res.msg } })
         return
@@ -120,48 +137,95 @@ async function init() {
       loading.value = false
       const data = res.data
       cashierInfo.value = data as any
+      // 判断码牌类型
+      if (cashierInfo.value?.amountType === 'fixed') {
+        amount.value = data.amount as string
+      }
+      else {
+        amount.value = '0'
+      }
       // 判断是否需要获取OpenId
       if (data.needOpenId) {
-        // 如果不是重定向跳转过来， 跳转到到重定向地址
-        if (!authCode) {
-          // 重定向跳转到微信授权地址
-          generateAuthUrl(cashierCode, CashierCodeTypeEnum.WECHAT_PAY).then((res) => {
-            if (res.code) {
-              router.replace({ name: 'payFail', query: { msg: res.msg } })
+        // 不等于9说明是微信重定向过来的
+        if (isChannel !== '9') {
+          if (isChannel === '1') {
+            // 通道认证
+            await channelAuth()
+            return
+          }
+          else {
+            // 微信官方认证
+            await commonAuth()
+            return
+          }
+        }
+
+        // 生成认证链接
+        generateAuthUrl(cashierCode, CashierSceneEnum.WECHAT_PAY)
+          .then((result) => {
+            if (res.code !== 0) {
+              // 如果异常，跳转异常页面
+              router.replace({
+                name: 'payFail',
+                query: { msg: result.msg },
+              })
               return
             }
-            const url = res.data
-            location.replace(url)
-          }).catch((res) => {
-            router.replace({ name: 'payFail', query: { msg: res.message } })
+            location.replace(result.data)
           })
-        }
-        else {
-          // 认证获取OpenId
-          auth({ cashierCode: cashierCode as string, scene: CashierCodeTypeEnum.WECHAT_PAY, authCode: authCode as string })
-            .then((res) => {
-              if (res.code) {
-                router.replace({ name: 'payFail', query: { msg: res.msg } })
-                return
-              }
-              openId.value = res.data.openId as string
-              show.value = true
-            }).catch((res) => {
-              router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
+          .catch((result) => {
+            router.replace({
+              name: 'payFail',
+              query: { msg: result.message },
             })
-        }
+          })
       }
       else {
         show.value = true
       }
     })
-    .catch((error) => {
-      router.replace({ name: 'payFail', query: { msg: error } })
+}
+
+/**
+ * 微信官方认证
+ */
+async function commonAuth() {
+  // 认证获取OpenId
+  const { code: authCode } = route.query
+  authParam.authCode = authCode as string
+  await wxAuth()
+}
+
+/**
+ * 通道微信认证
+ */
+async function channelAuth() {
+  // 获取回调的参数结果
+  const { openId } = getChannelAuthResult(channel as string, route.query)
+  authParam.authCode = openId
+  await wxAuth()
+}
+
+/**
+ * 认证操作
+ */
+async function wxAuth() {
+  await auth(authParam)
+    .then(({ data, code, msg }) => {
+      if (code) {
+        router.replace({ name: 'payFail', query: { msg }, replace: true })
+        return
+      }
+      openId.value = data.openId as string
+      show.value = true
+    })
+    .catch((res) => {
+      router.replace({ name: 'payFail', query: { msg: res.message }, replace: true })
     })
 }
 
 /**
- * 微信jsapi方式支付
+ * 调起支付, 需要根据调用类型发起
  */
 function pay() {
   const amountValue = Number(amount.value)
@@ -175,31 +239,31 @@ function pay() {
     amount: amountValue,
     cashierCode,
     openId: openId.value,
-    scene: CashierCodeTypeEnum.WECHAT_PAY,
+    cashierScene: CashierSceneEnum.WECHAT_PAY,
     description: description.value,
-  } as CashierPayParam
-  cashierPay(from)
-    .then((res) => {
-      if (res.code) {
-        router.replace({ name: 'payFail', query: { msg: res.msg } })
-        return
-      }
-      loading.value = false
-      // 根据类型拉起对应的支付。 支持跳转和jsapi
-      if (cashierInfo.value?.callType === GatewayCallTypeEnum.jsapi) {
-        const json = JSON.parse(res.data.payBody)
-        jsapiPay(json)
-      }
-      if (cashierInfo.value?.callType === GatewayCallTypeEnum.link) {
-        location.replace(res.data.payBody as any)
-      }
-    })
+  } as GatewayCashierCodePayParam
+  cashierPay(from).then((res) => {
+    if (res.code) {
+      router.replace({ name: 'payFail', query: { msg: res.msg } })
+      return
+    }
+    loading.value = false
+    // 根据类型拉起对应的支付。 支持跳转和jsapi
+    if (cashierInfo.value?.callType === GatewayCallTypeEnum.jsapi) {
+      const json = JSON.parse(res.data.payBody)
+      jsapiPay(json)
+    }
+    if (cashierInfo.value?.callType === GatewayCallTypeEnum.link) {
+      location.replace(res.data.payBody as any)
+    }
+  })
 }
 
 /**
  * 拉起Jsapi支付窗口
  */
 function jsapiPay(data: WxJsapiSignResult) {
+  console.log(data)
   const form = {
     appId: data.appId, // 公众号ID，由商户传入
     timeStamp: data.timeStamp, // 时间戳，自1970年以来的秒数
@@ -213,7 +277,7 @@ function jsapiPay(data: WxJsapiSignResult) {
     if (res.err_msg === 'get_brand_wcpay_request:ok') {
       // 跳转到成功页面
       router.replace({
-        path: '/paySuccess',
+        name: 'PaySuccess',
         query: { title: '支付成功' },
       })
     }
@@ -227,56 +291,76 @@ function jsapiPay(data: WxJsapiSignResult) {
 :deep(.van-key--blue) {
   background: @color;
 }
-.container {
-  background: linear-gradient(to bottom, #07c160, #07c160, #ffffff); // 从蓝色渐变到白色
-  width: 100%;
-  padding: 40px;
-  height: 40%;
-  border-radius: 10px;
-  text-align: center;
-  color: white;
+.wchatMpPay {
+  position: relative;
+  .container {
+    background: linear-gradient(to bottom, #07c160, #07c160, #ffffff); // 从蓝色渐变到白色
+    width: 100%;
+    padding: 40px;
+    height: 40%;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
 
-  .payName {
-    margin: 5px 0;
-    font-size: 16px;
+    .payName {
+      margin: 5px 0;
+      font-size: 16px;
 
-    .paytext {
-      font-size: 20px;
-      margin-left: 5px;
-      font-weight: 600;
+      .paytext {
+        font-size: 20px;
+        margin-left: 5px;
+        font-weight: 600;
+      }
+    }
+
+    .amount-display {
+      background-color: white;
+      color: @color;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 1.875rem;
+      align-items: center;
+
+      p {
+        font-size: 32px;
+      }
+
+      .title {
+        font-size: 20px;
+      }
     }
   }
 
-  .amount-display {
-    background-color: white;
-    color: @color;
-    border-radius: 20px;
-    padding: 20px;
-    margin: 20px 0;
+  .notes {
+    width: 100%;
+    height: 10%;
     display: flex;
-    gap: 1.875rem;
+    justify-content: center;
     align-items: center;
 
-    p {
-      font-size: 32px;
-    }
-
-    .title {
-      font-size: 20px;
+    .remark {
+      color: @color;
+      cursor: pointer;
+      .remarkDecript {
+        max-width: 75vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
-}
-
-.notes {
-  width: 100%;
-  height: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  .remark {
-    color: @color;
-    cursor: pointer;
+  .redirectPayBtn {
+    width: 100%;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 3.125rem;
+    display: flex;
+    justify-content: center;
+    .van-button {
+      width: 90%;
+    }
   }
 }
 
