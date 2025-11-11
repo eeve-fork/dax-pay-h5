@@ -1,5 +1,5 @@
 <template>
-  <div class="mpPay">
+  <div>
     <div class="container">
       <div class="payName">
         <span>付款给</span>
@@ -20,12 +20,7 @@
           添加备注
         </div>
         <div v-else style="max-width: 75vw">
-          <p style="text-align: center;">
-            备注：
-          </p>
-          <p class="remarkDecript">
-            {{ description }}
-          </p>
+          <van-text-ellipsis :content="`备注: ${description}`" />
           <div />
         </div>
       </div>
@@ -61,7 +56,6 @@
       />
     </van-dialog>
     <van-number-keyboard
-      v-if="cashierInfo.amountType === 'random'"
       :show="!loading"
       theme="custom"
       extra-key="."
@@ -70,11 +64,6 @@
       @input="input"
       @delete="del"
     />
-    <div v-if="cashierInfo.amountType === 'fixed'" class="redirectPayBtn" @click="pay">
-      <van-button type="primary">
-        付款
-      </van-button>
-    </div>
   </div>
 </template>
 
@@ -82,9 +71,9 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showNotify } from 'vant'
-import type { GatewayCashierCodeConfig, GatewayCashierCodePayParam } from '../CashierCode.api'
+import type { CashierPayParam, GatewayCashierConfig } from '../CashierCode.api'
 import { cashierPay, getCashierCodeConfig } from '../CashierCode.api'
-import { AggregateEnum, CashierSceneEnum } from '@/enums/daxpay/DaxPayEnum'
+import { AggregateEnum, CashierCodeTypeEnum } from '@/enums/daxpay/DaxPayEnum'
 import { useKeyboard } from '@/hooks/daxpay/useKeyboard'
 
 const route = useRoute()
@@ -93,7 +82,7 @@ const { code } = route.params
 
 const showRemark = ref<boolean>(false) // 是否展示备注
 const loading = ref<boolean>(false) // 加载状态
-const cashierInfo = ref<GatewayCashierCodeConfig>({})
+const cashierInfo = ref<GatewayCashierConfig>()
 const amount = ref<string>('0') // 金额
 const description = ref<string>()
 
@@ -109,25 +98,14 @@ onMounted(() => {
 function initData() {
   // 获取信息
   loading.value = true
-  getCashierCodeConfig(code, CashierSceneEnum.ALIPAY)
+  getCashierCodeConfig(code, CashierCodeTypeEnum.ALIPAY)
     .then((res) => {
       if (res.code) {
         router.replace({ name: 'payFail', query: { msg: res.msg } })
         return
       }
-      cashierInfo.value = res.data as any
-      // 是否启用
-      if (!cashierInfo.value?.enable) {
-        router.replace({ name: 'payFail', query: { msg: '收银码牌未启用' } })
-      }
-      // 判断类型
-      if (cashierInfo.value?.amountType === 'fixed') {
-        amount.value = res.data.amount as string
-      }
-      else {
-        amount.value = '0'
-      }
       loading.value = false
+      cashierInfo.value = res.data as any
     })
     .catch((res) => {
       router.replace({ name: 'payFail', query: { msg: res.message } })
@@ -146,10 +124,10 @@ function pay() {
   loading.value = true
   const from = {
     amount: amountValue,
-    code,
+    cashierCode: code,
     scene: AggregateEnum.ALI,
     description: description.value,
-  } as GatewayCashierCodePayParam
+  } as CashierPayParam
   cashierPay(from).then((res) => {
     if (res.code) {
       router.replace({ name: 'payFail', query: { msg: res.msg } })
@@ -169,79 +147,58 @@ function pay() {
   background: @color;
 }
 
-.mpPay {
-  position: relative;
-  .container {
-    background: linear-gradient(to bottom, #1e90ff, #1e90ff, #ffffff); // 从蓝色渐变到白色
-    width: 100%;
-    padding: 40px;
-    height: 40%;
-    border-radius: 10px;
-    text-align: center;
-    color: white;
+.container {
+  background: linear-gradient(to bottom, #1e90ff, #1e90ff, #ffffff); // 从蓝色渐变到白色
+  width: 100%;
+  padding: 40px;
+  height: 40%;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
 
-    .payName {
-      margin: 5px 0;
-      font-size: 16px;
+  .payName {
+    margin: 5px 0;
+    font-size: 16px;
 
-      .paytext {
-        font-size: 20px;
-        margin-left: 5px;
-        font-weight: 600;
-      }
-    }
-
-    .amount-display {
-      background-color: white;
-      color: @color;
-      border-radius: 20px;
-      padding: 20px;
-      margin: 20px 0;
-      display: flex;
-      gap: 1.875rem;
-      align-items: center;
-
-      p {
-        font-size: 32px;
-      }
-
-      .title {
-        font-size: 20px;
-      }
+    .paytext {
+      font-size: 20px;
+      margin-left: 5px;
+      font-weight: 600;
     }
   }
 
-  .notes {
-    width: 100%;
-    height: 10%;
+  .amount-display {
+    background-color: white;
+    color: @color;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 20px 0;
     display: flex;
-    justify-content: center;
+    gap: 1.875rem;
     align-items: center;
 
-    .remark {
-      color: @color;
-      cursor: pointer;
-      .remarkDecript {
-        max-width: 75vw;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
+    p {
+      font-size: 32px;
     }
-  }
-  .redirectPayBtn {
-    width: 100%;
-    margin: 0 auto;
-    position: absolute;
-    bottom: 3.125rem;
-    display: flex;
-    justify-content: center;
-    .van-button {
-      width: 90%;
+
+    .title {
+      font-size: 20px;
     }
   }
 }
 
+.notes {
+  width: 100%;
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .remark {
+    color: @color;
+    cursor: pointer;
+  }
+}
 /* loading */
 .loadingMask {
   position: fixed;
