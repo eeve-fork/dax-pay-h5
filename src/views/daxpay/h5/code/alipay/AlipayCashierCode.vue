@@ -116,10 +116,6 @@ function initData() {
         return
       }
       cashierInfo.value = res.data as any
-      // 是否启用
-      if (!cashierInfo.value?.enable) {
-        router.replace({ name: 'payFail', query: { msg: '收银码牌未启用' } })
-      }
       // 判断类型
       if (cashierInfo.value?.amountType === 'fixed') {
         amount.value = res.data.amount as string

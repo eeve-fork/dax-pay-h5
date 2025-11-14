@@ -237,9 +237,9 @@ function pay() {
   loading.value = true
   const from = {
     amount: amountValue,
-    cashierCode,
+    code: cashierCode,
     openId: openId.value,
-    cashierScene: CashierSceneEnum.WECHAT_PAY,
+    scene: CashierSceneEnum.WECHAT_PAY,
     description: description.value,
   } as GatewayCashierCodePayParam
   cashierPay(from).then((res) => {

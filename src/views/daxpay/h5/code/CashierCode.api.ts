@@ -20,7 +20,7 @@ export function generateAuthUrl(code, scene) {
   return http.request<Result<string>>({
     url: '/unipay/gateway/cashier/code/generateAuthUrl',
     method: 'POST',
-    data: { code, scene },
+    params: { code, scene },
   })
 }
 
