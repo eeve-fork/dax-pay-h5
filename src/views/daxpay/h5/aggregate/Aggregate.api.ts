@@ -21,7 +21,7 @@ export function generateAuthUrl(orderNo, scene) {
   return http.request<Result<string>>({
     url: '/unipay/gateway/generateAuthUrl',
     method: 'POST',
-    data: { orderNo, scene },
+    params: { orderNo, scene },
   })
 }
 
@@ -66,38 +66,12 @@ export interface AggregateOrderAndConfig {
   order?: GatewayOrder
   /** 收银台配置信息 */
   config?: GatewayPayConfig
-  /** 聚合支付配置信息 */
-  aggregateConfig?: AggregateConfig
-}
-
-/**
- * 收银台聚合配置信息
- */
-export interface AggregateConfig {
-  /** 支付类型 */
-  scene?: string
-  /** 通道 */
-  channel?: string
-  /** 支付方式 */
-  payMethod?: string
-  /** 其他支付方式 */
-  otherMethod?: string
   /** 自动拉起支付 */
   autoLaunch?: boolean
   /** 需要获取OpenId */
   needOpenId?: boolean
   /** 调起方式 */
   callType?: string
-}
-
-/**
- * 获取认证URL参数
- */
-export interface GatewayAuthUrlParam {
-  // 订单号
-  orderNo?: string
-  // 聚合支付类型
-  scene?: string
 }
 
 /**
@@ -172,5 +146,5 @@ export interface paySuccess {
   // 金额
   amount: number
   // 超时时间
-  expiredTime
+  expiredTime: number
 }

@@ -56,7 +56,7 @@
         </div>
       </div>
     </div>
-    <div v-show="!isAutoLaunch" class="payBtnBox">
+    <div v-show="!isAutoLaunch" class="payBtnBox" @click="payCallback">
       立即支付
     </div>
     <!-- loading -->
@@ -176,7 +176,7 @@ async function init() {
     orderAndConfig.value = data
   })
   // 判断是否需要获取OpenId
-  if (orderAndConfig.value?.aggregateConfig?.needOpenId) {
+  if (orderAndConfig.value?.needOpenId) {
     // 不等于9说明是微信重定向过来的
     if (isChannel !== '9') {
       if (isChannel === '1') {
@@ -259,7 +259,7 @@ async function wxAuth() {
 function payMethod() {
   show.value = true
   // 判断是否自动拉起支付
-  if (orderAndConfig.value?.aggregateConfig?.autoLaunch) {
+  if (orderAndConfig.value?.autoLaunch) {
     isAutoLaunch.value = true
     payCallback()
   }
@@ -268,7 +268,6 @@ function payMethod() {
     orderTime.getDownTotalTime(orderAndConfig.value?.order?.expiredTime) // 计算倒计时
     orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
     resume() // 开启倒计时
-    payCallback()
   }
 }
 
@@ -289,11 +288,11 @@ function payCallback() {
       return
     }
     // 根据类型拉起对应的支付 支持跳转和jsapi
-    if (orderAndConfig.value?.aggregateConfig?.callType === GatewayCallTypeEnum.jsapi) {
+    if (orderAndConfig.value?.callType === GatewayCallTypeEnum.jsapi) {
       const json = JSON.parse(data.payBody)
       jsapiPay(json)
     }
-    if (orderAndConfig.value?.aggregateConfig?.callType === GatewayCallTypeEnum.link) {
+    if (orderAndConfig.value?.callType === GatewayCallTypeEnum.link) {
       location.replace(data.payBody as any)
     }
   })

@@ -6,7 +6,7 @@
         <div class="payPrice">
           <span class="unit">￥</span>
           <div class="price">
-            {{ orderAndConfig?.order.amount }}
+            {{ orderAndConfig?.order?.amount }}
           </div>
         </div>
         <!-- 支付时间 -->
@@ -19,14 +19,14 @@
         <!-- 订单详情 -->
         <div class="infoBox">
           <div class="payMessItem titleOne">
-            {{ orderAndConfig?.order.title }}
+            {{ orderAndConfig?.order?.title }}
           </div>
           <div class="payMessItem">
             <div class="itemTitle">
               订单编号
             </div>
             <div class="itemContent">
-              {{ orderAndConfig?.order.orderNo }}
+              {{ orderAndConfig?.order?.orderNo }}
             </div>
           </div>
           <div class="payMessItem">
@@ -34,10 +34,10 @@
               商户订单号
             </div>
             <div class="itemContent">
-              {{ orderAndConfig?.order.bizOrderNo }}
+              {{ orderAndConfig?.order?.bizOrderNo }}
             </div>
           </div>
-          <div v-if="orderAndConfig?.order.description" class="payMessItem">
+          <div v-if="orderAndConfig?.order?.description" class="payMessItem">
             <div class="itemTitle">
               订单描述
             </div>
@@ -50,13 +50,13 @@
               订单结束时间
             </div>
             <div class="itemContent">
-              {{ orderAndConfig?.order.expiredTime }}
+              {{ orderAndConfig?.order?.expiredTime }}
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div v-show="!isAutoLaunch" class="payBtnBox">
+    <div v-show="!isAutoLaunch" class="payBtnBox" @click="pay">
       立即支付
     </div>
     <!-- loading -->
@@ -145,18 +145,18 @@ function init() {
       return
     }
     show.value = true
+    loading.value = false
     orderAndConfig.value = data
     // 判断是否自动拉起支付
-    if (orderAndConfig.value?.aggregateConfig?.autoLaunch) {
+    if (orderAndConfig.value?.autoLaunch) {
       isAutoLaunch.value = true
       pay()
     }
     else {
       isAutoLaunch.value = false // 控制是否显示倒计时和时间
-      orderTime.getDownTotalTime(data.order.expiredTime) // 计算倒计时
+      orderTime.getDownTotalTime(orderAndConfig.value?.order?.expiredTime) // 计算倒计时
       orderTime.getMinter() // 先执行一下 解决进入页面一秒后才显示倒计时
       resume() // 开启倒计时
-      pay()
     }
   })
 }
@@ -166,7 +166,7 @@ function init() {
  */
 function pay() {
   loading.value = true
-  if (orderAndConfig.value?.aggregateConfig?.callType === GatewayCallTypeEnum.link) {
+  if (orderAndConfig.value?.callType === GatewayCallTypeEnum.link) {
     const from = {
       orderNo: orderNo as string,
       scene: AggregateEnum.ALI,
